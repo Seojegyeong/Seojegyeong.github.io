@@ -11,7 +11,7 @@ export function SectionHeader({ icon: Icon, title }: Props) {
       <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-white">
         <Icon className="h-4 w-4 text-slate-900" strokeWidth={1.5} />
       </div>
-      <h2 className="text-xl font-bold tracking-tight text-slate-900">{title}</h2>
+      <h2 className="text-2xl font-bold tracking-tight text-slate-900">{title}</h2>
     </div>
   );
 }

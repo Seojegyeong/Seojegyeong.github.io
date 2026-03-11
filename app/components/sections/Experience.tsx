@@ -13,15 +13,15 @@ function TimelineItem({ item }: { item: ExperienceItem }) {
       <span className="absolute left-[-3.5px] top-[7px] block w-2 h-2 rounded-full border-2 border-slate-300 bg-white" />
       <div className="pb-6 space-y-1">
         <div className="flex items-center justify-between gap-2">
-          <span className="text-xs font-medium text-slate-400">{item.period}</span>
-          <span className="text-[10px] font-semibold text-slate-400 bg-slate-50 px-1.5 py-0.5 rounded border border-slate-100 uppercase tracking-wide">
+          <span className="text-xs font-medium text-slate-500">{item.period}</span>
+          <span className="text-xs font-semibold text-slate-500 bg-slate-50 px-1.5 py-0.5 rounded border border-slate-100 uppercase tracking-wide">
             {item.type}
           </span>
         </div>
-        <h4 className="text-sm font-bold text-slate-900 leading-snug">{item.title}</h4>
-        <p className="text-xs font-medium text-slate-500">{item.org}</p>
+        <h4 className="text-[15px] font-bold text-slate-900 leading-snug">{item.title}</h4>
+        <p className="text-sm font-medium text-slate-500">{item.org}</p>
         {item.desc && (
-          <p className="text-xs text-slate-400 pt-1 leading-relaxed">{item.desc}</p>
+          <p className="text-sm text-slate-500 pt-1 leading-relaxed">{item.desc}</p>
         )}
         {item.href && (
           <a
@@ -59,7 +59,7 @@ export function Experience() {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
         <div className="space-y-4">
-          <h3 className="text-[11px] font-bold uppercase tracking-[0.2em] text-slate-500">
+          <h3 className="text-xs font-bold uppercase tracking-[0.2em] text-slate-500">
             Activities
           </h3>
           <div>
@@ -70,7 +70,7 @@ export function Experience() {
         </div>
 
         <div className="space-y-4">
-          <h3 className="text-[11px] font-bold uppercase tracking-[0.2em] text-slate-500">
+          <h3 className="text-xs font-bold uppercase tracking-[0.2em] text-slate-500">
             Certifications
           </h3>
           <div className="rounded-xl border border-slate-100 bg-white px-5">
