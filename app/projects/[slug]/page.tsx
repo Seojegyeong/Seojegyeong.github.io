@@ -125,6 +125,21 @@ export default async function ProjectDetailPage({ params }: Props) {
         </div>
       )}
 
+      {/* Demo video */}
+      {project.videoUrl && (
+        <section className="mt-8">
+          <div className="rounded-2xl border border-slate-100 overflow-hidden aspect-video">
+            <iframe
+              src={project.videoUrl}
+              title={`${project.title} 시연 영상`}
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+              className="w-full h-full"
+            />
+          </div>
+        </section>
+      )}
+
       {/* Main image */}
       <section className="mt-8">
         <Card className="overflow-hidden rounded-2xl">
@@ -161,21 +176,6 @@ export default async function ProjectDetailPage({ params }: Props) {
               />
             </div>
           ))}
-        </section>
-      )}
-
-      {/* Demo video */}
-      {project.videoUrl && (
-        <section className="mt-6">
-          <div className="rounded-2xl border border-slate-100 overflow-hidden aspect-video">
-            <iframe
-              src={project.videoUrl}
-              title={`${project.title} 시연 영상`}
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-              allowFullScreen
-              className="w-full h-full"
-            />
-          </div>
         </section>
       )}
 

@@ -1,0 +1,31 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git -C /Users/jegyeong/Desktop/Project/portfolio status --short)",
+      "Bash(sed -i '' 's|import { Hero } from \"\"./components/Hero\"\";|import { Hero } from \"\"@/app/components/sections/Hero\"\";|' /Users/jegyeong/Desktop/Project/portfolio/app/page.tsx)",
+      "Bash(sed -i '' 's|import { Summary } from \"\"./components/Summary\"\";|import { Summary } from \"\"@/app/components/sections/Summary\"\";|' /Users/jegyeong/Desktop/Project/portfolio/app/page.tsx)",
+      "Bash(sed -i '' 's|import { CoreCompetencies } from \"\"./components/CoreCompetencies\"\";|import { CoreCompetencies } from \"\"@/app/components/sections/CoreCompetencies\"\";|' /Users/jegyeong/Desktop/Project/portfolio/app/page.tsx)",
+      "Bash(sed -i '' 's|import { Skills } from \"\"./components/skills/Skills\"\";|import { Skills } from \"\"@/app/components/sections/Skills\"\";|' /Users/jegyeong/Desktop/Project/portfolio/app/page.tsx)",
+      "Bash(sed -i '' 's|import { Experience } from \"\"./components/experience/experience\"\";|import { Experience } from \"\"@/app/components/sections/Experience\"\";|' /Users/jegyeong/Desktop/Project/portfolio/app/page.tsx)",
+      "Bash(sed -i '' 's|import { Projects } from \"\"./components/projects/Projects\"\";|import { Projects } from \"\"@/app/components/sections/Projects\"\";|' /Users/jegyeong/Desktop/Project/portfolio/app/page.tsx)",
+      "Bash(sed -i '' 's|import { GithubContributions } from \"\"./components/github/GithubContributions\"\";|import { GithubContributions } from \"\"@/app/components/sections/GithubContributions\"\";|' /Users/jegyeong/Desktop/Project/portfolio/app/page.tsx)",
+      "Bash(sed -i '' 's|import { Header } from \"\"./components/Header\"\";|import { Header } from \"\"@/app/components/layout/Header\"\";|' /Users/jegyeong/Desktop/Project/portfolio/app/layout.tsx)",
+      "Bash(sed -i '' 's|import { projects } from \"\"@/app/components/projects/Projects.data\"\";|import { projects } from \"\"@/app/data/projects\"\";|' /Users/jegyeong/Desktop/Project/portfolio/app/projects/[slug]/page.tsx)",
+      "Bash(npx tsc:*)",
+      "Bash(cat /Users/jegyeong/Desktop/Project/portfolio/next.config.*)",
+      "Bash(node -e \"const pkg = require\\(''''./node_modules/react-github-calendar/package.json''''\\); console.log\\(pkg.version\\);\")",
+      "Bash(npm run:*)",
+      "Bash(cat next.config.*)",
+      "Bash(git add:*)",
+      "Bash(git push:*)",
+      "Bash(git pull:*)",
+      "Bash(/Users/jegyeong/Desktop/Project/portfolio/README.md:*)",
+      "Bash(xargs -I{} sh -c 'git show --format=\"\"\"\"%B\"\"\"\" -s {} 2>/dev/null')",
+      "Bash(FILTER_BRANCH_SQUELCH_WARNING=1 git filter-branch --msg-filter 'grep -v \"\"^Co-Authored-By:\"\"' -- --all)",
+      "Bash(git stash:*)"
+    ],
+    "additionalDirectories": [
+      "/Users/jegyeong/Desktop/Project/portfolio/app"
+    ]
+  }
+}

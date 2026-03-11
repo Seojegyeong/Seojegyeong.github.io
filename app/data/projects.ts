@@ -84,6 +84,7 @@ export const projects: Project[] = [
     description: "AI 기반 개인 맞춤형 데이트 코스 추천 서비스",
     tech: ["React", "TypeScript", "Tailwind CSS"],
     image: WithTimeMain,
+    videoUrl: "https://www.youtube.com/embed/oy63--lXUtQ",
     slides: [
       "/withTime/1. Title.png",
       "/withTime/2. 기술 스택.png",
