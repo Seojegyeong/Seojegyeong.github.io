@@ -167,12 +167,13 @@ export default async function ProjectDetailPage({ params }: Props) {
       {/* Demo video */}
       {project.videoUrl && (
         <section className="mt-6">
-          <div className="rounded-2xl border border-slate-100 overflow-hidden">
-            <video
+          <div className="rounded-2xl border border-slate-100 overflow-hidden aspect-video">
+            <iframe
               src={project.videoUrl}
-              controls
-              playsInline
-              className="w-full h-auto"
+              title={`${project.title} 시연 영상`}
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+              className="w-full h-full"
             />
           </div>
         </section>

@@ -54,6 +54,7 @@ export const projects: Project[] = [
     solution:
       "Pinterest 스타일 피드와 AI 기반 취향 분석 온보딩을 도입하고, 레퍼런스 등록 → 제품 연결 → 쇼핑까지 이어지는 통합 UX 플로우를 구현했습니다.",
     image: RoomeMain,
+    videoUrl: "https://www.youtube.com/embed/hCe5JMVMQxE",
     slides: [
       "/roome/1. Title.png",
       "/roome/2. 기술스택.png",
