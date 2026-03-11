@@ -33,7 +33,7 @@ export default async function ProjectDetailPage({ params }: Props) {
   if (!project) return notFound();
 
   return (
-    <main className="mx-auto max-w-4xl px-6 lg:px-8 py-14">
+    <main className="mx-auto max-w-5xl px-6 lg:px-8 py-14">
       <div className="mb-10">
         <Link
           href="/#projects"
@@ -111,7 +111,9 @@ export default async function ProjectDetailPage({ params }: Props) {
               <h2 className="text-[11px] font-bold uppercase tracking-[0.2em] text-slate-400">
                 Problem
               </h2>
-              <p className="text-sm text-slate-700 leading-relaxed">{project.problem}</p>
+              <p className="text-sm text-slate-700 leading-relaxed">
+                {project.problem}
+              </p>
             </div>
           )}
           {project.solution && (
@@ -119,7 +121,9 @@ export default async function ProjectDetailPage({ params }: Props) {
               <h2 className="text-[11px] font-bold uppercase tracking-[0.2em] text-slate-400">
                 Solution
               </h2>
-              <p className="text-sm text-slate-700 leading-relaxed">{project.solution}</p>
+              <p className="text-sm text-slate-700 leading-relaxed">
+                {project.solution}
+              </p>
             </div>
           )}
         </div>
@@ -155,7 +159,9 @@ export default async function ProjectDetailPage({ params }: Props) {
             />
           ) : (
             <div className="w-full aspect-video bg-slate-100 flex items-center justify-center">
-              <span className="text-sm font-medium text-slate-400">준비 중입니다</span>
+              <span className="text-sm font-medium text-slate-400">
+                준비 중입니다
+              </span>
             </div>
           )}
         </Card>
@@ -165,7 +171,10 @@ export default async function ProjectDetailPage({ params }: Props) {
       {project.slides && project.slides.length > 0 && (
         <section className="mt-6 space-y-4">
           {project.slides.map((src, i) => (
-            <div key={i} className="overflow-hidden rounded-2xl border border-slate-100">
+            <div
+              key={i}
+              className="overflow-hidden rounded-2xl border border-slate-100"
+            >
               <Image
                 src={src}
                 alt={`${project.title} 슬라이드 ${i + 1}`}
@@ -188,7 +197,10 @@ export default async function ProjectDetailPage({ params }: Props) {
             </h2>
             <ul className="space-y-2.5">
               {project.highlights.map((h) => (
-                <li key={h} className="flex items-start gap-3 text-sm text-slate-700 leading-relaxed">
+                <li
+                  key={h}
+                  className="flex items-start gap-3 text-sm text-slate-700 leading-relaxed"
+                >
                   <span className="mt-2 shrink-0 block w-1.5 h-1.5 rounded-full bg-slate-400" />
                   {h}
                 </li>
@@ -204,7 +216,10 @@ export default async function ProjectDetailPage({ params }: Props) {
             </h2>
             <ul className="space-y-2.5">
               {project.collaboration.map((h) => (
-                <li key={h} className="flex items-start gap-3 text-sm text-slate-700 leading-relaxed">
+                <li
+                  key={h}
+                  className="flex items-start gap-3 text-sm text-slate-700 leading-relaxed"
+                >
                   <span className="mt-2 shrink-0 block w-1.5 h-1.5 rounded-full bg-slate-300" />
                   {h}
                 </li>

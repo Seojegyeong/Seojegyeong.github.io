@@ -13,8 +13,8 @@ const spacings: Record<NonNullable<Props["spacing"]>, string> = {
 };
 
 const widths: Record<NonNullable<Props["width"]>, string> = {
-  wide: "max-w-6xl",
-  content: "max-w-4xl",
+  wide: "max-w-4xl",
+  content: "max-w-5xl",
 };
 
 export function Section({
