@@ -32,9 +32,6 @@ export default async function ProjectDetailPage({ params }: Props) {
   const project = projects.find((p) => p.slug === slug);
   if (!project) return notFound();
 
-  const hasHighlights = project.highlights && project.highlights.length > 0;
-  const hasCollaboration = project.collaboration && project.collaboration.length > 0;
-
   return (
     <main className="mx-auto max-w-4xl px-6 lg:px-8 py-14">
       <div className="mb-10">
@@ -66,7 +63,7 @@ export default async function ProjectDetailPage({ params }: Props) {
           {project.title}
         </h1>
 
-        <p className="text-base text-slate-600 leading-relaxed max-w-2xl">
+        <p className="text-base text-slate-700 leading-[1.8] max-w-2xl">
           {project.description}
         </p>
 
@@ -106,27 +103,91 @@ export default async function ProjectDetailPage({ params }: Props) {
         )}
       </header>
 
-      <section className="mt-10">
+      {/* Problem / Solution */}
+      {(project.problem || project.solution) && (
+        <div className="mt-10 grid grid-cols-1 md:grid-cols-2 gap-4">
+          {project.problem && (
+            <div className="rounded-xl border border-slate-100 bg-slate-50 p-5 space-y-2">
+              <h2 className="text-[11px] font-bold uppercase tracking-[0.2em] text-slate-400">
+                Problem
+              </h2>
+              <p className="text-sm text-slate-700 leading-relaxed">{project.problem}</p>
+            </div>
+          )}
+          {project.solution && (
+            <div className="rounded-xl border border-slate-100 bg-white p-5 space-y-2">
+              <h2 className="text-[11px] font-bold uppercase tracking-[0.2em] text-slate-400">
+                Solution
+              </h2>
+              <p className="text-sm text-slate-700 leading-relaxed">{project.solution}</p>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Main image */}
+      <section className="mt-8">
         <Card className="overflow-hidden rounded-2xl">
-          <Image
-            src={project.image}
-            alt={`${project.title} 프로젝트 화면`}
-            width={1200}
-            height={675}
-            className="w-full h-auto object-cover"
-            priority
-            sizes="(max-width: 768px) 100vw, 896px"
-          />
+          {project.image ? (
+            <Image
+              src={project.image}
+              alt={`${project.title} 프로젝트 화면`}
+              width={1200}
+              height={675}
+              className="w-full h-auto object-cover"
+              priority
+              sizes="(max-width: 768px) 100vw, 896px"
+            />
+          ) : (
+            <div className="w-full aspect-video bg-slate-100 flex items-center justify-center">
+              <span className="text-sm font-medium text-slate-400">준비 중입니다</span>
+            </div>
+          )}
         </Card>
       </section>
 
+      {/* Slides */}
+      {project.slides && project.slides.length > 0 && (
+        <section className="mt-6 space-y-4">
+          {project.slides.map((src, i) => (
+            <div key={i} className="overflow-hidden rounded-2xl border border-slate-100">
+              <Image
+                src={src}
+                alt={`${project.title} 슬라이드 ${i + 1}`}
+                width={1600}
+                height={900}
+                className="w-full h-auto"
+                sizes="(max-width: 768px) 100vw, 896px"
+              />
+            </div>
+          ))}
+        </section>
+      )}
+
+      {/* Demo video */}
+      {project.videoUrl && (
+        <section className="mt-6">
+          <div className="rounded-2xl border border-slate-100 overflow-hidden">
+            <video
+              src={project.videoUrl}
+              controls
+              playsInline
+              className="w-full h-auto"
+            />
+          </div>
+        </section>
+      )}
+
+      {/* Detail sections */}
       <div className="mt-12 space-y-10">
-        {hasHighlights && (
+        {project.highlights && project.highlights.length > 0 && (
           <section>
-            <h2 className="text-base font-bold text-slate-900 mb-4">Key Implementation</h2>
+            <h2 className="text-[11px] font-bold uppercase tracking-[0.2em] text-slate-400 mb-4">
+              Key Implementation
+            </h2>
             <ul className="space-y-2.5">
-              {project.highlights!.map((h) => (
-                <li key={h} className="flex items-start gap-3 text-sm text-slate-600 leading-relaxed">
+              {project.highlights.map((h) => (
+                <li key={h} className="flex items-start gap-3 text-sm text-slate-700 leading-relaxed">
                   <span className="mt-2 shrink-0 block w-1.5 h-1.5 rounded-full bg-slate-400" />
                   {h}
                 </li>
@@ -135,12 +196,14 @@ export default async function ProjectDetailPage({ params }: Props) {
           </section>
         )}
 
-        {hasCollaboration && (
+        {project.collaboration && project.collaboration.length > 0 && (
           <section>
-            <h2 className="text-base font-bold text-slate-900 mb-4">Collaboration & Quality</h2>
+            <h2 className="text-[11px] font-bold uppercase tracking-[0.2em] text-slate-400 mb-4">
+              Collaboration & Quality
+            </h2>
             <ul className="space-y-2.5">
-              {project.collaboration!.map((h) => (
-                <li key={h} className="flex items-start gap-3 text-sm text-slate-600 leading-relaxed">
+              {project.collaboration.map((h) => (
+                <li key={h} className="flex items-start gap-3 text-sm text-slate-700 leading-relaxed">
                   <span className="mt-2 shrink-0 block w-1.5 h-1.5 rounded-full bg-slate-300" />
                   {h}
                 </li>
@@ -151,9 +214,11 @@ export default async function ProjectDetailPage({ params }: Props) {
 
         {project.keyLearning && (
           <section>
-            <h2 className="text-base font-bold text-slate-900 mb-4">Key Learning</h2>
+            <h2 className="text-[11px] font-bold uppercase tracking-[0.2em] text-slate-400 mb-4">
+              Key Learning
+            </h2>
             <div className="bg-slate-50 rounded-xl p-5 border border-slate-100">
-              <p className="text-sm text-slate-600 italic leading-relaxed">
+              <p className="text-sm text-slate-700 italic leading-relaxed">
                 &ldquo;{project.keyLearning}&rdquo;
               </p>
             </div>

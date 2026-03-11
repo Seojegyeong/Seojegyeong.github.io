@@ -43,9 +43,13 @@ export type Project = {
   category: ProjectCategory;
   description: string;
   tech: string[];
-  image: string | StaticImageData;
+  image?: string | StaticImageData;
+  videoUrl?: string;
+  slides?: string[];
   liveUrl?: string;
   githubUrl?: string;
+  problem?: string;
+  solution?: string;
   highlights?: string[];
   collaboration?: string[];
   keyLearning?: string;

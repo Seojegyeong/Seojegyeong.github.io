@@ -31,7 +31,7 @@ function ProjectCard({ project }: { project: Project }) {
       )}
     >
       <ProjectCardHeader project={project} />
-      <ProjectCardBody project={project} />
+      <ProjectCardAchievements project={project} />
       <ProjectCardFooter project={project} />
     </div>
   );
@@ -46,7 +46,7 @@ function ProjectCardHeader({ project }: { project: Project }) {
             <span className="text-[11px] font-semibold text-primary bg-primary/10 px-2 py-0.5 rounded uppercase tracking-wide">
               {project.isLead ? "Lead Project" : "Project"}
             </span>
-            <span className="text-sm font-medium text-slate-400">{project.period}</span>
+            <span className="text-sm font-medium text-slate-500">{project.period}</span>
           </div>
           {project.isCore && (
             <span className="text-[11px] font-semibold text-rose-500 bg-rose-50 px-2 py-0.5 rounded uppercase tracking-wide border border-rose-100">
@@ -57,13 +57,13 @@ function ProjectCardHeader({ project }: { project: Project }) {
         <h3 className="text-2xl font-bold text-slate-900 tracking-tight">{project.title}</h3>
       </div>
 
-      <p className="text-base text-slate-600 leading-relaxed max-w-3xl">
+      <p className="text-base text-slate-700 leading-relaxed max-w-3xl">
         {project.description}
       </p>
 
       <div className="flex flex-wrap gap-x-8 gap-y-4 pt-1">
         <div className="space-y-2">
-          <span className="text-xs font-semibold text-slate-400 uppercase tracking-widest block">
+          <span className="text-xs font-semibold text-slate-500 uppercase tracking-widest block">
             ROLE
           </span>
           <span className="px-3 py-1 rounded-md bg-slate-50 border border-slate-100 text-sm font-medium text-slate-700">
@@ -76,14 +76,14 @@ function ProjectCardHeader({ project }: { project: Project }) {
           </span>
         </div>
         <div className="space-y-2">
-          <span className="text-xs font-semibold text-slate-400 uppercase tracking-widest block">
+          <span className="text-xs font-semibold text-slate-500 uppercase tracking-widest block">
             TECH STACK
           </span>
           <div className="flex flex-wrap gap-1.5">
-            {project.tech.map((t) => (
+            {project.tech.slice(0, 4).map((t) => (
               <span
                 key={t}
-                className="px-3 py-1 rounded-md bg-white border border-slate-200 text-sm font-medium text-slate-500"
+                className="px-3 py-1 rounded-md bg-white border border-slate-200 text-sm font-medium text-slate-600"
               >
                 {t}
               </span>
@@ -95,63 +95,23 @@ function ProjectCardHeader({ project }: { project: Project }) {
   );
 }
 
-function ProjectCardBody({ project }: { project: Project }) {
-  const hasHighlights = project.highlights && project.highlights.length > 0;
-  const hasCollaboration = project.collaboration && project.collaboration.length > 0;
-  const hasBody = hasHighlights || hasCollaboration || project.keyLearning;
-
-  if (!hasBody) return null;
+function ProjectCardAchievements({ project }: { project: Project }) {
+  const achievements = project.highlights?.slice(0, 3);
+  if (!achievements || achievements.length === 0) return null;
 
   return (
-    <div className="space-y-6 border-t border-slate-100 pt-7">
-      {hasHighlights && (
-        <div className="space-y-3">
-          <h4 className="text-xs font-semibold text-slate-400 uppercase tracking-widest">
-            Key Implementation
-          </h4>
-          <ul className="grid grid-cols-1 md:grid-cols-2 gap-x-10 gap-y-2.5">
-            {project.highlights!.map((h) => (
-              <li key={h} className="text-sm text-slate-600 flex items-start gap-2.5 leading-relaxed">
-                <span className="mt-2 shrink-0 block w-1.5 h-1.5 rounded-full bg-slate-400 flex-none" />
-                {h}
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
-
-      {(hasCollaboration || project.keyLearning) && (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 border-t border-slate-50 pt-6">
-          {hasCollaboration && (
-            <div className="space-y-3">
-              <h4 className="text-xs font-semibold text-slate-400 uppercase tracking-widest">
-                Collaboration & Quality
-              </h4>
-              <ul className="space-y-2">
-                {project.collaboration!.map((h) => (
-                  <li key={h} className="text-sm text-slate-500 flex items-start gap-2 leading-relaxed">
-                    <span className="mt-2 shrink-0 block w-1.5 h-1.5 rounded-full bg-slate-300 flex-none" />
-                    {h}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-
-          {project.keyLearning && (
-            <div className="space-y-3">
-              <h4 className="text-xs font-semibold text-slate-400 uppercase tracking-widest">
-                Key Learning
-              </h4>
-              <div className="bg-slate-50 rounded-xl p-4 border border-slate-100">
-                <p className="text-sm text-slate-600 italic leading-relaxed">
-                  &ldquo;{project.keyLearning}&rdquo;
-                </p>
-              </div>
-            </div>
-          )}
-        </div>
-      )}
+    <div className="border-t border-slate-100 pt-6 space-y-3">
+      <h4 className="text-xs font-semibold text-slate-500 uppercase tracking-widest">
+        Key Achievements
+      </h4>
+      <ul className="space-y-2">
+        {achievements.map((h) => (
+          <li key={h} className="text-sm text-slate-700 flex items-start gap-2.5 leading-relaxed">
+            <span className="mt-[7px] shrink-0 block w-1.5 h-1.5 rounded-full bg-slate-400 flex-none" />
+            {h}
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }
@@ -163,7 +123,7 @@ function ProjectCardFooter({ project }: { project: Project }) {
         href={`/projects/${project.slug}`}
         className="inline-flex items-center gap-1.5 text-sm font-semibold text-slate-900 hover:text-primary transition-colors group"
       >
-        Project Details
+        View Case Study
         <span className="group-hover:translate-x-0.5 transition-transform">→</span>
       </Link>
       <span className="text-xs font-medium text-slate-400 uppercase tracking-wide">

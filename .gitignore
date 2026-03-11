@@ -24,6 +24,12 @@
 .DS_Store
 *.pem
 
+# large media files
+*.MP4
+*.mp4
+*.mov
+*.MOV
+
 # debug
 npm-debug.log*
 yarn-debug.log*

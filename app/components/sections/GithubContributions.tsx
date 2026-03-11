@@ -7,7 +7,7 @@ import { Section } from "@/app/components/ui/Section";
 import { SectionHeader } from "@/app/components/ui/SectionHeader";
 
 const GITHUB_THEME: ThemeInput = {
-  light: ["#F1F5F9", "#DBEAFE", "#93C5FD", "#3B82F6", "#1D4ED8"],
+  light: ["#EFF6FF", "#DBEAFE", "#93C5FD", "#2563EB", "#1E40AF"],
 };
 
 type Props = {

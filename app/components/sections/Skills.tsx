@@ -15,7 +15,7 @@ export function Skills() {
             key={category}
             className="grid grid-cols-1 md:grid-cols-4 gap-3 md:gap-6 items-start border-b border-slate-50 pb-7 last:border-0 last:pb-0"
           >
-            <h3 className="text-xs font-semibold uppercase tracking-[0.15em] text-slate-400 pt-1.5">
+            <h3 className="text-[11px] font-bold uppercase tracking-[0.2em] text-slate-500 pt-1.5">
               {skillCategoryLabels[category]}
             </h3>
             <div className="md:col-span-3 flex flex-wrap gap-2">

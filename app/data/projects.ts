@@ -21,7 +21,10 @@ export const projects: Project[] = [
       "TanStack Query",
       "React Router",
     ],
-    image: "/whereyouad_main.png",
+    problem:
+      "광고 성과 데이터가 산재되어 있어 마케터가 KPI를 한눈에 파악하기 어렵고, 팀 단위 워크스페이스 협업 환경이 부재했습니다.",
+    solution:
+      "AI Summary 패널로 성과 인사이트를 자동 요약하고, Zustand · TanStack Query로 서버/클라이언트 상태를 분리하여 안정적인 대시보드 아키텍처를 설계했습니다.",
     highlights: [
       "AI 기반 광고 성과 요약(AI Summary) 패널 UI 설계 및 인터랙션 구현",
       "대시보드 KPI 카드 및 Highcharts 기반 데이터 시각화 라이브러리 연동 구현",
@@ -46,7 +49,21 @@ export const projects: Project[] = [
     category: "Public Service",
     description: "AI 기반 인테리어 큐레이션 및 소셜 네트워킹 플랫폼",
     tech: ["React", "TypeScript", "Tailwind CSS", "Zustand"],
+    problem:
+      "인테리어에 관심 있는 사용자들이 레퍼런스를 수집하고 제품을 탐색하는 과정이 단절되어 있었고, 취향 기반 큐레이션 기능이 없었습니다.",
+    solution:
+      "Pinterest 스타일 피드와 AI 기반 취향 분석 온보딩을 도입하고, 레퍼런스 등록 → 제품 연결 → 쇼핑까지 이어지는 통합 UX 플로우를 구현했습니다.",
     image: RoomeMain,
+    slides: [
+      "/roome/1. Title.png",
+      "/roome/2. 기술스택.png",
+      "/roome/3. Feed.png",
+      "/roome/4. Feed 상세.png",
+      "/roome/5. 레퍼런스 업로드.png",
+      "/roome/6. 레퍼런스 업로드_개선.png",
+      "/roome/7. Shop.png",
+      "/roome/8. End.png",
+    ],
     highlights: [
       "핀터레스트 스타일의 카드 레이아웃 및 무한 스크롤(Intersection Observer) 기반 피드 구현",
       "사용자 취향 분석을 위한 단계별 온보딩 플로우 및 전환 애니메이션 구현",
@@ -66,6 +83,14 @@ export const projects: Project[] = [
     description: "AI 기반 개인 맞춤형 데이트 코스 추천 서비스",
     tech: ["React", "TypeScript", "Tailwind CSS"],
     image: WithTimeMain,
+    slides: [
+      "/withTime/1. Title.png",
+      "/withTime/2. 기술 스택.png",
+      "/withTime/3. 공통 레이아웃.png",
+      "/withTime/4. 설정.png",
+      "/withTime/5. 공지사항 및 자주 묻는 질문.png",
+      "/withTime/6. 마무리.png",
+    ],
     highlights: [
       "개인 프로필 설정 및 비밀번호 변경 등 회원 정보 관리 플로우 구현",
       "시맨틱 마크업을 준수한 FAQ 및 공지사항 접근성 개선 페이지 구현",

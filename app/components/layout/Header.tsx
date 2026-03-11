@@ -1,10 +1,7 @@
 export function Header() {
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-white/90 backdrop-blur-sm border-b border-slate-100/80">
-      <div className="max-w-4xl mx-auto px-6 h-14 flex items-center justify-between">
-        <a href="#" className="text-sm font-bold text-slate-900 tracking-tight">
-          SJY
-        </a>
+      <div className="max-w-4xl mx-auto px-6 h-14 flex items-center justify-center">
         <div className="flex items-center gap-6">
           <a href="#competencies" className="text-sm font-medium text-slate-500 hover:text-black transition-colors">
             About
