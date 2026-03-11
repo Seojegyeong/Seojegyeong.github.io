@@ -22,7 +22,9 @@
       "Bash(/Users/jegyeong/Desktop/Project/portfolio/README.md:*)",
       "Bash(xargs -I{} sh -c 'git show --format=\"\"\"\"%B\"\"\"\" -s {} 2>/dev/null')",
       "Bash(FILTER_BRANCH_SQUELCH_WARNING=1 git filter-branch --msg-filter 'grep -v \"\"^Co-Authored-By:\"\"' -- --all)",
-      "Bash(git stash:*)"
+      "Bash(git stash:*)",
+      "Bash(gh api:*)",
+      "Bash(git ls-remote:*)"
     ],
     "additionalDirectories": [
       "/Users/jegyeong/Desktop/Project/portfolio/app"

@@ -43,13 +43,13 @@ function ProjectCardHeader({ project }: { project: Project }) {
       <div className="space-y-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2.5">
-            <span className="text-[11px] font-semibold text-primary bg-primary/10 px-2 py-0.5 rounded uppercase tracking-wide">
+            <span className="text-xs font-semibold text-primary bg-primary/10 px-2 py-0.5 rounded uppercase tracking-wide">
               {project.isLead ? "Lead Project" : "Project"}
             </span>
             <span className="text-sm font-medium text-slate-500">{project.period}</span>
           </div>
           {project.isCore && (
-            <span className="text-[11px] font-semibold text-rose-500 bg-rose-50 px-2 py-0.5 rounded uppercase tracking-wide border border-rose-100">
+            <span className="text-xs font-semibold text-rose-500 bg-rose-50 px-2 py-0.5 rounded uppercase tracking-wide border border-rose-100">
               Core
             </span>
           )}

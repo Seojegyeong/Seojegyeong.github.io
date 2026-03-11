@@ -35,7 +35,7 @@ export function Hero() {
               {keywords.map((k) => (
                 <span
                   key={k}
-                  className="text-xs font-semibold text-slate-600 bg-slate-100 border border-slate-200 px-2.5 py-1 rounded-md tracking-wide"
+                  className="text-xs font-semibold text-slate-700 bg-slate-100 border border-slate-200 px-2.5 py-1 rounded-md tracking-wide"
                 >
                   {k}
                 </span>
