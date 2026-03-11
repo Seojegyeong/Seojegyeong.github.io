@@ -3,15 +3,13 @@ import React from "react";
 
 type Props = React.HTMLAttributes<HTMLElement> & {
   spacing?: "tight" | "normal" | "loose";
-  divider?: boolean;
-  tone?: "default" | "card";
   width?: "wide" | "content";
 };
 
 const spacings: Record<NonNullable<Props["spacing"]>, string> = {
-  tight: "py-10 sm:py-12",
-  normal: "py-14 sm:py-16",
-  loose: "py-16 sm:py-20",
+  tight: "py-10 md:py-14",
+  normal: "py-14 md:py-20",
+  loose: "py-20 md:py-28",
 };
 
 const widths: Record<NonNullable<Props["width"]>, string> = {
@@ -19,31 +17,16 @@ const widths: Record<NonNullable<Props["width"]>, string> = {
   content: "max-w-4xl",
 };
 
-const tones: Record<NonNullable<Props["tone"]>, string> = {
-  default: "bg-background",
-  card: "bg-card",
-};
-
 export function Section({
   spacing = "loose",
-  divider = false,
-  tone = "default",
   width = "wide",
   className,
   children,
   ...props
 }: Props) {
   return (
-    <section
-      className={cn(
-        tones[tone],
-        spacings[spacing],
-        divider ? "border-b border-border" : "",
-        className
-      )}
-      {...props}
-    >
-      <div className={cn("mx-auto px-6 lg:px-7", widths[width])}>
+    <section className={cn(spacings[spacing], className)} {...props}>
+      <div className={cn("mx-auto px-6 lg:px-8", widths[width])}>
         {children}
       </div>
     </section>

@@ -1,17 +1,27 @@
-import { Experience } from "./components/experience/experience";
-import { Projects } from "./components/projects/Projects";
-import { Hero } from "./components/Hero";
-import { GithubContributions } from "./components/github/GithubContributions";
-import { EngineeringValues } from "./components/about/EngineeringEthics";
+import { Suspense } from "react";
+import { Hero } from "@/app/components/sections/Hero";
+import { Summary } from "@/app/components/sections/Summary";
+import { CoreCompetencies } from "@/app/components/sections/CoreCompetencies";
+import { Skills } from "@/app/components/sections/Skills";
+import { Experience } from "@/app/components/sections/Experience";
+import { Projects } from "@/app/components/sections/Projects";
+import { GithubContributions } from "@/app/components/sections/GithubContributions";
+import { ErrorBoundary } from "@/app/components/ui/ErrorBoundary";
 
 export default function Page() {
   return (
-    <div className="mx-auto w-full">
+    <>
       <Hero />
-      <EngineeringValues />
+      <Summary />
+      <CoreCompetencies />
+      <Skills />
       <Experience />
       <Projects />
-      <GithubContributions username="Seojegyeong" />
-    </div>
+      <ErrorBoundary>
+        <Suspense>
+          <GithubContributions username="Seojegyeong" />
+        </Suspense>
+      </ErrorBoundary>
+    </>
   );
 }

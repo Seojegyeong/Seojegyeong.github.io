@@ -28,8 +28,7 @@
     "**/*.tsx",
     ".next/types/**/*.ts",
     ".next/dev/types/**/*.ts",
-    "**/*.mts",
-    "app/components/experience/experience.data.ts "
+    "**/*.mts"
   ],
   "exclude": ["node_modules"]
 }
