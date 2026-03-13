@@ -29,6 +29,7 @@ export type ExperienceItem = {
   period: string;
   desc?: string;
   href?: string | null;
+  fileUrl?: string | null;
 };
 
 export type ProjectCategory = "B2B SaaS" | "Public Service";

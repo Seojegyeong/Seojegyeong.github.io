@@ -4,7 +4,7 @@ export const profile: Profile = {
   name: "Seo Je Gyeong",
   role: "Frontend Developer",
   slogan:
-    "React · TypeScript 기반으로\n사용자 흐름과 유지보수성을 고려한 웹 인터페이스를 구현하는\n프론트엔드 개발자입니다.",
+    "사용자 흐름과 유지보수성을 고려한 웹 인터페이스를 구현하는\n프론트엔드 개발자입니다.",
   email: "seojk0315@naver.com",
   github: "https://github.com/Seojegyeong",
   linkedIn:

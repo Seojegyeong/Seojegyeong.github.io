@@ -1,7 +1,5 @@
 import { Suspense } from "react";
 import { Hero } from "@/app/components/sections/Hero";
-import { Summary } from "@/app/components/sections/Summary";
-import { CoreCompetencies } from "@/app/components/sections/CoreCompetencies";
 import { Skills } from "@/app/components/sections/Skills";
 import { Experience } from "@/app/components/sections/Experience";
 import { Projects } from "@/app/components/sections/Projects";
@@ -12,10 +10,8 @@ export default function Page() {
   return (
     <>
       <Hero />
-      <Summary />
-      <CoreCompetencies />
-      <Skills />
       <Experience />
+      <Skills />
       <Projects />
       <ErrorBoundary>
         <Suspense>
