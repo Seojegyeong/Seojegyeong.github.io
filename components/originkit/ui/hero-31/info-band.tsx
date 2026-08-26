@@ -68,14 +68,15 @@ export const InfoBand = () => (
       <div className="px-[20px] pb-[32px] ipad:flex ipad:h-[290px] ipad:flex-col ipad:justify-between ipad:border-b ipad:border-white/40 ipad:px-[56px] ipad:py-[32px] desktop-sm:h-full desktop-sm:min-w-0 desktop-sm:flex-1 desktop-sm:border-b-0 desktop-sm:border-r desktop-sm:py-[40px]">
         <p className={`hidden ipad:block ${LABEL}`}>학력</p>
         <div className="flex flex-col gap-2">
-          <p className="text-white font-semibold text-[16px] ipad:text-[22px] tracking-[-0.02em]">
+          <p className="text-white font-semibold text-[16px] ipad:text-[22px] tracking-[-0.02em] flex items-baseline gap-2">
             상명대학교
+            <span className="text-white/50 font-normal text-[12px] ipad:text-[13px]">2027년 2월 졸업 예정</span>
           </p>
           <p className="text-white/80 text-[14px] ipad:text-[16px] leading-[1.5]">
-            한일문화콘텐츠전공 | 컴퓨터과학전공(복수전공)
+            컴퓨터과학 <span className="text-[12px] ipad:text-[13px] text-white/60">복수전공</span> | 한일문화콘텐츠전공
           </p>
           <p className="text-white/60 text-[13px] ipad:text-[14px]">
-            학점 3.91 / 4.5 · 2027년 2월 졸업 예정
+            학점 3.91 / 4.5
           </p>
         </div>
       </div>
