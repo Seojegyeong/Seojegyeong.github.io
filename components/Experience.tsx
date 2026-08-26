@@ -1,15 +1,16 @@
 const activities = [
   {
-    period: "2025.09 ~ 2026.02",
-    title: "UMC 9기 WEB 시니어 챌린저",
+    period: "2025.03 ~ 2026.02",
+    title: "UMC 8·9기 WEB 챌린저",
   },
   {
     period: "2025.09 ~ 2026.01",
     title: "잇타(IT's TIME) 8기 WEB",
   },
   {
-    period: "2025.03 ~ 2025.08",
-    title: "UMC 8기 WEB 챌린저",
+    period: "2024.08 ~ 2024.12",
+    title: "교환학생 - University of Mississippi (Computer Science)",
+    href: "https://olemiss.edu/",
   },
 ];
 
@@ -39,12 +40,23 @@ export default function Experience() {
             <ul className="flex flex-col gap-6">
               {activities.map((item) => (
                 <li key={item.title} className="flex gap-5">
-                  <span className="text-sm text-gray-400 shrink-0 pt-0.5 w-36">
+                  <span className="text-sm text-text-subtle shrink-0 pt-0.5 w-36">
                     {item.period}
                   </span>
-                  <span className="font-medium text-gray-800">
-                    {item.title}
-                  </span>
+                  {"href" in item ? (
+                    <a
+                      href={item.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="font-medium text-text-primary hover:text-brand-blue transition-colors"
+                    >
+                      {item.title}
+                    </a>
+                  ) : (
+                    <span className="font-medium text-text-primary">
+                      {item.title}
+                    </span>
+                  )}
                 </li>
               ))}
             </ul>
@@ -56,10 +68,10 @@ export default function Experience() {
             <ul className="flex flex-col gap-6">
               {certifications.map((item) => (
                 <li key={item.title} className="flex gap-5">
-                  <span className="text-sm text-gray-400 shrink-0 pt-0.5 w-20">
+                  <span className="text-sm text-text-subtle shrink-0 pt-0.5 w-20">
                     {item.date}
                   </span>
-                  <span className="font-medium text-gray-800">
+                  <span className="font-medium text-text-primary">
                     {item.title}
                   </span>
                 </li>

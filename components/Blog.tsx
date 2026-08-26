@@ -53,16 +53,16 @@ export default async function Blog() {
             href="https://seojegyeong.tistory.com/"
             target="_blank"
             rel="noopener noreferrer"
-            className="text-sm text-gray-500 hover:text-gray-900 transition-colors"
+            className="text-sm text-text-muted hover:text-text-primary transition-colors"
           >
             전체 글 보기 →
           </a>
         </div>
 
         {posts.length === 0 ? (
-          <p className="text-gray-400 text-center py-12">글을 불러오는 중...</p>
+          <p className="text-text-subtle text-center py-12">글을 불러오는 중...</p>
         ) : (
-          <ul className="flex flex-col divide-y divide-gray-200">
+          <ul className="flex flex-col divide-y divide-border">
             {posts.map((post) => (
               <li key={post.link}>
                 <a
@@ -71,10 +71,10 @@ export default async function Blog() {
                   rel="noopener noreferrer"
                   className="flex items-center justify-between py-5 group"
                 >
-                  <span className="text-gray-800 font-medium group-hover:text-blue-600 transition-colors">
+                  <span className="text-text-primary font-medium group-hover:text-brand-blue transition-colors">
                     {post.title}
                   </span>
-                  <span className="text-sm text-gray-400 shrink-0 ml-6">
+                  <span className="text-sm text-text-subtle shrink-0 ml-6">
                     {post.date}
                   </span>
                 </a>
