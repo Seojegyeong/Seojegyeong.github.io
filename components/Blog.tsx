@@ -16,16 +16,16 @@ async function getPosts(): Promise<Post[]> {
     return items.map((item) => {
       const title =
         item
-          .match(/<title>(.*?)<\/title>/s)?.[1]
+          .match(/<title>(.*?)<\/title>/)?.[1]
           ?.replace(/&amp;/g, "&")
           .replace(/&lt;/g, "<")
           .replace(/&gt;/g, ">")
           .replace(/&quot;/g, '"')
           .trim() ?? "";
 
-      const link = item.match(/<link>(.*?)<\/link>/s)?.[1]?.trim() ?? "";
+      const link = item.match(/<link>(.*?)<\/link>/)?.[1]?.trim() ?? "";
 
-      const pubDate = item.match(/<pubDate>(.*?)<\/pubDate>/s)?.[1]?.trim() ?? "";
+      const pubDate = item.match(/<pubDate>(.*?)<\/pubDate>/)?.[1]?.trim() ?? "";
       const date = pubDate
         ? new Date(pubDate).toLocaleDateString("ko-KR", {
             year: "numeric",
