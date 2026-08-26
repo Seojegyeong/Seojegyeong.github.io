@@ -43,16 +43,18 @@ export default function Contact() {
       >
         <div className="text-sm text-text-muted">
           <p className="font-medium text-text-secondary">Seo Je Gyeong</p>
-          <p className="mt-0.5">Next.js & Tailwind CSS</p>
+          <p className="mt-0.5">Built with Next.js & Tailwind CSS</p>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-4">
           {socials.map(({ label, href, icon }) => (
             <motion.a
               key={label}
               href={href}
               target={href.startsWith("mailto") ? undefined : "_blank"}
-              rel={href.startsWith("mailto") ? undefined : "noopener noreferrer"}
+              rel={
+                href.startsWith("mailto") ? undefined : "noopener noreferrer"
+              }
               aria-label={label}
               whileHover={{ scale: 1.12 }}
               whileTap={{ scale: 0.92 }}

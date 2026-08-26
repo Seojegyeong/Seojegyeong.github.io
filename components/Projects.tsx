@@ -94,9 +94,12 @@ export default function Projects() {
 
   const pointerStartX = useRef<number | null>(null);
   const didDrag = useRef(false);
-  const lastWheel = useRef(0);
+  const lastNav = useRef(0);
 
   const go = (dir: "left" | "right") => {
+    const now = Date.now();
+    if (now - lastNav.current < 600) return;
+    lastNav.current = now;
     const d = dir === "right" ? 1 : -1;
     setDirection(d);
     setActiveIndex((prev) => (prev + d + count) % count);
@@ -122,9 +125,6 @@ export default function Projects() {
 
   const onWheel = (e: React.WheelEvent) => {
     if (Math.abs(e.deltaX) <= Math.abs(e.deltaY)) return;
-    const now = Date.now();
-    if (now - lastWheel.current < 600) return;
-    lastWheel.current = now;
     e.deltaX > 0 ? go("right") : go("left");
   };
 
@@ -162,10 +162,10 @@ export default function Projects() {
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.9 }}
             transition={{ duration: 0.2, ease }}
-            className="absolute left-8 top-1/2 -translate-y-1/2 z-20 p-2 text-text-subtle hover:text-text-primary transition-colors"
+            className="absolute left-6 top-1/2 -translate-y-1/2 z-20 w-10 h-10 flex items-center justify-center rounded-full bg-white border border-border text-text-secondary shadow-sm hover:border-brand-blue hover:text-brand-blue transition-colors"
             aria-label="이전"
           >
-            <ChevronLeft className="w-7 h-7" />
+            <ChevronLeft className="w-5 h-5" />
           </motion.button>
 
           <AnimatePresence initial={false} custom={direction}>
@@ -204,10 +204,10 @@ export default function Projects() {
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.9 }}
             transition={{ duration: 0.2, ease }}
-            className="absolute right-8 top-1/2 -translate-y-1/2 z-20 p-2 text-text-subtle hover:text-text-primary transition-colors"
+            className="absolute right-6 top-1/2 -translate-y-1/2 z-20 w-10 h-10 flex items-center justify-center rounded-full bg-white border border-border text-text-secondary shadow-sm hover:border-brand-blue hover:text-brand-blue transition-colors"
             aria-label="다음"
           >
-            <ChevronRight className="w-7 h-7" />
+            <ChevronRight className="w-5 h-5" />
           </motion.button>
         </div>
 
