@@ -29,6 +29,11 @@ export default function ProjectModal({ project, onClose }: Props) {
 
   const current = project.media[mediaIndex];
 
+  const toEmbedUrl = (src: string) => {
+    const id = src.match(/(?:youtu\.be\/|v=)([^&?/]+)/)?.[1];
+    return id ? `https://www.youtube.com/embed/${id}` : src;
+  };
+
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
@@ -39,8 +44,15 @@ export default function ProjectModal({ project, onClose }: Props) {
         onClick={(e) => e.stopPropagation()}
       >
         {/* 미디어 슬라이더 */}
-        <div className="relative bg-gray-100 dark:bg-gray-800 rounded-t-2xl aspect-video flex items-center justify-center overflow-hidden">
-          {current.type === "video" ? (
+        <div className="relative bg-black rounded-t-2xl aspect-video flex items-center justify-center overflow-hidden">
+          {current.type === "youtube" ? (
+            <iframe
+              src={toEmbedUrl(current.src)}
+              className="w-full h-full"
+              allowFullScreen
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            />
+          ) : current.type === "video" ? (
             <video
               src={current.src}
               controls
