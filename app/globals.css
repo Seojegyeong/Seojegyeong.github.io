@@ -4,6 +4,48 @@
 @import "./originkit-section-themes.css";
 @import "./originkit-section-theme.css";
 
+/* ============================================================
+   Design Tokens
+   ============================================================ */
+
+@theme {
+  /* Brand — 히어로 웨이브 팔레트 */
+  --color-brand-blue:    #002fff;   /* 딥 블루 · 배경·도트·페이드 */
+  --color-brand-cyan:    #00bcff;   /* 시안    · 웨이브 필드 배경 */
+  --color-brand-mid:     #0050ff;   /* 미드 블루 · 도트 최대 커버리지 */
+
+  /* Brand tints (white blend) */
+  --color-brand-50:  #eef2ff;
+  --color-brand-100: #e0eaff;
+  --color-brand-200: #c7d7fe;
+  --color-brand-300: #a5b4fc;
+  --color-brand-400: #6d7eff;
+  --color-brand-500: #002fff;   /* = brand-blue */
+  --color-brand-600: #0026cc;
+  --color-brand-700: #001d99;
+  --color-brand-800: #001366;
+  --color-brand-900: #000a33;
+
+  /* Neutral */
+  --color-surface:        #ffffff;
+  --color-surface-subtle: #f8faff;  /* 브랜드 컬러 극미량 */
+
+  /* Text — 라이트 모드 위계 */
+  --color-text-primary:   #0a0a14;   /* 제목·강조 — 블루 베이스 극미량 가미 */
+  --color-text-secondary: #374151;   /* 본문 */
+  --color-text-muted:     #6b7280;   /* 보조 설명·날짜 */
+  --color-text-subtle:    #9ca3af;   /* 플레이스홀더·비활성 */
+
+  /* Text — 브랜드 배경(파란 히어로) 위에 올라가는 텍스트 */
+  --color-text-on-brand:          #ffffff;              /* 메인 제목 */
+  --color-text-on-brand-secondary: rgba(255,255,255,0.75); /* 부제목·직함 */
+  --color-text-on-brand-muted:    rgba(255,255,255,0.50);  /* 캡션·메타 */
+
+  /* Border */
+  --color-border:         #e5e7eb;
+  --color-border-subtle:  #dde3f0;
+}
+
 :root {
   --background: #ffffff;
   --foreground: #171717;
@@ -14,12 +56,6 @@
   --color-foreground: var(--foreground);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
 
 body {
   background: var(--background);

@@ -39,10 +39,10 @@ export default function Experience() {
             <ul className="flex flex-col gap-6">
               {activities.map((item) => (
                 <li key={item.title} className="flex gap-5">
-                  <span className="text-sm text-gray-400 dark:text-gray-500 shrink-0 pt-0.5 w-36">
+                  <span className="text-sm text-gray-400 shrink-0 pt-0.5 w-36">
                     {item.period}
                   </span>
-                  <span className="font-medium text-gray-800 dark:text-gray-200">
+                  <span className="font-medium text-gray-800">
                     {item.title}
                   </span>
                 </li>
@@ -56,10 +56,10 @@ export default function Experience() {
             <ul className="flex flex-col gap-6">
               {certifications.map((item) => (
                 <li key={item.title} className="flex gap-5">
-                  <span className="text-sm text-gray-400 dark:text-gray-500 shrink-0 pt-0.5 w-20">
+                  <span className="text-sm text-gray-400 shrink-0 pt-0.5 w-20">
                     {item.date}
                   </span>
-                  <span className="font-medium text-gray-800 dark:text-gray-200">
+                  <span className="font-medium text-gray-800">
                     {item.title}
                   </span>
                 </li>
