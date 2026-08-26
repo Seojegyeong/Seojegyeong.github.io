@@ -41,6 +41,8 @@ async function getPosts(): Promise<Post[]> {
   }
 }
 
+import BlogList from "./BlogList";
+
 export default async function Blog() {
   const posts = await getPosts();
 
@@ -59,29 +61,7 @@ export default async function Blog() {
           </a>
         </div>
 
-        {posts.length === 0 ? (
-          <p className="text-text-subtle text-center py-12">글을 불러오는 중...</p>
-        ) : (
-          <ul className="flex flex-col divide-y divide-border">
-            {posts.map((post) => (
-              <li key={post.link}>
-                <a
-                  href={post.link}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center justify-between py-5 group"
-                >
-                  <span className="text-text-primary font-medium group-hover:text-brand-blue transition-colors">
-                    {post.title}
-                  </span>
-                  <span className="text-sm text-text-subtle shrink-0 ml-6">
-                    {post.date}
-                  </span>
-                </a>
-              </li>
-            ))}
-          </ul>
-        )}
+        <BlogList posts={posts} />
       </div>
     </section>
   );

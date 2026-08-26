@@ -1,3 +1,6 @@
+"use client";
+
+import { motion } from "framer-motion";
 import { Mail } from "lucide-react";
 
 const socials = [
@@ -26,32 +29,41 @@ const socials = [
   },
 ];
 
+const ease = [0.22, 1, 0.36, 1] as const;
+
 export default function Contact() {
   return (
     <footer id="contact">
-      <div className="max-w-5xl mx-auto px-6 py-14 flex flex-col sm:flex-row items-center justify-between gap-6 border-t border-border">
-        {/* 왼쪽: 이름 + 스택 */}
+      <motion.div
+        initial={{ opacity: 0, y: 16 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.5, ease }}
+        className="max-w-5xl mx-auto px-6 py-14 flex flex-col sm:flex-row items-center justify-between gap-6 border-t border-border"
+      >
         <div className="text-sm text-text-muted">
           <p className="font-medium text-text-secondary">Seo Je Gyeong</p>
-          <p className="mt-0.5">Powered by Next.js & Tailwind CSS</p>
+          <p className="mt-0.5">Next.js & Tailwind CSS</p>
         </div>
 
-        {/* 오른쪽: 소셜 아이콘 */}
         <div className="flex items-center gap-3">
           {socials.map(({ label, href, icon }) => (
-            <a
+            <motion.a
               key={label}
               href={href}
               target={href.startsWith("mailto") ? undefined : "_blank"}
               rel={href.startsWith("mailto") ? undefined : "noopener noreferrer"}
               aria-label={label}
-              className="w-9 h-9 flex items-center justify-center rounded-full border border-border text-text-muted hover:border-brand-blue hover:text-brand-blue transition"
+              whileHover={{ scale: 1.12 }}
+              whileTap={{ scale: 0.92 }}
+              transition={{ duration: 0.2, ease }}
+              className="w-9 h-9 flex items-center justify-center rounded-full border border-border text-text-muted hover:border-brand-blue hover:text-brand-blue transition-colors"
             >
               {icon}
-            </a>
+            </motion.a>
           ))}
         </div>
-      </div>
+      </motion.div>
     </footer>
   );
 }
