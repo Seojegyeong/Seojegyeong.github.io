@@ -1,3 +1,8 @@
+"use client";
+
+import { useRef } from "react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+
 const projects = [
   {
     title: "Project Name 1",
@@ -23,17 +28,37 @@ const projects = [
 ];
 
 export default function Projects() {
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  const scroll = (dir: "left" | "right") => {
+    scrollRef.current?.scrollBy({ left: dir === "right" ? 440 : -440, behavior: "smooth" });
+  };
+
   return (
-    <section id="projects" className="py-24 px-6 bg-gray-50 dark:bg-gray-900/50">
-      <div className="max-w-5xl mx-auto">
+    <section id="projects" className="py-24 bg-gray-50 dark:bg-gray-900/50">
+      <div className="max-w-5xl mx-auto px-6">
         <h2 className="text-3xl font-bold mb-12 text-center">Projects</h2>
-        <div className="flex gap-6 overflow-x-auto pb-4 -mx-6 px-6 snap-x snap-mandatory scrollbar-hide">
+      </div>
+
+      <div className="relative flex items-center gap-4 px-6 max-w-5xl mx-auto">
+        <button
+          onClick={() => scroll("left")}
+          className="shrink-0 w-10 h-10 flex items-center justify-center rounded-full border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 hover:bg-gray-100 dark:hover:bg-gray-800 transition text-gray-500 dark:text-gray-400"
+          aria-label="이전"
+        >
+          <ChevronLeft className="w-5 h-5" />
+        </button>
+
+        <div
+          ref={scrollRef}
+          className="flex gap-6 overflow-x-auto pb-2 snap-x snap-mandatory scrollbar-hide"
+        >
           {projects.map((project) => (
             <div
               key={project.title}
-              className="bg-white dark:bg-gray-900 rounded-2xl p-6 border border-gray-200 dark:border-gray-800 flex flex-col gap-4 hover:shadow-lg transition shrink-0 w-80 snap-start"
+              className="bg-white dark:bg-gray-900 rounded-2xl p-8 border border-gray-200 dark:border-gray-800 flex flex-col gap-5 hover:shadow-lg transition shrink-0 w-[480px] snap-start"
             >
-              <h3 className="font-bold text-lg">{project.title}</h3>
+              <h3 className="font-bold text-xl">{project.title}</h3>
               <p className="text-sm text-gray-500 dark:text-gray-400 flex-1 leading-relaxed">
                 {project.description}
               </p>
@@ -70,6 +95,14 @@ export default function Projects() {
             </div>
           ))}
         </div>
+
+        <button
+          onClick={() => scroll("right")}
+          className="shrink-0 w-10 h-10 flex items-center justify-center rounded-full border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 hover:bg-gray-100 dark:hover:bg-gray-800 transition text-gray-500 dark:text-gray-400"
+          aria-label="다음"
+        >
+          <ChevronRight className="w-5 h-5" />
+        </button>
       </div>
     </section>
   );
