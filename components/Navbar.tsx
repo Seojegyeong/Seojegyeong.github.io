@@ -5,7 +5,7 @@ import { useState } from "react";
 const links = [
   { label: "About", href: "#about" },
   { label: "Projects", href: "#projects" },
-  { label: "Blog", href: "https://seojegyeong.tistory.com/", external: true },
+  { label: "Blog", href: "#blog" },
   { label: "Contact", href: "#contact" },
 ];
 
@@ -21,7 +21,6 @@ export default function Navbar() {
             <li key={l.href}>
               <a
                 href={l.href}
-                {...(l.external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
                 className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 transition-colors"
               >
                 {l.label}
