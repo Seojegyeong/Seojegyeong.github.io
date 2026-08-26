@@ -124,14 +124,16 @@ export default function ProjectModal({ project, onClose }: Props) {
           </p>
 
           <div className="flex gap-3 text-sm font-medium pt-1">
-            <a
-              href={project.github}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 transition"
-            >
-              GitHub →
-            </a>
+            {project.github && (
+              <a
+                href={project.github}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 transition"
+              >
+                GitHub →
+              </a>
+            )}
             {project.demo && (
               <a
                 href={project.demo}
@@ -143,6 +145,28 @@ export default function ProjectModal({ project, onClose }: Props) {
               </a>
             )}
           </div>
+
+          {project.relatedPosts && project.relatedPosts.length > 0 && (
+            <div className="pt-2 border-t border-gray-100 dark:border-gray-800">
+              <p className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-3">
+                관련 블로그
+              </p>
+              <ul className="flex flex-col gap-2">
+                {project.relatedPosts.map((post) => (
+                  <li key={post.url}>
+                    <a
+                      href={post.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-sm text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition"
+                    >
+                      {post.title} →
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
         </div>
       </div>
     </div>

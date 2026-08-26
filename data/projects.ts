@@ -10,6 +10,7 @@ export type Project = {
   github: string;
   demo?: string;
   media: MediaItem[];
+  relatedPosts?: { title: string; url: string }[];
 };
 
 export const projects: Project[] = [
@@ -21,6 +22,12 @@ export const projects: Project[] = [
     github: "https://github.com/WhereYouAd/WhereYouAd-Frontend",
     demo: "",
     media: [{ type: "youtube", src: "https://youtu.be/sTcq1MLCJAY" }],
+    relatedPosts: [
+      { title: "[Vite] IP로 접속하면 로그인이 자꾸 풀리는 이유 (feat. Secure 쿠키)", url: "https://seojegyeong.tistory.com/8" },
+      { title: "[TypeScript] 대시보드 지표 포맷팅, 하나로 흐르게 만들기", url: "https://seojegyeong.tistory.com/7" },
+      { title: "[TanStack Query] queryKey 하나로 캐시 이해하기", url: "https://seojegyeong.tistory.com/6" },
+      { title: "[Playwright] Cursor와 Playwright로 테스트 자동화 하기", url: "https://seojegyeong.tistory.com/5" },
+    ],
   },
   {
     title: "Roome",
@@ -39,6 +46,9 @@ export const projects: Project[] = [
     github: "https://github.com/Seojegyeong/Light",
     demo: "https://chromewebstore.google.com/detail/light/oakngefnlimlmgcoadomekojacbminco",
     media: [{ type: "youtube", src: "https://youtu.be/P0sHsM-qLWU" }],
+    relatedPosts: [
+      { title: "[JS] 크롬 확장 프로그램에서 이벤트를 다루는 방법", url: "https://seojegyeong.tistory.com/9" },
+    ],
   },
   {
     title: "WithTime",
