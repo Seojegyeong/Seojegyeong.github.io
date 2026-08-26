@@ -40,7 +40,7 @@ export default function ProjectModal({ project, onClose }: Props) {
       onClick={onClose}
     >
       <div
-        className="bg-white dark:bg-gray-900 rounded-2xl w-full max-w-3xl max-h-[90vh] overflow-y-auto flex flex-col"
+        className="bg-white dark:bg-gray-900 rounded-2xl w-full max-w-3xl max-h-[90vh] flex flex-col"
         onClick={(e) => e.stopPropagation()}
       >
         {/* 미디어 슬라이더 */}
@@ -97,7 +97,7 @@ export default function ProjectModal({ project, onClose }: Props) {
         </div>
 
         {/* 프로젝트 설명 */}
-        <div className="p-8 flex flex-col gap-5">
+        <div className="p-8 flex flex-col gap-5 overflow-y-auto flex-1 min-h-0">
           <div className="flex items-start justify-between gap-4">
             <h3 className="font-bold text-2xl">{project.title}</h3>
             <button
@@ -159,28 +159,16 @@ export default function ProjectModal({ project, onClose }: Props) {
 
           {/* 하단 링크 */}
           <div className="border-t border-gray-100 dark:border-gray-800 pt-4 flex flex-col gap-4">
-            <div className="flex gap-3 text-sm font-medium">
-              {project.github && (
-                <a
-                  href={project.github}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 transition"
-                >
-                  GitHub →
-                </a>
-              )}
-              {project.demo && (
-                <a
-                  href={project.demo}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-blue-600 dark:text-blue-400 hover:opacity-80 transition"
-                >
-                  Live Demo →
-                </a>
-              )}
-            </div>
+            {project.demo && (
+              <a
+                href={project.demo}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-sm font-medium text-blue-600 dark:text-blue-400 hover:opacity-80 transition"
+              >
+                Live Demo →
+              </a>
+            )}
 
             {project.relatedPosts && project.relatedPosts.length > 0 && (
               <div>
@@ -202,6 +190,17 @@ export default function ProjectModal({ project, onClose }: Props) {
                   ))}
                 </ul>
               </div>
+            )}
+
+            {project.github && (
+              <a
+                href={project.github}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 transition"
+              >
+                GitHub →
+              </a>
             )}
           </div>
         </div>
