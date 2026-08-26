@@ -31,16 +31,19 @@ export default function Projects() {
   const scrollRef = useRef<HTMLDivElement>(null);
 
   const scroll = (dir: "left" | "right") => {
-    scrollRef.current?.scrollBy({ left: dir === "right" ? 440 : -440, behavior: "smooth" });
+    scrollRef.current?.scrollBy({
+      left: dir === "right" ? 504 : -504,
+      behavior: "smooth",
+    });
   };
 
   return (
     <section id="projects" className="py-24 bg-gray-50 dark:bg-gray-900/50">
-      <div className="max-w-5xl mx-auto px-6">
-        <h2 className="text-3xl font-bold mb-12 text-center">Projects</h2>
+      <div className="max-w-5xl mx-auto px-6 mb-12">
+        <h2 className="text-3xl font-bold text-center">Projects</h2>
       </div>
 
-      <div className="relative flex items-center gap-4 px-6 max-w-5xl mx-auto">
+      <div className="flex items-center gap-4 px-6 max-w-5xl mx-auto">
         <button
           onClick={() => scroll("left")}
           className="shrink-0 w-10 h-10 flex items-center justify-center rounded-full border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 hover:bg-gray-100 dark:hover:bg-gray-800 transition text-gray-500 dark:text-gray-400"
