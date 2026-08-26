@@ -18,11 +18,7 @@ export default function Projects() {
 
   return (
     <>
-      <section
-        id="projects"
-        className="py-40"
-        style={{ background: "linear-gradient(135deg, white 0%, var(--color-brand-50) 60%, var(--color-brand-100) 100%)" }}
-      >
+      <section id="projects" className="py-40 bg-white">
         <div className="max-w-5xl mx-auto px-6 mb-12">
           <h2 className="text-3xl font-bold text-center">Projects</h2>
         </div>
