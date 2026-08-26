@@ -29,10 +29,10 @@ const socials = [
 export default function Contact() {
   return (
     <footer id="contact">
-      <div className="max-w-5xl mx-auto px-6 py-8 flex flex-col sm:flex-row items-center justify-between gap-6 border-t border-gray-200">
+      <div className="max-w-5xl mx-auto px-6 py-8 flex flex-col sm:flex-row items-center justify-between gap-6 border-t border-border">
         {/* 왼쪽: 이름 + 스택 */}
-        <div className="text-sm text-gray-400">
-          <p className="font-medium text-gray-700">Seo Je Gyeong</p>
+        <div className="text-sm text-text-muted">
+          <p className="font-medium text-text-secondary">Seo Je Gyeong</p>
           <p className="mt-0.5">Powered by Next.js & Tailwind CSS</p>
         </div>
 
@@ -45,7 +45,7 @@ export default function Contact() {
               target={href.startsWith("mailto") ? undefined : "_blank"}
               rel={href.startsWith("mailto") ? undefined : "noopener noreferrer"}
               aria-label={label}
-              className="w-9 h-9 flex items-center justify-center rounded-full border border-gray-200 text-gray-500 hover:border-gray-400 hover:text-gray-900 transition"
+              className="w-9 h-9 flex items-center justify-center rounded-full border border-border text-text-muted hover:border-brand-blue hover:text-brand-blue transition"
             >
               {icon}
             </a>

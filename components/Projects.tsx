@@ -18,7 +18,11 @@ export default function Projects() {
 
   return (
     <>
-      <section id="projects" className="py-40 bg-[linear-gradient(135deg,#ffffff_0%,#eef2ff_60%,#e4edff_100%)]">
+      <section
+        id="projects"
+        className="py-40"
+        style={{ background: "linear-gradient(135deg, white 0%, var(--color-brand-50) 60%, var(--color-brand-100) 100%)" }}
+      >
         <div className="max-w-5xl mx-auto px-6 mb-12">
           <h2 className="text-3xl font-bold text-center">Projects</h2>
         </div>
@@ -26,7 +30,7 @@ export default function Projects() {
         <div className="flex items-center gap-4 px-6 max-w-5xl mx-auto">
           <button
             onClick={() => scroll("left")}
-            className="shrink-0 w-10 h-10 flex items-center justify-center rounded-full border border-gray-200 bg-white hover:bg-gray-100 transition text-gray-500"
+            className="shrink-0 w-10 h-10 flex items-center justify-center rounded-full border border-border bg-white hover:bg-surface-subtle transition text-text-muted"
             aria-label="이전"
           >
             <ChevronLeft className="w-5 h-5" />
@@ -40,17 +44,17 @@ export default function Projects() {
               <button
                 key={project.title}
                 onClick={() => setSelected(project)}
-                className="bg-white rounded-2xl p-8 border border-gray-200 flex flex-col gap-5 shrink-0 w-[480px] snap-start text-left cursor-pointer hover:border-gray-300 transition"
+                className="bg-white rounded-2xl p-8 border border-border flex flex-col gap-5 shrink-0 w-[480px] snap-start text-left cursor-pointer hover:border-border-subtle transition"
               >
                 <h3 className="font-bold text-xl">{project.title}</h3>
-                <p className="text-sm text-gray-500 flex-1 leading-relaxed whitespace-pre-line">
+                <p className="text-sm text-text-muted flex-1 leading-relaxed whitespace-pre-line">
                   {project.description}
                 </p>
                 <div className="flex flex-wrap gap-2">
                   {project.tags.map((tag) => (
                     <span
                       key={tag}
-                      className="px-2 py-1 rounded-md bg-blue-50 text-blue-600 text-xs font-medium"
+                      className="px-2 py-1 rounded-md bg-brand-50 text-brand-blue text-xs font-medium"
                     >
                       {tag}
                     </span>
@@ -62,7 +66,7 @@ export default function Projects() {
 
           <button
             onClick={() => scroll("right")}
-            className="shrink-0 w-10 h-10 flex items-center justify-center rounded-full border border-gray-200 bg-white hover:bg-gray-100 transition text-gray-500"
+            className="shrink-0 w-10 h-10 flex items-center justify-center rounded-full border border-border bg-white hover:bg-surface-subtle transition text-text-muted"
             aria-label="다음"
           >
             <ChevronRight className="w-5 h-5" />

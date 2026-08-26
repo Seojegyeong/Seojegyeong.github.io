@@ -102,7 +102,7 @@ export default function ProjectModal({ project, onClose }: Props) {
             <h3 className="font-bold text-2xl">{project.title}</h3>
             <button
               onClick={onClose}
-              className="shrink-0 p-1.5 rounded-full hover:bg-gray-100 transition text-gray-400"
+              className="shrink-0 p-1.5 rounded-full hover:bg-surface-subtle transition text-text-subtle"
             >
               <X className="w-5 h-5" />
             </button>
@@ -112,14 +112,14 @@ export default function ProjectModal({ project, onClose }: Props) {
             {project.tags.map((tag) => (
               <span
                 key={tag}
-                className="px-2 py-1 rounded-md bg-blue-50 text-blue-600 text-xs font-medium"
+                className="px-2 py-1 rounded-md bg-brand-50 text-brand-blue text-xs font-medium"
               >
                 {tag}
               </span>
             ))}
           </div>
 
-          <p className="text-sm text-gray-500 leading-relaxed whitespace-pre-line">
+          <p className="text-sm text-text-muted leading-relaxed whitespace-pre-line">
             {project.description}
           </p>
 
@@ -140,14 +140,14 @@ export default function ProjectModal({ project, onClose }: Props) {
 
           {/* 기여 */}
           {project.contributions && project.contributions.length > 0 && (
-            <div className="border-t border-gray-100 pt-4">
-              <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">
+            <div className="border-t border-border pt-4">
+              <p className="text-xs font-semibold text-text-subtle uppercase tracking-wider mb-3">
                 기여
               </p>
               <ul className="flex flex-col gap-2">
                 {project.contributions.map((item, i) => (
-                  <li key={i} className="flex gap-2 text-sm text-gray-700 leading-relaxed">
-                    <span className="text-gray-300 shrink-0">•</span>
+                  <li key={i} className="flex gap-2 text-sm text-text-secondary leading-relaxed">
+                    <span className="text-text-subtle shrink-0">•</span>
                     {item}
                   </li>
                 ))}
@@ -157,15 +157,15 @@ export default function ProjectModal({ project, onClose }: Props) {
 
           {/* 트러블슈팅 */}
           {project.troubleshooting && project.troubleshooting.length > 0 && (
-            <div className="border-t border-gray-100 pt-4">
-              <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">
+            <div className="border-t border-border pt-4">
+              <p className="text-xs font-semibold text-text-subtle uppercase tracking-wider mb-3">
                 트러블슈팅
               </p>
               <ul className="flex flex-col gap-4">
                 {project.troubleshooting.map((item, i) => (
                   <li key={i} className="flex flex-col gap-1 text-sm leading-relaxed">
-                    <span className="text-gray-500">{item.problem}</span>
-                    <span className="text-gray-800">→ {item.solution}</span>
+                    <span className="text-text-muted">{item.problem}</span>
+                    <span className="text-text-primary">→ {item.solution}</span>
                   </li>
                 ))}
               </ul>
@@ -173,13 +173,13 @@ export default function ProjectModal({ project, onClose }: Props) {
           )}
 
           {/* 하단 링크 */}
-          <div className="border-t border-gray-100 pt-4 flex flex-col gap-4">
+          <div className="border-t border-border pt-4 flex flex-col gap-4">
             {project.demo && (
               <a
                 href={project.demo}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-sm font-medium text-blue-600 hover:opacity-80 transition"
+                className="text-sm font-medium text-brand-blue hover:opacity-80 transition"
               >
                 Live Demo →
               </a>
@@ -187,7 +187,7 @@ export default function ProjectModal({ project, onClose }: Props) {
 
             {project.relatedPosts && project.relatedPosts.length > 0 && (
               <div>
-                <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">
+                <p className="text-xs font-semibold text-text-subtle uppercase tracking-wider mb-3">
                   관련 블로그
                 </p>
                 <ul className="flex flex-col gap-2">
@@ -197,7 +197,7 @@ export default function ProjectModal({ project, onClose }: Props) {
                         href={post.url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-sm text-gray-600 hover:text-blue-600 transition"
+                        className="text-sm text-text-secondary hover:text-brand-blue transition"
                       >
                         {post.title} →
                       </a>
@@ -212,7 +212,7 @@ export default function ProjectModal({ project, onClose }: Props) {
                 href={project.github}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-sm font-medium text-gray-600 hover:text-gray-900 transition"
+                className="text-sm font-medium text-text-secondary hover:text-text-primary transition"
               >
                 GitHub →
               </a>
