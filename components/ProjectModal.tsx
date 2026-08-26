@@ -123,50 +123,87 @@ export default function ProjectModal({ project, onClose }: Props) {
             {project.description}
           </p>
 
-          <div className="flex gap-3 text-sm font-medium pt-1">
-            {project.github && (
-              <a
-                href={project.github}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 transition"
-              >
-                GitHub →
-              </a>
-            )}
-            {project.demo && (
-              <a
-                href={project.demo}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-blue-600 dark:text-blue-400 hover:opacity-80 transition"
-              >
-                Live Demo →
-              </a>
-            )}
-          </div>
-
-          {project.relatedPosts && project.relatedPosts.length > 0 && (
-            <div className="pt-2 border-t border-gray-100 dark:border-gray-800">
+          {/* 기여 */}
+          {project.contributions && project.contributions.length > 0 && (
+            <div className="border-t border-gray-100 dark:border-gray-800 pt-4">
               <p className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-3">
-                관련 블로그
+                기여
               </p>
               <ul className="flex flex-col gap-2">
-                {project.relatedPosts.map((post) => (
-                  <li key={post.url}>
-                    <a
-                      href={post.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-sm text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition"
-                    >
-                      {post.title} →
-                    </a>
+                {project.contributions.map((item, i) => (
+                  <li key={i} className="flex gap-2 text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
+                    <span className="text-gray-300 dark:text-gray-600 shrink-0">•</span>
+                    {item}
                   </li>
                 ))}
               </ul>
             </div>
           )}
+
+          {/* 트러블슈팅 */}
+          {project.troubleshooting && project.troubleshooting.length > 0 && (
+            <div className="border-t border-gray-100 dark:border-gray-800 pt-4">
+              <p className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-3">
+                트러블슈팅
+              </p>
+              <ul className="flex flex-col gap-4">
+                {project.troubleshooting.map((item, i) => (
+                  <li key={i} className="flex flex-col gap-1 text-sm leading-relaxed">
+                    <span className="text-gray-500 dark:text-gray-400">{item.problem}</span>
+                    <span className="text-gray-800 dark:text-gray-200">→ {item.solution}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          {/* 하단 링크 */}
+          <div className="border-t border-gray-100 dark:border-gray-800 pt-4 flex flex-col gap-4">
+            <div className="flex gap-3 text-sm font-medium">
+              {project.github && (
+                <a
+                  href={project.github}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 transition"
+                >
+                  GitHub →
+                </a>
+              )}
+              {project.demo && (
+                <a
+                  href={project.demo}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-blue-600 dark:text-blue-400 hover:opacity-80 transition"
+                >
+                  Live Demo →
+                </a>
+              )}
+            </div>
+
+            {project.relatedPosts && project.relatedPosts.length > 0 && (
+              <div>
+                <p className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-3">
+                  관련 블로그
+                </p>
+                <ul className="flex flex-col gap-2">
+                  {project.relatedPosts.map((post) => (
+                    <li key={post.url}>
+                      <a
+                        href={post.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-sm text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition"
+                      >
+                        {post.title} →
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>
