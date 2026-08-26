@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+
 import { X, ChevronLeft, ChevronRight, Trophy } from "lucide-react";
 import type { Project } from "@/data/projects";
 
@@ -40,7 +41,7 @@ export default function ProjectModal({ project, onClose }: Props) {
       onClick={onClose}
     >
       <div
-        className="bg-white dark:bg-gray-900 rounded-2xl w-full max-w-3xl max-h-[90vh] flex flex-col"
+        className="bg-white rounded-2xl w-full max-w-3xl max-h-[90vh] flex flex-col"
         onClick={(e) => e.stopPropagation()}
       >
         {/* 미디어 슬라이더 */}
@@ -102,7 +103,7 @@ export default function ProjectModal({ project, onClose }: Props) {
             <h3 className="font-bold text-2xl">{project.title}</h3>
             <button
               onClick={onClose}
-              className="shrink-0 p-1.5 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition text-gray-400"
+              className="shrink-0 p-1.5 rounded-full hover:bg-surface-subtle transition text-text-subtle"
             >
               <X className="w-5 h-5" />
             </button>
@@ -112,14 +113,14 @@ export default function ProjectModal({ project, onClose }: Props) {
             {project.tags.map((tag) => (
               <span
                 key={tag}
-                className="px-2 py-1 rounded-md bg-blue-50 dark:bg-blue-950 text-blue-600 dark:text-blue-400 text-xs font-medium"
+                className="px-2 py-1 rounded-md bg-brand-50 text-brand-blue text-xs font-medium"
               >
                 {tag}
               </span>
             ))}
           </div>
 
-          <p className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed whitespace-pre-line">
+          <p className="text-sm text-text-muted leading-relaxed whitespace-pre-line">
             {project.description}
           </p>
 
@@ -129,7 +130,7 @@ export default function ProjectModal({ project, onClose }: Props) {
               {project.awards.map((award, i) => (
                 <span
                   key={i}
-                  className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-400 text-xs font-medium"
+                  className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-amber-50 text-amber-700 text-xs font-medium"
                 >
                   <Trophy className="w-3 h-3 shrink-0" />
                   {award}
@@ -140,14 +141,14 @@ export default function ProjectModal({ project, onClose }: Props) {
 
           {/* 기여 */}
           {project.contributions && project.contributions.length > 0 && (
-            <div className="border-t border-gray-100 dark:border-gray-800 pt-4">
-              <p className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-3">
+            <div className="border-t border-border pt-4">
+              <p className="text-xs font-semibold text-text-subtle uppercase tracking-wider mb-3">
                 기여
               </p>
               <ul className="flex flex-col gap-2">
                 {project.contributions.map((item, i) => (
-                  <li key={i} className="flex gap-2 text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
-                    <span className="text-gray-300 dark:text-gray-600 shrink-0">•</span>
+                  <li key={i} className="flex gap-2 text-sm text-text-secondary leading-relaxed">
+                    <span className="text-text-subtle shrink-0">•</span>
                     {item}
                   </li>
                 ))}
@@ -157,15 +158,15 @@ export default function ProjectModal({ project, onClose }: Props) {
 
           {/* 트러블슈팅 */}
           {project.troubleshooting && project.troubleshooting.length > 0 && (
-            <div className="border-t border-gray-100 dark:border-gray-800 pt-4">
-              <p className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-3">
+            <div className="border-t border-border pt-4">
+              <p className="text-xs font-semibold text-text-subtle uppercase tracking-wider mb-3">
                 트러블슈팅
               </p>
               <ul className="flex flex-col gap-4">
                 {project.troubleshooting.map((item, i) => (
                   <li key={i} className="flex flex-col gap-1 text-sm leading-relaxed">
-                    <span className="text-gray-500 dark:text-gray-400">{item.problem}</span>
-                    <span className="text-gray-800 dark:text-gray-200">→ {item.solution}</span>
+                    <span className="text-text-muted">{item.problem}</span>
+                    <span className="text-text-primary">→ {item.solution}</span>
                   </li>
                 ))}
               </ul>
@@ -173,13 +174,13 @@ export default function ProjectModal({ project, onClose }: Props) {
           )}
 
           {/* 하단 링크 */}
-          <div className="border-t border-gray-100 dark:border-gray-800 pt-4 flex flex-col gap-4">
+          <div className="border-t border-border pt-4 flex flex-col gap-4">
             {project.demo && (
               <a
                 href={project.demo}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-sm font-medium text-blue-600 dark:text-blue-400 hover:opacity-80 transition"
+                className="text-sm font-medium text-brand-blue hover:opacity-80 transition"
               >
                 Live Demo →
               </a>
@@ -187,7 +188,7 @@ export default function ProjectModal({ project, onClose }: Props) {
 
             {project.relatedPosts && project.relatedPosts.length > 0 && (
               <div>
-                <p className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-3">
+                <p className="text-xs font-semibold text-text-subtle uppercase tracking-wider mb-3">
                   관련 블로그
                 </p>
                 <ul className="flex flex-col gap-2">
@@ -197,7 +198,7 @@ export default function ProjectModal({ project, onClose }: Props) {
                         href={post.url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-sm text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition"
+                        className="text-sm text-text-secondary hover:text-brand-blue transition"
                       >
                         {post.title} →
                       </a>
@@ -212,7 +213,7 @@ export default function ProjectModal({ project, onClose }: Props) {
                 href={project.github}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 transition"
+                className="text-sm font-medium text-text-secondary hover:text-text-primary transition"
               >
                 GitHub →
               </a>
