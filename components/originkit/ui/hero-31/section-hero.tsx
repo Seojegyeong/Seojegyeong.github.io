@@ -39,13 +39,16 @@ export const SectionHero = () => (
     </div>
 
     <div
-      className={`${STAGE} z-10 flex flex-col items-center justify-end min-h-[449px] ipad:min-h-[470px] desktop-sm:min-h-[429px] px-[20px] ipad:px-[56px] text-center`}
+      className={`${STAGE} z-10 flex flex-1 flex-col items-center justify-center pt-16 px-[20px] ipad:px-[56px] text-center`}
     >
       <h1 className="mb-4 font-bold text-[clamp(32px,10vw,42px)] leading-[1.1] tracking-[-0.06em] text-white ipad:text-[68px] desktop-sm:text-[84px]">
         Seo Je Gyeong
       </h1>
-      <p className="mb-[191px] text-[clamp(18px,4vw,24px)] leading-[1.2] tracking-[-0.03em] text-white/70 ipad:mb-[56px] ipad:text-[36px] desktop-sm:text-[44px]">
+      <p className="text-[clamp(18px,4vw,24px)] leading-[1.2] tracking-[-0.03em] text-white/70 ipad:text-[36px] desktop-sm:text-[44px]">
         Frontend Developer
+      </p>
+      <p className="mt-4 text-[clamp(14px,2vw,17px)] leading-[1.6] text-white/80 ipad:text-[20px] desktop-sm:text-[22px]">
+        침묵하는 프로덕션 오류를 끝까지 추적해, 사용자의 신뢰를 제품에 심는 개발자.
       </p>
     </div>
 
@@ -53,7 +56,7 @@ export const SectionHero = () => (
 
     <div
       aria-hidden
-      className="h-[40px] shrink-0 ipad:h-[22px] desktop-sm:h-[24px]"
+      className="h-[80px] shrink-0 ipad:h-[60px] desktop-sm:h-[64px]"
     />
   </section>
 );
