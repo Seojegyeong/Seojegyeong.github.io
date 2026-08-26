@@ -29,7 +29,7 @@ const socials = [
 export default function Contact() {
   return (
     <footer id="contact">
-      <div className="max-w-5xl mx-auto px-6 py-8 flex flex-col sm:flex-row items-center justify-between gap-6 border-t border-border">
+      <div className="max-w-5xl mx-auto px-6 py-14 flex flex-col sm:flex-row items-center justify-between gap-6 border-t border-border">
         {/* 왼쪽: 이름 + 스택 */}
         <div className="text-sm text-text-muted">
           <p className="font-medium text-text-secondary">Seo Je Gyeong</p>
