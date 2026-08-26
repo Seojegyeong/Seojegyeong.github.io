@@ -59,7 +59,7 @@ export default function Projects() {
           {projects.map((project) => (
             <div
               key={project.title}
-              className="bg-white dark:bg-gray-900 rounded-2xl p-8 border border-gray-200 dark:border-gray-800 flex flex-col gap-5 hover:shadow-lg transition shrink-0 w-[480px] snap-start"
+              className="bg-white dark:bg-gray-900 rounded-2xl p-8 border border-gray-200 dark:border-gray-800 flex flex-col gap-5 shrink-0 w-[480px] snap-start"
             >
               <h3 className="font-bold text-xl">{project.title}</h3>
               <p className="text-sm text-gray-500 dark:text-gray-400 flex-1 leading-relaxed">
