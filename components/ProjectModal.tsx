@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { X, ChevronLeft, ChevronRight } from "lucide-react";
+import { X, ChevronLeft, ChevronRight, Trophy } from "lucide-react";
 import type { Project } from "@/data/projects";
 
 type Props = {
@@ -44,7 +44,7 @@ export default function ProjectModal({ project, onClose }: Props) {
         onClick={(e) => e.stopPropagation()}
       >
         {/* 미디어 슬라이더 */}
-        <div className="relative bg-black rounded-t-2xl aspect-video flex items-center justify-center overflow-hidden">
+        <div className="relative bg-gray-950 rounded-t-2xl aspect-video flex items-center justify-center overflow-hidden">
           {current.type === "youtube" ? (
             <iframe
               src={toEmbedUrl(current.src)}
@@ -119,9 +119,24 @@ export default function ProjectModal({ project, onClose }: Props) {
             ))}
           </div>
 
-          <p className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed">
+          <p className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed whitespace-pre-line">
             {project.description}
           </p>
+
+          {/* 수상 */}
+          {project.awards && project.awards.length > 0 && (
+            <div className="flex flex-wrap gap-2">
+              {project.awards.map((award, i) => (
+                <span
+                  key={i}
+                  className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-400 text-xs font-medium"
+                >
+                  <Trophy className="w-3 h-3 shrink-0" />
+                  {award}
+                </span>
+              ))}
+            </div>
+          )}
 
           {/* 기여 */}
           {project.contributions && project.contributions.length > 0 && (

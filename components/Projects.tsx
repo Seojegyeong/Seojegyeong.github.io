@@ -43,7 +43,7 @@ export default function Projects() {
                 className="bg-white dark:bg-gray-900 rounded-2xl p-8 border border-gray-200 dark:border-gray-800 flex flex-col gap-5 shrink-0 w-[480px] snap-start text-left cursor-pointer hover:border-gray-300 dark:hover:border-gray-700 transition"
               >
                 <h3 className="font-bold text-xl">{project.title}</h3>
-                <p className="text-sm text-gray-500 dark:text-gray-400 flex-1 leading-relaxed">
+                <p className="text-sm text-gray-500 dark:text-gray-400 flex-1 leading-relaxed whitespace-pre-line">
                   {project.description}
                 </p>
                 <div className="flex flex-wrap gap-2">
