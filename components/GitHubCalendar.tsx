@@ -1,7 +1,12 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { GitHubCalendar as ReactGitHubCalendar } from "react-github-calendar";
+import dynamic from "next/dynamic";
+
+const ReactGitHubCalendar = dynamic(
+  () => import("react-github-calendar").then((m) => m.GitHubCalendar),
+  { ssr: false }
+);
 
 const ease = [0.22, 1, 0.36, 1] as const;
 
@@ -30,7 +35,7 @@ export default function GitHubCalendar() {
           <div className="flex items-start justify-between mb-8">
             <div>
               <p className="font-bold text-text-primary text-lg leading-tight">GitHub Contribution</p>
-              <p className="text-sm text-text-muted mt-1">꾸준한 커밋으로 쌓아온 1년간의 개발 활동 기록입니다.</p>
+              <p className="text-sm text-text-muted mt-1">꾸준하게 쌓아온 개발 활동 기록입니다.</p>
             </div>
 
             <a

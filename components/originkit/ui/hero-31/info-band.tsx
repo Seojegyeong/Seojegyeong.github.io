@@ -65,9 +65,9 @@ export const InfoBand = () => (
     <div className={`${STAGE} h-full desktop-sm:flex`}>
       {/* Cell one. On the phone this is just the paragraph in the page gutter —
         no label, no rules, and a 32px foot holding it off the rule below. */}
-      <div className="px-[20px] pb-[32px] ipad:flex ipad:h-[290px] ipad:flex-col ipad:justify-between ipad:border-b ipad:border-white/40 ipad:px-[56px] ipad:py-[32px] desktop-sm:h-full desktop-sm:min-w-0 desktop-sm:flex-1 desktop-sm:border-b-0 desktop-sm:border-r desktop-sm:py-[40px]">
+      <div className="pl-5 pr-5 pb-8 ipad:flex ipad:h-[290px] ipad:flex-col ipad:border-b ipad:border-white/40 ipad:pl-14 ipad:pr-14 ipad:pt-8 ipad:pb-8 desktop-sm:h-full desktop-sm:min-w-0 desktop-sm:flex-1 desktop-sm:border-b-0 desktop-sm:border-r desktop-sm:pl-14 desktop-sm:pr-14 desktop-sm:pt-10 desktop-sm:pb-10">
         <p className={`hidden ipad:block ${LABEL}`}>학력</p>
-        <div className="flex flex-col gap-2">
+        <div className="flex flex-col gap-2 ipad:mt-auto">
           <p className="text-white font-semibold text-[16px] ipad:text-[22px] tracking-[-0.02em] flex items-baseline gap-2">
             상명대학교
             <span className="text-white/50 font-normal text-[12px] ipad:text-[13px]">2027년 2월 졸업 예정</span>
@@ -83,9 +83,9 @@ export const InfoBand = () => (
 
       {/* Cell two. Its own top rule is the phone's single upper rule and the
         tablet's mid rule; on desktop the band's top rule already covers it. */}
-      <div className="relative flex h-[220px] flex-col justify-between border-t border-white/40 p-[20px] ipad:h-[290px] ipad:px-[56px] ipad:py-[32px] desktop-sm:h-full desktop-sm:min-w-0 desktop-sm:flex-1 desktop-sm:border-t-0 desktop-sm:py-[40px]">
+      <div className="relative flex h-[220px] flex-col border-t border-white/40 pl-5 pr-5 pt-5 pb-5 ipad:h-[290px] ipad:pl-14 ipad:pr-14 ipad:pt-8 ipad:pb-8 desktop-sm:h-full desktop-sm:min-w-0 desktop-sm:flex-1 desktop-sm:border-t-0 desktop-sm:pl-14 desktop-sm:pr-14 desktop-sm:pt-10 desktop-sm:pb-10">
         <p className={LABEL}>링크</p>
-        <ul className="flex flex-col gap-3">
+        <ul className="flex flex-col gap-3 mt-auto">
           {[
             { label: "GitHub", href: "https://github.com/Seojegyeong" },
             { label: "Blog", href: "https://seojegyeong.tistory.com" },
@@ -96,10 +96,10 @@ export const InfoBand = () => (
                 href={href}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="group flex items-center gap-2 text-white/70 hover:text-white transition-colors duration-150 text-[14px] ipad:text-[16px]"
+                className="group flex items-center gap-2 text-white/90 hover:text-white transition-colors duration-150 text-[14px] ipad:text-[16px]"
               >
                 <span>{label}</span>
-                <span className="opacity-0 group-hover:opacity-100 transition-opacity duration-150 text-xs">↗</span>
+                <span className="text-xs text-white/50 group-hover:text-white transition-colors duration-150">↗</span>
               </a>
             </li>
           ))}

@@ -36,7 +36,7 @@ const items: {
     type: "경험",
     sub: "Computer Science",
     href: "https://olemiss.edu/",
-    desc: "Java, 컴퓨터 구조 등 CS 전공 수업을 영어 강의 환경에서 이수하며 글로벌 환경에서 전공 역량을 키웠습니다.",
+    desc: "Java, 컴퓨터 구조 등 CS 전공 수업을 영어 강의 환경에서 이수하며 전 과목 A+를 달성했습니다.",
   },
   {
     period: "2026.09",
@@ -61,7 +61,7 @@ const items: {
     title: "상명대학교 교내 창업아이디어 경진대회 대상",
     type: "수상",
     sub: "WhereYouAd",
-    desc: "교내 창업 아이디어 경진대회에서 서비스 기획·발표·팜플렛 디자인을 주도하며 대상을 수상했습니다.",
+    desc: "교내 창업 아이디어 경진대회에서 서비스 기획·팜플렛 디자인을 주도하며 대상을 수상했습니다.",
   },
   {
     period: "2026",
@@ -82,7 +82,7 @@ const sorted = [...items].sort((a, b) => getSortKey(b.period) - getSortKey(a.per
 
 const BADGE: Record<Category, string> = {
   경험: "bg-brand-50 text-brand-blue",
-  자격증: "bg-gray-100 text-text-secondary",
+  자격증: "bg-surface-subtle text-text-secondary",
   수상: "bg-amber-50 text-amber-700",
 };
 

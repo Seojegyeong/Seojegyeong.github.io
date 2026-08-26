@@ -7,7 +7,7 @@ export type Project = {
   title: string;
   description: string;
   tags: string[];
-  github: string;
+  github?: string;
   demo?: string;
   media: MediaItem[];
   awards?: string[];
@@ -23,7 +23,6 @@ export const projects: Project[] = [
       "Google·Naver·Meta 광고 성과를 단일 대시보드에 통합하는 B2B SaaS.",
     tags: ["React", "TypeScript", "Vite", "TanStack Query", "Zustand", "AWS"],
     github: "https://github.com/WhereYouAd/WhereYouAd-Frontend",
-    demo: "",
     media: [{ type: "youtube", src: "https://youtu.be/sTcq1MLCJAY" }],
     awards: ["교내 창업아이디어 경진대회 대상", "모두의 창업 공모전 1기 본선"],
     contributions: [
@@ -77,7 +76,6 @@ export const projects: Project[] = [
       "Framer Motion",
     ],
     github: "https://github.com/ITA-Roome/roome-fe",
-    demo: "",
     media: [{ type: "youtube", src: "https://youtu.be/hCe5JMVMQxE" }],
     contributions: [
       "FE 2인 팀에서 프로젝트 셋업·API 인프라·Feed/Shop·온보딩·배포 전담 (아키텍처 기반 전체 담당)",
@@ -143,8 +141,6 @@ export const projects: Project[] = [
       "Zustand",
       "Firebase",
     ],
-    github: "",
-    demo: "",
     media: [{ type: "youtube", src: "https://youtu.be/oy63--lXUtQ" }],
     contributions: [
       "설정·공지·FAQ 도메인 전담 구현",

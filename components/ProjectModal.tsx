@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+
 import { X, ChevronLeft, ChevronRight, Trophy } from "lucide-react";
 import type { Project } from "@/data/projects";
 
