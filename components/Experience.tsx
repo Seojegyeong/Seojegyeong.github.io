@@ -120,15 +120,17 @@ export default function Experience() {
           className="flex flex-col gap-9"
         >
           {sorted.map((item) => (
-            <motion.li key={item.title} variants={listItem} className="flex gap-5 items-start">
-              <span className="text-sm text-text-subtle shrink-0 pt-0.5 w-36">
-                {item.period}
-              </span>
-              <span
-                className={`text-xs font-medium px-2 py-0.5 rounded-full shrink-0 mt-0.5 ${BADGE[item.type]}`}
-              >
-                {item.type}
-              </span>
+            <motion.li key={item.title} variants={listItem} className="flex flex-col gap-1.5 sm:flex-row sm:gap-5 sm:items-start">
+              <div className="flex items-center gap-2 sm:contents">
+                <span className="text-xs text-text-subtle shrink-0 sm:text-sm sm:pt-0.5 sm:w-36">
+                  {item.period}
+                </span>
+                <span
+                  className={`text-xs font-medium px-2 py-0.5 rounded-full shrink-0 sm:mt-0.5 ${BADGE[item.type]}`}
+                >
+                  {item.type}
+                </span>
+              </div>
               <div className="flex flex-col gap-1">
                 {item.href ? (
                   <a
