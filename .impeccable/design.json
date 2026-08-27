@@ -1,0 +1,230 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-08-27T00:00:00Z",
+  "title": "Design System: Seo Je Gyeong Portfolio",
+  "extensions": {
+    "colorMeta": {
+      "mission-blue": {
+        "role": "primary",
+        "displayName": "Mission Blue",
+        "canonical": "#002fff",
+        "tonalRamp": ["#000a33", "#001366", "#001d99", "#0026cc", "#002fff", "#4d6fff", "#99b3ff", "#eef2ff"]
+      },
+      "kinetic-cyan": {
+        "role": "secondary",
+        "displayName": "Kinetic Cyan",
+        "canonical": "#00bcff",
+        "tonalRamp": ["#003d52", "#005e7a", "#0080a8", "#009fd4", "#00bcff", "#33cbff", "#80e1ff", "#d9f5ff"]
+      },
+      "mid-blue": {
+        "role": "secondary",
+        "displayName": "Mid Blue",
+        "canonical": "#0050ff",
+        "tonalRamp": ["#001266", "#001f99", "#002fcc", "#0050ff", "#4d80ff", "#80a3ff", "#b3c6ff", "#e6ecff"]
+      },
+      "brand-50": {
+        "role": "tertiary",
+        "displayName": "Brand 50",
+        "canonical": "#eef2ff",
+        "tonalRamp": ["#c7d7fe", "#d4e0fe", "#dce8fe", "#e4edff", "#eef2ff", "#f2f5ff", "#f7f9ff", "#fbfcff"]
+      },
+      "surface": {
+        "role": "neutral",
+        "displayName": "Surface White",
+        "canonical": "#ffffff",
+        "tonalRamp": ["#d1d1d1", "#e0e0e0", "#ebebeb", "#f2f2f2", "#f7f7f7", "#fafafa", "#fdfdfd", "#ffffff"]
+      },
+      "surface-subtle": {
+        "role": "neutral",
+        "displayName": "Surface Subtle",
+        "canonical": "#f8faff",
+        "tonalRamp": ["#c0c8e8", "#ced7f0", "#dae3f5", "#e5edfb", "#eef4ff", "#f3f7ff", "#f8faff", "#fdfeff"]
+      },
+      "text-primary": {
+        "role": "neutral",
+        "displayName": "Text Primary",
+        "canonical": "#0a0a14",
+        "tonalRamp": ["#0a0a14", "#1a1a28", "#2a2a3c", "#3a3a50", "#4a4a64", "#6b6b80", "#9ca3af", "#e5e7eb"]
+      },
+      "text-secondary": {
+        "role": "neutral",
+        "displayName": "Text Secondary",
+        "canonical": "#374151",
+        "tonalRamp": ["#111827", "#1f2937", "#374151", "#4b5563", "#6b7280", "#9ca3af", "#d1d5db", "#f9fafb"]
+      },
+      "text-muted": {
+        "role": "neutral",
+        "displayName": "Text Muted",
+        "canonical": "#6b7280",
+        "tonalRamp": ["#374151", "#4b5563", "#6b7280", "#9ca3af", "#d1d5db", "#e5e7eb", "#f3f4f6", "#f9fafb"]
+      },
+      "border": {
+        "role": "neutral",
+        "displayName": "Border",
+        "canonical": "#e5e7eb",
+        "tonalRamp": ["#9ca3af", "#c4c9d4", "#d1d5db", "#dde0e6", "#e5e7eb", "#eff0f2", "#f3f4f6", "#f9fafb"]
+      }
+    },
+    "typographyMeta": {
+      "display": { "displayName": "Display", "purpose": "히어로 이름 전용. 포트폴리오에서 단 한 번 사용." },
+      "headline": { "displayName": "Headline", "purpose": "섹션 제목 전용 (경험, Projects 등)." },
+      "body": { "displayName": "Body", "purpose": "프로젝트 설명, 경험 desc, 트러블슈팅 내용." },
+      "label": { "displayName": "Label", "purpose": "기술 태그, 기간 표시, 뱃지. 소문자 처리." }
+    },
+    "shadows": [
+      {
+        "name": "nav-scroll",
+        "value": "0 1px 2px rgba(0,0,0,0.05)",
+        "purpose": "네비게이션 바. 스크롤 80% 이상 진입 시에만 등장."
+      },
+      {
+        "name": "arrow-rest",
+        "value": "0 1px 2px rgba(0,0,0,0.05)",
+        "purpose": "프로젝트 캐러셀 화살표 버튼. 항상 적용."
+      }
+    ],
+    "motion": [
+      {
+        "name": "ease-standard",
+        "value": "cubic-bezier(0.22, 1, 0.36, 1)",
+        "purpose": "시스템 표준 이징. 모든 진입 애니메이션, hover, 카드 전환에 사용."
+      },
+      {
+        "name": "ease-hero",
+        "value": "cubic-bezier(0.215, 0.61, 0.355, 1)",
+        "purpose": "hero-reveal 전용 이징. 히어로 섹션 초기 등장."
+      },
+      {
+        "name": "duration-micro",
+        "value": "150ms",
+        "purpose": "hover 색상 전환 등 마이크로 인터랙션."
+      },
+      {
+        "name": "duration-standard",
+        "value": "200ms",
+        "purpose": "버튼 scale, 모달 overlay fade."
+      },
+      {
+        "name": "duration-enter",
+        "value": "500ms",
+        "purpose": "섹션 콘텐츠 진입 애니메이션 (y + opacity)."
+      },
+      {
+        "name": "duration-hero",
+        "value": "300ms",
+        "purpose": "히어로 섹션 reveal 애니메이션."
+      },
+      {
+        "name": "stagger-list",
+        "value": "70ms",
+        "purpose": "Experience 타임라인 아이템 staggerChildren 간격."
+      }
+    ],
+    "breakpoints": [
+      { "name": "ipad", "value": "768px" },
+      { "name": "ipad-air", "value": "834px" },
+      { "name": "desktop-sm", "value": "1280px" },
+      { "name": "laptop", "value": "1440px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Tech Tag",
+      "kind": "chip",
+      "refersTo": "tag-primary",
+      "description": "기술 스택 레이블. 인터랙션 없는 순수 표시 요소.",
+      "html": "<span class=\"ds-tag\">TypeScript</span>",
+      "css": ".ds-tag { display: inline-flex; align-items: center; background: #eef2ff; color: #002fff; border-radius: 6px; padding: 4px 8px; font-size: 12px; font-weight: 500; font-family: Pretendard, -apple-system, BlinkMacSystemFont, sans-serif; line-height: 1; }"
+    },
+    {
+      "name": "Experience Badge — 경험",
+      "kind": "chip",
+      "refersTo": "tag-primary",
+      "description": "경험 타임라인 카테고리 뱃지. 경험 타입.",
+      "html": "<span class=\"ds-badge-exp\">경험</span>",
+      "css": ".ds-badge-exp { display: inline-flex; align-items: center; background: #eef2ff; color: #002fff; border-radius: 9999px; padding: 2px 8px; font-size: 12px; font-weight: 500; font-family: Pretendard, -apple-system, BlinkMacSystemFont, sans-serif; line-height: 1.4; }"
+    },
+    {
+      "name": "Experience Badge — 자격증",
+      "kind": "chip",
+      "refersTo": "tag-primary",
+      "description": "경험 타임라인 카테고리 뱃지. 자격증 타입.",
+      "html": "<span class=\"ds-badge-cert\">자격증</span>",
+      "css": ".ds-badge-cert { display: inline-flex; align-items: center; background: #f8faff; color: #374151; border-radius: 9999px; padding: 2px 8px; font-size: 12px; font-weight: 500; font-family: Pretendard, -apple-system, BlinkMacSystemFont, sans-serif; line-height: 1.4; }"
+    },
+    {
+      "name": "Experience Badge — 수상",
+      "kind": "chip",
+      "refersTo": "tag-primary",
+      "description": "경험 타임라인 카테고리 뱃지. 수상 타입.",
+      "html": "<span class=\"ds-badge-award\">수상</span>",
+      "css": ".ds-badge-award { display: inline-flex; align-items: center; background: #fffbeb; color: #b45309; border-radius: 9999px; padding: 2px 8px; font-size: 12px; font-weight: 500; font-family: Pretendard, -apple-system, BlinkMacSystemFont, sans-serif; line-height: 1.4; }"
+    },
+    {
+      "name": "Carousel Arrow Button",
+      "kind": "button",
+      "refersTo": "nav-arrow",
+      "description": "프로젝트 캐러셀 좌우 탐색 버튼.",
+      "html": "<button class=\"ds-arrow\" aria-label=\"이전\"><svg width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M15 18l-6-6 6-6\"/></svg></button>",
+      "css": ".ds-arrow { display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 9999px; background: #ffffff; border: 1px solid #e5e7eb; color: #374151; box-shadow: 0 1px 2px rgba(0,0,0,0.05); cursor: pointer; transition: border-color 150ms cubic-bezier(0.22,1,0.36,1), color 150ms cubic-bezier(0.22,1,0.36,1), transform 200ms cubic-bezier(0.22,1,0.36,1); } .ds-arrow:hover { border-color: #002fff; color: #002fff; transform: scale(1.1); } .ds-arrow:active { transform: scale(0.9); }"
+    },
+    {
+      "name": "Contact Icon Button",
+      "kind": "button",
+      "refersTo": "contact-icon",
+      "description": "footer 소셜 링크 버튼. GitHub·LinkedIn·Email.",
+      "html": "<a href=\"#\" class=\"ds-contact-icon\" aria-label=\"GitHub\"><svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"currentColor\"><path d=\"M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12\"/></svg></a>",
+      "css": ".ds-contact-icon { display: flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 9999px; border: 1px solid #e5e7eb; color: #6b7280; background: transparent; transition: border-color 200ms cubic-bezier(0.22,1,0.36,1), color 200ms cubic-bezier(0.22,1,0.36,1), transform 200ms cubic-bezier(0.22,1,0.36,1); text-decoration: none; } .ds-contact-icon:hover { border-color: #002fff; color: #002fff; transform: scale(1.12); } .ds-contact-icon:active { transform: scale(0.92); }"
+    },
+    {
+      "name": "Project Card",
+      "kind": "card",
+      "refersTo": "tag-primary",
+      "description": "프로젝트 캐러셀 메인 카드. 클릭 시 모달 오픈.",
+      "html": "<div class=\"ds-project-card\"><div class=\"ds-card-media\"></div><div class=\"ds-card-body\"><h3 class=\"ds-card-title\">WhereYouAd</h3><p class=\"ds-card-desc\">Google·Naver·Meta 광고 성과를 단일 대시보드에 통합하고, AI 분석 리포트를 생성·저장하는 팀 협업 B2B SaaS.</p><div class=\"ds-card-tags\"><span class=\"ds-card-tag\">React</span><span class=\"ds-card-tag\">TypeScript</span><span class=\"ds-card-tag\">TanStack Query</span></div></div></div>",
+      "css": ".ds-project-card { background: #ffffff; border-radius: 16px; border: 1px solid #e5e7eb; overflow: hidden; display: flex; flex-direction: column; cursor: pointer; } .ds-card-media { aspect-ratio: 16/9; width: 100%; background: #eef2ff; } .ds-card-body { display: flex; flex-direction: column; gap: 12px; padding: 24px; } .ds-card-title { font-size: 18px; font-weight: 700; color: #0a0a14; font-family: Pretendard, -apple-system, BlinkMacSystemFont, sans-serif; margin: 0; } .ds-card-desc { font-size: 14px; color: #6b7280; line-height: 1.6; font-family: Pretendard, -apple-system, BlinkMacSystemFont, sans-serif; margin: 0; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; } .ds-card-tags { display: flex; flex-wrap: wrap; gap: 8px; } .ds-card-tag { background: #eef2ff; color: #002fff; border-radius: 6px; padding: 4px 8px; font-size: 12px; font-weight: 500; font-family: Pretendard, -apple-system, BlinkMacSystemFont, sans-serif; }"
+    },
+    {
+      "name": "Section Heading",
+      "kind": "custom",
+      "refersTo": null,
+      "description": "모든 바디 섹션 공통 제목. Framer Motion 진입 시 y+opacity 애니메이션.",
+      "html": "<h2 class=\"ds-section-heading\">경험</h2>",
+      "css": ".ds-section-heading { font-size: 30px; font-weight: 700; color: #0a0a14; font-family: Pretendard, -apple-system, BlinkMacSystemFont, sans-serif; line-height: 1.2; margin: 0 0 40px 0; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Signal Depth",
+    "overview": "이 시스템은 표면 아래 깊은 곳에서 정확한 신호를 발신하는 개발자를 시각화한다. 딥 블루의 심연에서 시작해 시안의 파동이 표면으로 부서지는 히어로 배경은 단순한 배경이 아닌 포트폴리오의 논리적 메타포다 — 침묵하는 프로덕션 오류를 끝까지 추적하는 개발자가 작동하는 방식이 그렇다.\n\n바디 섹션은 의도적으로 조용하다. 순백의 배경, 절제된 텍스트 위계, Mission Blue는 인터랙션이나 강조가 필요한 순간에만 등장한다. 이 희소성이 브랜드 블루의 힘을 유지한다.\n\nFramer Motion 기반 진입 애니메이션은 섬세하고 목적 지향적이다. y축 이동 + 투명도 페이드의 조합으로 콘텐츠가 아래에서 올라오며 자리를 잡는다.",
+    "keyCharacteristics": [
+      "딥 블루 히어로가 첫 뷰포트를 장악하고, 아래 섹션들은 침묵으로 응답한다",
+      "Mission Blue는 인터랙션과 강조 순간에만 등장 — 희소성으로 힘을 유지",
+      "타이포그래피 위계가 정보 스캔 속도를 제어한다",
+      "섀도우 없는 평면 시스템 — 깊이는 레이어드 투명도와 border로 표현",
+      "모든 애니메이션은 [0.22, 1, 0.36, 1] 커브로 통일 — 빠른 시작, 부드러운 착지"
+    ],
+    "rules": [
+      { "name": "The One-Voice Rule", "body": "Mission Blue(#002fff)는 화면당 인터랙션 강조가 필요한 요소에만 쓴다. 대량 노출 시 희소성이 소진된다.", "section": "colors" },
+      { "name": "The Blank Canvas Rule", "body": "바디 섹션 배경은 반드시 Surface White(#ffffff)다. 그라디언트·wash·텍스처 금지.", "section": "colors" },
+      { "name": "The Compression Rule", "body": "히어로 디스플레이는 자간 -0.06em, 서브는 -0.03em. 바디에는 letter-spacing 적용 금지.", "section": "typography" },
+      { "name": "The Single Family Rule", "body": "새로운 폰트 패밀리를 도입하지 않는다. Pretendard 단일 패밀리로 전체 위계를 처리한다.", "section": "typography" },
+      { "name": "The Flat-By-Default Rule", "body": "모든 카드와 컨테이너는 그림자 없이 시작한다. 깊이가 필요하면 border와 bg 대비를 먼저 쓴다.", "section": "elevation" }
+    ],
+    "dos": [
+      "Do 바디 섹션 배경은 항상 #ffffff를 유지한다.",
+      "Do Mission Blue(#002fff)는 hover, 강조, 인터랙션 시에만 사용한다.",
+      "Do 진입 애니메이션은 ease: [0.22, 1, 0.36, 1]를 기본 커브로 사용한다.",
+      "Do 카드 border는 border-border(#e5e7eb)를 사용한다.",
+      "Do 섹션 타이틀(h2)은 text-3xl font-bold 단일 스타일로 통일한다.",
+      "Do 자간 압축(-0.06em, -0.03em)은 히어로 텍스트에만 적용한다."
+    ],
+    "donts": [
+      "Don't 바디 섹션 배경에 컬러 그라디언트, wash, 텍스처를 추가한다.",
+      "Don't 카드에 box-shadow를 추가한다.",
+      "Don't 새로운 폰트 패밀리를 도입한다.",
+      "Don't Mission Blue를 버튼 배경 fill로 사용한다.",
+      "Don't 애니메이션 duration을 0.5s 이상으로 설정한다(섹션 진입 제외).",
+      "Don't rounded-none 또는 직각 모서리를 카드·버튼에 사용한다."
+    ]
+  }
+}

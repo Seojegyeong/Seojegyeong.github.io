@@ -21,10 +21,20 @@ export const projects: Project[] = [
     title: "WhereYouAd",
     description:
       "Google·Naver·Meta 광고 성과를 단일 대시보드에 통합하고, AI 분석 리포트를 생성·저장하는 팀 협업 B2B SaaS.",
-    tags: ["React", "TypeScript", "TanStack Query", "Zustand", "Tailwind CSS", "AWS"],
+    tags: [
+      "React",
+      "TypeScript",
+      "TanStack Query",
+      "Zustand",
+      "Tailwind CSS",
+      "AWS",
+    ],
     github: "https://github.com/WhereYouAd/WhereYouAd-Frontend",
     media: [{ type: "youtube", src: "https://youtu.be/sTcq1MLCJAY" }],
-    awards: ["상명대학교 창업 아이디어 경진대회 대상", "모두의 창업 1기 선발·본선 진출"],
+    awards: [
+      "상명대학교 교내 창업아이디어 경진대회 대상",
+      "모두의 창업 1기 선발·본선 진출",
+    ],
     contributions: [
       "Skeleton UI 적용으로 다중 API 로딩 빈 화면 문제 해결, LCP 1,180ms → 1,048ms(-11%) 개선",
       "METRIC_REGISTRY로 지표 포맷 로직 단일화, Vitest 51케이스 CI 연동으로 위반 PR 자동 차단",
@@ -78,7 +88,7 @@ export const projects: Project[] = [
       "Vercel",
     ],
     github: "https://github.com/ITA-Roome/roome-fe",
-    media: [{ type: "youtube", src: "https://youtu.be/hCe5JMVMQxE" }],
+    media: [{ type: "youtube", src: "https://youtu.be/gwQPsdBpcwI" }],
     contributions: [
       "FE 2인 팀에서 프로젝트 셋업·API 인프라·Feed/Shop·온보딩·배포 전담",
       "필터 조합별 InfiniteData 캐시 낙관적 업데이트로 좋아요·스크랩 4종 즉각 반응 구현, 에러 시 자동 rollback 처리",
