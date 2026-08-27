@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-
+import { motion } from "framer-motion";
 import { X, ChevronLeft, ChevronRight, Trophy } from "lucide-react";
 import type { Project } from "@/data/projects";
 
@@ -9,6 +9,8 @@ type Props = {
   project: Project;
   onClose: () => void;
 };
+
+const ease = [0.22, 1, 0.36, 1] as const;
 
 export default function ProjectModal({ project, onClose }: Props) {
   const [mediaIndex, setMediaIndex] = useState(0);
@@ -36,16 +38,32 @@ export default function ProjectModal({ project, onClose }: Props) {
   };
 
   return (
-    <div
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.2 }}
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
       onClick={onClose}
     >
-      <div
-        className="bg-white rounded-2xl w-full max-w-3xl max-h-[90vh] flex flex-col"
+      <motion.div
+        initial={{ opacity: 0, scale: 0.96, y: 16 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        exit={{ opacity: 0, scale: 0.96, y: 16 }}
+        transition={{ duration: 0.25, ease }}
+        className="relative bg-white rounded-2xl w-full max-w-3xl max-h-[90vh] flex flex-col"
         onClick={(e) => e.stopPropagation()}
       >
+        {/* 닫기 버튼 (항상 우상단 고정) */}
+        <button
+          onClick={onClose}
+          className="absolute top-3 right-3 z-10 p-1.5 rounded-full bg-black/30 hover:bg-black/50 transition text-white"
+        >
+          <X className="w-4 h-4" />
+        </button>
+
         {/* 미디어 슬라이더 */}
-        <div className="relative bg-gray-950 rounded-t-2xl aspect-video flex items-center justify-center overflow-hidden">
+        <div className="relative bg-gray-950 rounded-t-2xl aspect-video flex items-center justify-center overflow-hidden shrink-0">
           {current.type === "youtube" ? (
             <iframe
               src={toEmbedUrl(current.src)}
@@ -97,32 +115,24 @@ export default function ProjectModal({ project, onClose }: Props) {
           )}
         </div>
 
-        {/* 프로젝트 설명 */}
-        <div className="p-8 flex flex-col gap-5 overflow-y-auto flex-1 min-h-0">
-          <div className="flex items-start justify-between gap-4">
+        {/* 스크롤 영역 (전체) */}
+        <div className="px-8 pb-8 pt-6 flex flex-col gap-5 overflow-y-auto flex-1 min-h-0">
+          <div className="flex flex-col gap-3 pr-6">
             <h3 className="font-bold text-2xl">{project.title}</h3>
-            <button
-              onClick={onClose}
-              className="shrink-0 p-1.5 rounded-full hover:bg-surface-subtle transition text-text-subtle"
-            >
-              <X className="w-5 h-5" />
-            </button>
+            <p className="text-sm text-text-muted leading-relaxed">
+              {project.description}
+            </p>
+            <div className="flex flex-wrap gap-2">
+              {project.tags.map((tag) => (
+                <span
+                  key={tag}
+                  className="px-2 py-1 rounded-md bg-brand-50 text-brand-blue text-xs font-medium"
+                >
+                  {tag}
+                </span>
+              ))}
+            </div>
           </div>
-
-          <div className="flex flex-wrap gap-2">
-            {project.tags.map((tag) => (
-              <span
-                key={tag}
-                className="px-2 py-1 rounded-md bg-brand-50 text-brand-blue text-xs font-medium"
-              >
-                {tag}
-              </span>
-            ))}
-          </div>
-
-          <p className="text-sm text-text-muted leading-relaxed whitespace-pre-line">
-            {project.description}
-          </p>
 
           {/* 수상 */}
           {project.awards && project.awards.length > 0 && (
@@ -142,13 +152,12 @@ export default function ProjectModal({ project, onClose }: Props) {
           {/* 기여 */}
           {project.contributions && project.contributions.length > 0 && (
             <div className="border-t border-border pt-4">
-              <p className="text-xs font-semibold text-text-subtle uppercase tracking-wider mb-3">
+              <p className="text-sm font-semibold text-text-primary mb-3">
                 기여
               </p>
-              <ul className="flex flex-col gap-2">
+              <ul className="flex flex-col gap-4">
                 {project.contributions.map((item, i) => (
-                  <li key={i} className="flex gap-2 text-sm text-text-secondary leading-relaxed">
-                    <span className="text-text-subtle shrink-0">•</span>
+                  <li key={i} className="text-sm text-text-secondary leading-relaxed break-keep">
                     {item}
                   </li>
                 ))}
@@ -159,14 +168,24 @@ export default function ProjectModal({ project, onClose }: Props) {
           {/* 트러블슈팅 */}
           {project.troubleshooting && project.troubleshooting.length > 0 && (
             <div className="border-t border-border pt-4">
-              <p className="text-xs font-semibold text-text-subtle uppercase tracking-wider mb-3">
+              <p className="text-sm font-semibold text-text-primary mb-3">
                 트러블슈팅
               </p>
-              <ul className="flex flex-col gap-4">
+              <ul className="flex flex-col gap-3">
                 {project.troubleshooting.map((item, i) => (
-                  <li key={i} className="flex flex-col gap-1 text-sm leading-relaxed">
-                    <span className="text-text-muted">{item.problem}</span>
-                    <span className="text-text-primary">→ {item.solution}</span>
+                  <li key={i} className="flex flex-col gap-2 text-sm leading-relaxed rounded-xl bg-gray-50 p-4">
+                    <div className="flex gap-2 items-start">
+                      <span className="shrink-0 mt-0.5 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-red-50 text-red-500">
+                        문제
+                      </span>
+                      <span className="text-text-muted">{item.problem}</span>
+                    </div>
+                    <div className="flex gap-2 items-start">
+                      <span className="shrink-0 mt-0.5 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-emerald-50 text-emerald-600">
+                        해결
+                      </span>
+                      <span className="text-text-primary">{item.solution}</span>
+                    </div>
                   </li>
                 ))}
               </ul>
@@ -175,20 +194,9 @@ export default function ProjectModal({ project, onClose }: Props) {
 
           {/* 하단 링크 */}
           <div className="border-t border-border pt-4 flex flex-col gap-4">
-            {project.demo && (
-              <a
-                href={project.demo}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-sm font-medium text-brand-blue hover:opacity-80 transition"
-              >
-                Live Demo →
-              </a>
-            )}
-
             {project.relatedPosts && project.relatedPosts.length > 0 && (
               <div>
-                <p className="text-xs font-semibold text-text-subtle uppercase tracking-wider mb-3">
+                <p className="text-sm font-semibold text-text-primary mb-3">
                   관련 블로그
                 </p>
                 <ul className="flex flex-col gap-2">
@@ -208,19 +216,33 @@ export default function ProjectModal({ project, onClose }: Props) {
               </div>
             )}
 
-            {project.github && (
-              <a
-                href={project.github}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-sm font-medium text-text-secondary hover:text-text-primary transition"
-              >
-                GitHub →
-              </a>
+            {(project.demo || project.github) && (
+              <div className="flex flex-wrap gap-2">
+                {project.demo && (
+                  <a
+                    href={project.demo}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-sm font-medium text-brand-blue border border-brand-blue px-4 py-1.5 rounded-lg hover:bg-brand-50 transition"
+                  >
+                    Live Demo →
+                  </a>
+                )}
+                {project.github && (
+                  <a
+                    href={project.github}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-sm font-medium text-text-secondary border border-border px-4 py-1.5 rounded-lg hover:bg-surface-subtle hover:text-text-primary transition"
+                  >
+                    GitHub →
+                  </a>
+                )}
+              </div>
             )}
           </div>
         </div>
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   );
 }

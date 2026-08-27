@@ -227,9 +227,11 @@ export default function Projects() {
         </div>
       </section>
 
-      {selected && (
-        <ProjectModal project={selected} onClose={() => setSelected(null)} />
-      )}
+      <AnimatePresence>
+        {selected && (
+          <ProjectModal key="modal" project={selected} onClose={() => setSelected(null)} />
+        )}
+      </AnimatePresence>
     </>
   );
 }
