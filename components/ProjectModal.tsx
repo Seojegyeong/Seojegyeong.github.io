@@ -154,7 +154,16 @@ export default function ProjectModal({ project, onClose }: Props) {
         {/* 스크롤 영역 (전체) */}
         <div className="px-8 pb-8 pt-6 flex flex-col gap-8 overflow-y-auto flex-1 min-h-0">
           <div className="flex flex-col gap-3 pr-6">
-            <h3 className="font-bold text-2xl">{project.title}</h3>
+            <div className="flex flex-col gap-1">
+              <h3 className="font-bold text-2xl">{project.title}</h3>
+              {project.team && (
+                <p className="text-xs text-text-subtle">
+                  {project.team.type === "solo"
+                    ? "개인 프로젝트"
+                    : `팀 프로젝트 · ${project.team.size}인 (${project.team.roles.join(" · ")})`}
+                </p>
+              )}
+            </div>
             <p className="text-sm text-text-muted leading-relaxed">
               {project.description}
             </p>

@@ -3,6 +3,10 @@ export type MediaItem =
   | { type: "image"; src: string }
   | { type: "video"; src: string };
 
+export type Team =
+  | { type: "solo" }
+  | { type: "team"; size: number; roles: string[] };
+
 export type Project = {
   title: string;
   description: string;
@@ -10,6 +14,7 @@ export type Project = {
   github?: string;
   demo?: string;
   media: MediaItem[];
+  team?: Team;
   awards?: string[];
   contributions?: string[];
   troubleshooting?: { problem: string; solution: string }[];
@@ -31,6 +36,7 @@ export const projects: Project[] = [
     ],
     github: "https://github.com/WhereYouAd/WhereYouAd-Frontend",
     media: [{ type: "youtube", src: "https://youtu.be/sTcq1MLCJAY" }],
+    team: { type: "team", size: 6, roles: ["FE 3", "BE 3"] },
     awards: [
       "상명대학교 교내 창업아이디어 경진대회 대상",
       "모두의 창업 1기 선발·본선 진출",
@@ -89,6 +95,7 @@ export const projects: Project[] = [
     ],
     github: "https://github.com/ITA-Roome/roome-fe",
     media: [{ type: "youtube", src: "https://youtu.be/gwQPsdBpcwI" }],
+    team: { type: "team", size: 6, roles: ["PM 1", "FE 2", "BE 3"] },
     contributions: [
       "FE 2인 팀에서 프로젝트 셋업·API 인프라·Feed/Shop·온보딩·배포 전담",
       "필터 조합별 InfiniteData 캐시 낙관적 업데이트로 좋아요·스크랩 4종 즉각 반응 구현, 에러 시 자동 rollback 처리",
@@ -123,6 +130,7 @@ export const projects: Project[] = [
     github: "https://github.com/Seojegyeong/Light",
     demo: "https://chromewebstore.google.com/detail/light/oakngefnlimlmgcoadomekojacbminco",
     media: [{ type: "youtube", src: "https://youtu.be/P0sHsM-qLWU" }],
+    team: { type: "solo" },
     contributions: [
       "프론트(Chrome Extension)부터 백엔드(Node.js + Express + Claude API)까지 1인 풀스택 개발",
       "Figma MCP + Claude Code로 기획 문서 기반 초안 자동 생성, 자연어 피드백 반복 수정으로 기획·디자인·구현 전 과정 단독 완성",
@@ -169,6 +177,7 @@ export const projects: Project[] = [
       "Firebase",
     ],
     media: [{ type: "youtube", src: "https://youtu.be/oy63--lXUtQ" }],
+    team: { type: "team", size: 7, roles: ["PM 1", "FE 3", "BE 3"] },
     contributions: [
       "설정·공지·FAQ 도메인 전담 구현, 웹·모바일 네브바 구현",
       "FAQItem에 aria-expanded·aria-controls 적용한 접근성 준수 아코디언 구현",
