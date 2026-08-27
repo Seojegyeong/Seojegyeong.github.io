@@ -1,0 +1,38 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "design-system-color",
+        "value": "#b8bfcc",
+        "createdAt": "2026-08-27T03:31:52.839Z",
+        "reason": "inline CSS targets react-github-calendar SVG internals; CSS variables cannot reach third-party SVG text fill"
+      },
+      {
+        "rule": "design-system-font",
+        "value": "inter tight",
+        "createdAt": "2026-08-27T03:31:56.861Z",
+        "reason": "Inter Tight is the primary typeface declared in DESIGN.md as font-tight; false positive on Google Fonts URL string"
+      },
+      {
+        "rule": "design-system-font",
+        "value": "inter",
+        "createdAt": "2026-08-27T03:31:56.958Z",
+        "reason": "Inter is the secondary/fallback typeface in DESIGN.md CSS variables; false positive on Google Fonts URL string"
+      },
+      {
+        "rule": "overused-font",
+        "value": "inter",
+        "createdAt": "2026-08-27T03:33:50.816Z",
+        "reason": "Inter is only a CSS-variable fallback; the surface-visible face is Inter Tight (font-tight) per DESIGN.md Single Family rule"
+      },
+      {
+        "rule": "design-system-color",
+        "value": "rgba(0,0,0,0.35)",
+        "createdAt": "2026-08-27T03:36:54.224Z",
+        "reason": "mobile menu dim overlay — standard scrim pattern, not a brand color; inline black/alpha is appropriate for this utility layer"
+      }
+    ]
+  }
+}
