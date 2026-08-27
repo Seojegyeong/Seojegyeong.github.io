@@ -59,7 +59,7 @@ const LABEL = "text-[18px] leading-[1.2] font-medium text-white";
 
 export const InfoBand = () => (
   <section
-    aria-label="About Voice AI"
+    aria-label="학력 및 링크"
     className="relative z-10 w-full shrink-0 border-b border-white/40 ipad:border-t desktop-sm:h-[320px]"
   >
     <div className={`${STAGE} h-full desktop-sm:flex`}>
