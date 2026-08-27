@@ -176,6 +176,7 @@ export const projects: Project[] = [
       "Zustand",
       "Firebase",
     ],
+    github: "https://github.com/WithTime12/WithTimeFE",
     media: [{ type: "youtube", src: "https://youtu.be/oy63--lXUtQ" }],
     team: { type: "team", size: 7, roles: ["PM 1", "FE 3", "BE 3"] },
     contributions: [
