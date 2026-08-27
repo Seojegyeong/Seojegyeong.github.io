@@ -54,7 +54,6 @@ const items: {
     period: "2025.01",
     title: "OPIc IH",
     type: "자격증",
-    desc: "영어 말하기 능력 시험 OPIc에서 IH 등급을 취득했습니다.",
   },
   {
     period: "2026",
