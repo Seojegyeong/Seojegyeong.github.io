@@ -116,7 +116,7 @@ export default function ProjectModal({ project, onClose }: Props) {
         </div>
 
         {/* 스크롤 영역 (전체) */}
-        <div className="px-8 pb-8 pt-6 flex flex-col gap-5 overflow-y-auto flex-1 min-h-0">
+        <div className="px-8 pb-8 pt-6 flex flex-col gap-8 overflow-y-auto flex-1 min-h-0">
           <div className="flex flex-col gap-3 pr-6">
             <h3 className="font-bold text-2xl">{project.title}</h3>
             <p className="text-sm text-text-muted leading-relaxed">
@@ -149,98 +149,103 @@ export default function ProjectModal({ project, onClose }: Props) {
             </div>
           )}
 
-          {/* 기여 */}
-          {project.contributions && project.contributions.length > 0 && (
-            <div className="border-t border-border pt-4">
-              <p className="text-sm font-semibold text-text-primary mb-3">
-                기여
-              </p>
-              <ul className="flex flex-col gap-4">
-                {project.contributions.map((item, i) => (
-                  <li key={i} className="text-sm text-text-secondary leading-relaxed break-keep">
-                    {item}
-                  </li>
-                ))}
-              </ul>
+          {/* Technical 블록 — 기여 + 트러블슈팅 */}
+          {(project.contributions?.length || project.troubleshooting?.length) ? (
+            <div className="border-t border-border flex flex-col gap-8 pt-6">
+              {project.contributions && project.contributions.length > 0 && (
+                <div>
+                  <p className="text-sm font-semibold text-text-primary mb-3">
+                    기여
+                  </p>
+                  <ul className="flex flex-col gap-4">
+                    {project.contributions.map((item, i) => (
+                      <li key={i} className="text-sm text-text-secondary leading-relaxed break-keep">
+                        {item}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              {project.troubleshooting && project.troubleshooting.length > 0 && (
+                <div>
+                  <p className="text-sm font-semibold text-text-primary mb-3">
+                    트러블슈팅
+                  </p>
+                  <ul className="flex flex-col gap-3">
+                    {project.troubleshooting.map((item, i) => (
+                      <li key={i} className="flex flex-col gap-2 text-sm leading-relaxed rounded-xl bg-gray-50 p-4">
+                        <div className="flex gap-2 items-start">
+                          <span className="shrink-0 mt-0.5 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-red-50 text-red-500">
+                            문제
+                          </span>
+                          <span className="text-text-muted">{item.problem}</span>
+                        </div>
+                        <div className="flex gap-2 items-start">
+                          <span className="shrink-0 mt-0.5 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-emerald-50 text-emerald-600">
+                            해결
+                          </span>
+                          <span className="text-text-primary">{item.solution}</span>
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
             </div>
-          )}
+          ) : null}
 
-          {/* 트러블슈팅 */}
-          {project.troubleshooting && project.troubleshooting.length > 0 && (
-            <div className="border-t border-border pt-4">
-              <p className="text-sm font-semibold text-text-primary mb-3">
-                트러블슈팅
-              </p>
-              <ul className="flex flex-col gap-3">
-                {project.troubleshooting.map((item, i) => (
-                  <li key={i} className="flex flex-col gap-2 text-sm leading-relaxed rounded-xl bg-gray-50 p-4">
-                    <div className="flex gap-2 items-start">
-                      <span className="shrink-0 mt-0.5 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-red-50 text-red-500">
-                        문제
-                      </span>
-                      <span className="text-text-muted">{item.problem}</span>
-                    </div>
-                    <div className="flex gap-2 items-start">
-                      <span className="shrink-0 mt-0.5 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-emerald-50 text-emerald-600">
-                        해결
-                      </span>
-                      <span className="text-text-primary">{item.solution}</span>
-                    </div>
-                  </li>
-                ))}
-              </ul>
+          {/* Links 블록 — 관련 블로그 + 링크 버튼 */}
+          {(project.relatedPosts?.length || project.demo || project.github) ? (
+            <div className="border-t border-border flex flex-col gap-5 pt-6">
+              {project.relatedPosts && project.relatedPosts.length > 0 && (
+                <div>
+                  <p className="text-sm font-semibold text-text-primary mb-3">
+                    관련 블로그
+                  </p>
+                  <ul className="flex flex-col gap-2">
+                    {project.relatedPosts.map((post) => (
+                      <li key={post.url}>
+                        <a
+                          href={post.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-sm text-text-secondary hover:text-brand-blue transition"
+                        >
+                          {post.title} →
+                        </a>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              {(project.demo || project.github) && (
+                <div className="flex flex-wrap gap-2 justify-end">
+                  {project.demo && (
+                    <a
+                      href={project.demo}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-sm font-medium text-brand-blue border border-brand-blue px-4 py-1.5 rounded-lg hover:bg-brand-50 transition"
+                    >
+                      Live Demo →
+                    </a>
+                  )}
+                  {project.github && (
+                    <a
+                      href={project.github}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-sm font-medium text-text-secondary border border-border px-4 py-1.5 rounded-lg hover:bg-surface-subtle hover:text-text-primary transition"
+                    >
+                      GitHub →
+                    </a>
+                  )}
+                </div>
+              )}
             </div>
-          )}
-
-          {/* 하단 링크 */}
-          <div className="border-t border-border pt-4 flex flex-col gap-4">
-            {project.relatedPosts && project.relatedPosts.length > 0 && (
-              <div>
-                <p className="text-sm font-semibold text-text-primary mb-3">
-                  관련 블로그
-                </p>
-                <ul className="flex flex-col gap-2">
-                  {project.relatedPosts.map((post) => (
-                    <li key={post.url}>
-                      <a
-                        href={post.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-sm text-text-secondary hover:text-brand-blue transition"
-                      >
-                        {post.title} →
-                      </a>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
-
-            {(project.demo || project.github) && (
-              <div className="flex flex-wrap gap-2">
-                {project.demo && (
-                  <a
-                    href={project.demo}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-sm font-medium text-brand-blue border border-brand-blue px-4 py-1.5 rounded-lg hover:bg-brand-50 transition"
-                  >
-                    Live Demo →
-                  </a>
-                )}
-                {project.github && (
-                  <a
-                    href={project.github}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-sm font-medium text-text-secondary border border-border px-4 py-1.5 rounded-lg hover:bg-surface-subtle hover:text-text-primary transition"
-                  >
-                    GitHub →
-                  </a>
-                )}
-              </div>
-            )}
-          </div>
+          ) : null}
         </div>
       </motion.div>
     </motion.div>
