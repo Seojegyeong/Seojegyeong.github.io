@@ -135,12 +135,12 @@ export default function Experience() {
                     href={item.href}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="font-medium text-text-primary hover:text-brand-blue transition-colors"
+                    className="font-semibold text-text-primary hover:text-brand-blue transition-colors"
                   >
                     {item.title}
                   </a>
                 ) : (
-                  <span className="font-medium text-text-primary">{item.title}</span>
+                  <span className="font-semibold text-text-primary">{item.title}</span>
                 )}
                 {item.sub && (
                   <span className="text-xs text-text-subtle">{item.sub}</span>

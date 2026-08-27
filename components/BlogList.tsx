@@ -51,7 +51,7 @@ export default function BlogList({ posts }: { posts: Post[] }) {
             whileHover={{ x: 4 }}
             transition={{ duration: 0.2, ease }}
           >
-            <span className="text-text-primary font-medium group-hover:text-brand-blue transition-colors">
+            <span className="text-text-primary font-semibold group-hover:text-brand-blue transition-colors">
               {post.title}
             </span>
             <span className="text-sm text-text-subtle shrink-0 ml-6">
