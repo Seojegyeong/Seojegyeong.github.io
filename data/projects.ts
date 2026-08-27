@@ -20,7 +20,7 @@ export const projects: Project[] = [
   {
     title: "WhereYouAd",
     description:
-      "Google·Naver·Meta 광고 성과를 단일 대시보드에 통합하는 B2B SaaS.",
+      "Google·Naver·Meta 광고 성과를 단일 대시보드에 통합하고, AI 분석 리포트를 생성·저장하는 팀 협업 B2B SaaS.",
     tags: ["React", "TypeScript", "Vite", "TanStack Query", "Zustand", "AWS"],
     github: "https://github.com/WhereYouAd/WhereYouAd-Frontend",
     media: [{ type: "youtube", src: "https://youtu.be/sTcq1MLCJAY" }],
@@ -66,7 +66,7 @@ export const projects: Project[] = [
   },
   {
     title: "Roome",
-    description: "취향 기반 인테리어 레퍼런스 피드 + 가구 쇼핑 + AI 챗봇 앱.",
+    description: "인테리어 취향에 맞는 레퍼런스 피드를 탐색하고, 가구 쇼핑과 AI 챗봇 상담까지 한 곳에서 제공하는 앱.",
     tags: [
       "React",
       "TypeScript",
@@ -98,12 +98,13 @@ export const projects: Project[] = [
   {
     title: "Light",
     description:
-      "경제 뉴스 금융 용어를 자동 감지해 호버 툴팁으로 즉시 설명하는 Chrome 확장 프로그램. \n 프론트(Chrome Extension)부터 백엔드(Node.js + Express + Claude API)까지 1인 풀스택 개발. Chrome Web Store 배포.",
+      "경제 뉴스 금융 용어를 자동 감지해 호버 툴팁으로 즉시 설명하는 Chrome 확장 프로그램.",
     tags: ["TypeScript", "React", "Chrome Extension", "Claude AI", "Node.js"],
     github: "https://github.com/Seojegyeong/Light",
     demo: "https://chromewebstore.google.com/detail/light/oakngefnlimlmgcoadomekojacbminco",
     media: [{ type: "youtube", src: "https://youtu.be/P0sHsM-qLWU" }],
     contributions: [
+      "프론트(Chrome Extension)부터 백엔드(Node.js + Express + Claude API)까지 1인 풀스택 개발 및 Chrome Web Store 배포",
       "Shadow DOM에 React 마운트 + Emotion 캐시를 Shadow Root에 바인딩 — 미디어 사이트 전역 CSS·z-index 충돌 완전 격리",
       "TreeWalker + DocumentFragment로 텍스트 노드만 순회 치환 — innerHTML 치환 시 이벤트 리스너 파괴 문제 해결",
       "Node.js + Express + Claude API 백엔드 직접 구축 — 사전 등록 용어는 Map에서 O(1) 반환, 미등록 용어는 Claude AI로 실시간 추출 및 Promise.all 병렬 처리",
@@ -132,7 +133,7 @@ export const projects: Project[] = [
   {
     title: "WithTime",
     description:
-      "AI 기반 커플 데이트 코스 추천 서비스. 설정·공지·FAQ 도메인 전담. Firebase FCM 푸시 알림, 멤버십 등급 시스템 포함.",
+      "데이트 취향 테스트로 나만의 데이트 타입을 진단하고, 날씨와 AI 기반으로 맞춤 데이트 코스를 추천·생성하는 서비스.",
     tags: [
       "React",
       "TypeScript",
