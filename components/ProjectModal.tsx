@@ -89,6 +89,7 @@ export default function ProjectModal({ project, onClose }: Props) {
         {/* 닫기 버튼 (항상 우상단 고정) */}
         <button
           onClick={onClose}
+          aria-label="닫기"
           className="absolute top-3 right-3 z-10 p-1.5 rounded-full bg-black/30 hover:bg-black/50 transition text-white"
         >
           <X className="w-4 h-4" />

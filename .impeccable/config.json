@@ -26,6 +26,12 @@
         "value": "inter",
         "createdAt": "2026-08-27T03:33:50.816Z",
         "reason": "Inter is only a CSS-variable fallback; the surface-visible face is Inter Tight (font-tight) per DESIGN.md Single Family rule"
+      },
+      {
+        "rule": "design-system-color",
+        "value": "rgba(0,0,0,0.35)",
+        "createdAt": "2026-08-27T03:36:54.224Z",
+        "reason": "mobile menu dim overlay — standard scrim pattern, not a brand color; inline black/alpha is appropriate for this utility layer"
       }
     ]
   }

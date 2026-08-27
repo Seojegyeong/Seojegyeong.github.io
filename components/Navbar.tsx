@@ -76,12 +76,12 @@ export default function Navbar() {
       >
         <div className="max-w-5xl mx-auto px-6 h-full flex items-center justify-center">
           {/* Desktop */}
-          <nav className="hidden md:flex items-center gap-3">
+          <nav aria-label="메인 메뉴" className="hidden md:flex items-center gap-3">
             {links.map(({ label, href }) => (
               <a
                 key={href}
                 href={href}
-                className="group relative rounded-full px-4 py-1.5 text-base font-medium focus-visible:outline-none"
+                className="group relative rounded-full px-4 py-1.5 text-base font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue focus-visible:ring-offset-1"
               >
                 <span
                   aria-hidden
@@ -149,7 +149,7 @@ export default function Navbar() {
                 borderBottomColor: "rgba(221,227,240,1)",
               }}
             >
-              <nav className="flex flex-col px-4 py-3">
+              <nav aria-label="모바일 메뉴" className="flex flex-col px-4 py-3">
                 {links.map(({ label, href }) => (
                   <a
                     key={href}
