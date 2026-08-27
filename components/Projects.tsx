@@ -1,22 +1,11 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronLeft, ChevronRight } from "lucide-react";
 import ProjectModal from "./ProjectModal";
 import { projects, type Project } from "@/data/projects";
 
 const ease = [0.22, 1, 0.36, 1] as const;
-const CARD_W = 560;
-const count = projects.length;
-
-type Slot = "left" | "center" | "right";
-
-const SLOT: Record<Slot, { x: number; scale: number; z: number; opacity: number }> = {
-  left:   { x: -330, scale: 0.85, z: -150, opacity: 0.6 },
-  center: { x: 0,    scale: 1,    z: 0,    opacity: 1   },
-  right:  { x: 330,  scale: 0.85, z: -150, opacity: 0.6 },
-};
 
 function getYouTubeThumbnail(src: string): string | null {
   const id = src.match(/(?:youtu\.be\/|v=)([^&?/]+)/)?.[1];
@@ -34,7 +23,7 @@ function getThumbnail(project: Project): string | null {
 function CardFace({ project }: { project: Project }) {
   const thumb = getThumbnail(project);
   return (
-    <div className="bg-white rounded-2xl border border-border overflow-hidden flex flex-col">
+    <div className="bg-white rounded-2xl border border-border overflow-hidden flex flex-col h-full">
       <div className="aspect-video w-full bg-brand-50 overflow-hidden">
         {thumb ? (
           <img
@@ -72,176 +61,62 @@ function CardFace({ project }: { project: Project }) {
   );
 }
 
-const cardVariants = {
-  enter: (d: number) => ({
-    x: d > 0 ? CARD_W + 160 : -(CARD_W + 160),
-    scale: 0.85,
-    opacity: 0,
-    z: -150,
-  }),
-  exit: (d: number) => ({
-    x: d > 0 ? -(CARD_W + 160) : CARD_W + 160,
-    scale: 0.72,
-    opacity: 0,
-    z: -200,
-  }),
+const container = {
+  hidden: {},
+  visible: { transition: { staggerChildren: 0.08 } },
+};
+
+const cardItem = {
+  hidden: { opacity: 0, y: 20 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease } },
 };
 
 export default function Projects() {
-  const [activeIndex, setActiveIndex] = useState(0);
-  const [direction, setDirection] = useState(1);
   const [selected, setSelected] = useState<Project | null>(null);
-
-  const pointerStartX = useRef<number | null>(null);
-  const didDrag = useRef(false);
-  const lastNav = useRef(0);
-
-  const go = (dir: "left" | "right") => {
-    const now = Date.now();
-    if (now - lastNav.current < 600) return;
-    lastNav.current = now;
-    const d = dir === "right" ? 1 : -1;
-    setDirection(d);
-    setActiveIndex((prev) => (prev + d + count) % count);
-  };
-
-  const onPointerDown = (e: React.PointerEvent) => {
-    pointerStartX.current = e.clientX;
-    didDrag.current = false;
-  };
-
-  const onPointerMove = (e: React.PointerEvent) => {
-    if (pointerStartX.current !== null && Math.abs(e.clientX - pointerStartX.current) > 8) {
-      didDrag.current = true;
-    }
-  };
-
-  const onPointerUp = (e: React.PointerEvent) => {
-    if (pointerStartX.current === null) return;
-    const dx = e.clientX - pointerStartX.current;
-    if (Math.abs(dx) > 50) dx < 0 ? go("right") : go("left");
-    pointerStartX.current = null;
-  };
-
-  const onWheel = (e: React.WheelEvent) => {
-    if (Math.abs(e.deltaX) <= Math.abs(e.deltaY)) return;
-    e.deltaX > 0 ? go("right") : go("left");
-  };
-
-  const visibleCards = ([-1, 0, 1] as const).map((offset) => {
-    const idx = (activeIndex + offset + count) % count;
-    const slot: Slot = offset === -1 ? "left" : offset === 0 ? "center" : "right";
-    return { project: projects[idx], slot, offset };
-  });
 
   return (
     <>
-      <section id="projects" className="py-40 bg-white overflow-hidden">
-        <div className="max-w-5xl mx-auto px-6 mb-12">
+      <section id="projects" className="py-40 bg-white">
+        <div className="max-w-5xl mx-auto px-6">
           <motion.h2
             initial={{ opacity: 0, y: 16 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.5, ease }}
-            className="text-3xl font-bold text-center"
+            className="text-3xl font-bold mb-12"
           >
-            Projects
+            프로젝트
           </motion.h2>
-        </div>
 
-        <div
-          className="relative"
-          style={{ height: 500, perspective: "1200px", touchAction: "pan-y" }}
-          onPointerDown={onPointerDown}
-          onPointerMove={onPointerMove}
-          onPointerUp={onPointerUp}
-          onWheel={onWheel}
-        >
-          <motion.button
-            onClick={() => go("left")}
-            whileHover={{ scale: 1.1 }}
-            whileTap={{ scale: 0.9 }}
-            transition={{ duration: 0.2, ease }}
-            className="absolute left-6 top-1/2 -translate-y-1/2 z-20 w-10 h-10 flex items-center justify-center rounded-full bg-white border border-border text-text-secondary shadow-sm hover:border-brand-blue hover:text-brand-blue transition-colors"
-            aria-label="이전"
+          <motion.div
+            variants={container}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: "-40px" }}
+            className="grid grid-cols-1 sm:grid-cols-2 gap-6"
           >
-            <ChevronLeft className="w-5 h-5" />
-          </motion.button>
-
-          <AnimatePresence initial={false} custom={direction}>
-            {visibleCards.map(({ project, slot, offset }) => (
+            {projects.map((project) => (
               <motion.div
                 key={project.title}
-                custom={direction}
-                variants={cardVariants}
-                initial="enter"
-                animate={SLOT[slot]}
-                exit="exit"
-                transition={{ duration: 0.45, ease }}
-                className={slot !== "center" ? "group" : undefined}
-                style={{
-                  position: "absolute",
-                  width: CARD_W,
-                  left: "50%",
-                  top: "50%",
-                  marginLeft: -CARD_W / 2,
-                  marginTop: -250,
-                  zIndex: slot === "center" ? 10 : 5,
-                  cursor: "pointer",
-                }}
-                onClick={() => {
-                  if (didDrag.current) return;
-                  if (offset === 0) setSelected(project);
-                  else go(offset < 0 ? "left" : "right");
+                variants={cardItem}
+                whileHover={{ y: -4 }}
+                transition={{ duration: 0.2, ease }}
+                role="button"
+                tabIndex={0}
+                aria-label={`${project.title} 프로젝트 상세 보기`}
+                className="cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue focus-visible:ring-offset-2 rounded-2xl"
+                onClick={() => setSelected(project)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    setSelected(project);
+                  }
                 }}
               >
-                {slot !== "center" ? (
-                  <div className="relative">
-                    <CardFace project={project} />
-                    <div className="absolute inset-0 rounded-2xl flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none">
-                      <span className="bg-black/50 text-white text-xs font-medium px-3 py-1.5 rounded-full">
-                        {offset < 0 ? "← 이전" : "다음 →"}
-                      </span>
-                    </div>
-                  </div>
-                ) : (
-                  <CardFace project={project} />
-                )}
+                <CardFace project={project} />
               </motion.div>
             ))}
-          </AnimatePresence>
-
-          <motion.button
-            onClick={() => go("right")}
-            whileHover={{ scale: 1.1 }}
-            whileTap={{ scale: 0.9 }}
-            transition={{ duration: 0.2, ease }}
-            className="absolute right-6 top-1/2 -translate-y-1/2 z-20 w-10 h-10 flex items-center justify-center rounded-full bg-white border border-border text-text-secondary shadow-sm hover:border-brand-blue hover:text-brand-blue transition-colors"
-            aria-label="다음"
-          >
-            <ChevronRight className="w-5 h-5" />
-          </motion.button>
-        </div>
-
-        <div className="flex flex-col items-center gap-3 mt-8">
-          <span className="text-xs text-text-subtle tabular-nums">
-            {activeIndex + 1} / {count}
-          </span>
-          <div className="flex items-center gap-2">
-            {Array.from({ length: count }).map((_, i) => (
-              <button
-                key={i}
-                aria-label={`프로젝트 ${i + 1}로 이동`}
-                onClick={() => {
-                  setDirection(i > activeIndex ? 1 : -1);
-                  setActiveIndex(i);
-                }}
-                className={`h-1.5 rounded-full transition-all duration-300 ${
-                  i === activeIndex ? "w-6 bg-brand-blue" : "w-1.5 bg-border"
-                }`}
-              />
-            ))}
-          </div>
+          </motion.div>
         </div>
       </section>
 

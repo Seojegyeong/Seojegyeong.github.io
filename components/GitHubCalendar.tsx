@@ -34,7 +34,7 @@ export default function GitHubCalendar() {
 
           <div className="flex items-start justify-between mb-8">
             <div>
-              <h2 className="font-bold text-text-primary text-lg leading-tight">GitHub Contribution</h2>
+              <h2 className="font-bold text-text-primary text-3xl leading-tight">GitHub 활동</h2>
               <p className="text-sm text-text-muted mt-1">꾸준하게 쌓아온 개발 활동 기록입니다.</p>
             </div>
 

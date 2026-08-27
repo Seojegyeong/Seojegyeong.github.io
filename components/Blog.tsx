@@ -47,10 +47,10 @@ export default async function Blog() {
   const posts = await getPosts();
 
   return (
-    <section id="blog" className="py-24 px-6 bg-white">
+    <section id="blog" className="py-36 px-6 bg-white">
       <div className="max-w-5xl mx-auto">
         <div className="flex items-center justify-between mb-12">
-          <h2 className="text-3xl font-bold">Blog</h2>
+          <h2 className="text-3xl font-bold">블로그</h2>
           <a
             href="https://seojegyeong.tistory.com/"
             target="_blank"
