@@ -27,7 +27,7 @@ export const projects: Project[] = [
     awards: ["상명대학교 창업 아이디어 경진대회 대상", "모두의 창업 1기 선발·본선 진출"],
     contributions: [
       "Skeleton UI 적용으로 다중 API 로딩 빈 화면 문제 해결, LCP 1,180ms → 1,048ms(-11%) 개선",
-      "16개 파일 분산 지표 포맷 로직을 METRIC_REGISTRY 단일 SSOT로 통합, Vitest 51케이스 CI 연동으로 포맷 위반 PR 자동 차단",
+      "METRIC_REGISTRY로 지표 포맷 로직 단일화, Vitest 51케이스 CI 연동으로 위반 PR 자동 차단",
       "Zustand 메모리 저장 + CloudFront Functions CSP 두 레이어로 XSS 방어, Report-Only 검증 후 Enforcing 전환으로 프로덕션 충돌 없이 정책 배포",
       "useCoreQuery · useCoreMutation 공통 추상화로 TanStack Query 보일러플레이트 해소, 팀원 도메인 집중 환경 구축",
     ],
@@ -72,7 +72,6 @@ export const projects: Project[] = [
     tags: [
       "React",
       "TypeScript",
-      "Vite",
       "TanStack Query",
       "Zustand",
       "Framer Motion",
@@ -82,7 +81,7 @@ export const projects: Project[] = [
     media: [{ type: "youtube", src: "https://youtu.be/hCe5JMVMQxE" }],
     contributions: [
       "FE 2인 팀에서 프로젝트 셋업·API 인프라·Feed/Shop·온보딩·배포 전담",
-      "좋아요·스크랩 Optimistic Update — getQueriesData로 필터 조합별 InfiniteData 캐시 일괄 업데이트, 에러 시 자동 rollback으로 4종 즉각 반응 구현",
+      "필터 조합별 InfiniteData 캐시 낙관적 업데이트로 좋아요·스크랩 4종 즉각 반응 구현, 에러 시 자동 rollback 처리",
       "목록 → 상세 전환 시 initialData 즉시 주입 + initialDataUpdatedAt: 0 stale 처리로 전환 지연 없이 즉시 화면 표시",
       "UT 결과 기반으로 태그 드롭다운·사용 제품 미리보기 UI 직접 제안·구현해 레퍼런스 등록 흐름 개선",
     ],
@@ -117,7 +116,7 @@ export const projects: Project[] = [
     contributions: [
       "프론트(Chrome Extension)부터 백엔드(Node.js + Express + Claude API)까지 1인 풀스택 개발",
       "Figma MCP + Claude Code로 기획 문서 기반 초안 자동 생성, 자연어 피드백 반복 수정으로 기획·디자인·구현 전 과정 단독 완성",
-      "Shadow DOM에 React 마운트 + Emotion 캐시를 Shadow Root에 바인딩 — 미디어 사이트 전역 CSS·z-index 충돌 완전 격리",
+      "Shadow DOM에 React를 마운트하고 Emotion 캐시를 Shadow Root에 바인딩해 미디어 사이트 전역 CSS·z-index 충돌 완전 격리",
       "사전 등록 용어는 Map O(1) 반환, 미등록 용어는 Claude API + Promise.all 병렬 처리로 API 비용과 응답 속도 동시 최적화",
     ],
     troubleshooting: [
