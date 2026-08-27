@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { motion } from "framer-motion";
 import { X, ChevronLeft, ChevronRight, Trophy } from "lucide-react";
 import type { Project } from "@/data/projects";
@@ -14,18 +14,49 @@ const ease = [0.22, 1, 0.36, 1] as const;
 
 export default function ProjectModal({ project, onClose }: Props) {
   const [mediaIndex, setMediaIndex] = useState(0);
+  const panelRef = useRef<HTMLDivElement>(null);
+
+  const handleKeyDown = useCallback(
+    (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        onClose();
+        return;
+      }
+      if (e.key !== "Tab") return;
+      const panel = panelRef.current;
+      if (!panel) return;
+      const focusable = panel.querySelectorAll<HTMLElement>(
+        'a[href], button:not([disabled]), input, textarea, select, [tabindex]:not([tabindex="-1"])'
+      );
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (e.shiftKey) {
+        if (document.activeElement === first) {
+          e.preventDefault();
+          last.focus();
+        }
+      } else {
+        if (document.activeElement === last) {
+          e.preventDefault();
+          first.focus();
+        }
+      }
+    },
+    [onClose]
+  );
 
   useEffect(() => {
-    const handleKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
-    };
-    document.addEventListener("keydown", handleKey);
+    document.addEventListener("keydown", handleKeyDown);
     document.body.style.overflow = "hidden";
+    const first = panelRef.current?.querySelector<HTMLElement>(
+      'a[href], button:not([disabled]), input, textarea, select, [tabindex]:not([tabindex="-1"])'
+    );
+    first?.focus();
     return () => {
-      document.removeEventListener("keydown", handleKey);
+      document.removeEventListener("keydown", handleKeyDown);
       document.body.style.overflow = "";
     };
-  }, [onClose]);
+  }, [handleKeyDown]);
 
   const prev = () => setMediaIndex((i) => (i - 1 + project.media.length) % project.media.length);
   const next = () => setMediaIndex((i) => (i + 1) % project.media.length);
@@ -51,6 +82,7 @@ export default function ProjectModal({ project, onClose }: Props) {
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.96, y: 16 }}
         transition={{ duration: 0.25, ease }}
+        ref={panelRef}
         className="relative bg-white rounded-2xl w-full max-w-3xl max-h-[90vh] flex flex-col"
         onClick={(e) => e.stopPropagation()}
       >
@@ -89,12 +121,14 @@ export default function ProjectModal({ project, onClose }: Props) {
             <>
               <button
                 onClick={prev}
+                aria-label="이전 미디어"
                 className="absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 flex items-center justify-center rounded-full bg-black/40 text-white hover:bg-black/60 transition"
               >
                 <ChevronLeft className="w-5 h-5" />
               </button>
               <button
                 onClick={next}
+                aria-label="다음 미디어"
                 className="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 flex items-center justify-center rounded-full bg-black/40 text-white hover:bg-black/60 transition"
               >
                 <ChevronRight className="w-5 h-5" />
@@ -104,6 +138,7 @@ export default function ProjectModal({ project, onClose }: Props) {
                 {project.media.map((_, i) => (
                   <button
                     key={i}
+                    aria-label={`미디어 ${i + 1}로 이동`}
                     onClick={() => setMediaIndex(i)}
                     className={`w-1.5 h-1.5 rounded-full transition ${
                       i === mediaIndex ? "bg-white" : "bg-white/40"
@@ -176,13 +211,13 @@ export default function ProjectModal({ project, onClose }: Props) {
                     {project.troubleshooting.map((item, i) => (
                       <li key={i} className="flex flex-col gap-2 text-sm leading-relaxed rounded-xl bg-gray-50 p-4">
                         <div className="flex gap-2 items-start">
-                          <span className="shrink-0 mt-0.5 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-red-50 text-red-500">
+                          <span className="shrink-0 mt-0.5 px-1.5 py-0.5 rounded text-xs font-semibold bg-red-50 text-red-500">
                             문제
                           </span>
                           <span className="text-text-muted">{item.problem}</span>
                         </div>
                         <div className="flex gap-2 items-start">
-                          <span className="shrink-0 mt-0.5 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-emerald-50 text-emerald-600">
+                          <span className="shrink-0 mt-0.5 px-1.5 py-0.5 rounded text-xs font-semibold bg-emerald-50 text-emerald-600">
                             해결
                           </span>
                           <span className="text-text-primary">{item.solution}</span>

@@ -16,7 +16,7 @@ const theme = {
 
 export default function GitHubCalendar() {
   return (
-    <section className="pt-8 pb-20 px-6 bg-white">
+    <section id="github" className="pt-8 pb-20 px-6 bg-white">
       <div className="max-w-5xl mx-auto">
         <motion.div
           initial={{ opacity: 0, y: 16 }}
@@ -34,7 +34,7 @@ export default function GitHubCalendar() {
 
           <div className="flex items-start justify-between mb-8">
             <div>
-              <p className="font-bold text-text-primary text-lg leading-tight">GitHub Contribution</p>
+              <h2 className="font-bold text-text-primary text-lg leading-tight">GitHub Contribution</h2>
               <p className="text-sm text-text-muted mt-1">꾸준하게 쌓아온 개발 활동 기록입니다.</p>
             </div>
 

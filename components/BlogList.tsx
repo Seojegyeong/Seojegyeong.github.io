@@ -18,7 +18,19 @@ const item = {
 
 export default function BlogList({ posts }: { posts: Post[] }) {
   if (posts.length === 0) {
-    return <p className="text-text-subtle text-center py-12">글을 불러오는 중...</p>;
+    return (
+      <p className="text-text-subtle text-center py-12">
+        포스트를 불러올 수 없습니다.{" "}
+        <a
+          href="https://seojegyeong.tistory.com"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-brand-blue hover:underline"
+        >
+          블로그 바로가기 →
+        </a>
+      </p>
+    );
   }
 
   return (

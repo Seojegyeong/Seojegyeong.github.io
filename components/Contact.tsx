@@ -43,7 +43,13 @@ export default function Contact() {
       >
         <div className="text-sm text-text-muted">
           <p className="font-medium text-text-secondary">Seo Je Gyeong</p>
-          <p className="mt-0.5">Built with Next.js & Tailwind CSS</p>
+          <p className="mt-1">현재 구직 중 · 채용 문의 환영합니다</p>
+          <a
+            href="mailto:seojk0315@naver.com"
+            className="mt-0.5 block hover:text-brand-blue transition-colors"
+          >
+            seojk0315@naver.com
+          </a>
         </div>
 
         <div className="flex items-center gap-4">

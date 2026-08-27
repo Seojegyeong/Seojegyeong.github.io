@@ -178,6 +178,7 @@ export default function Projects() {
                 animate={SLOT[slot]}
                 exit="exit"
                 transition={{ duration: 0.45, ease }}
+                className={slot !== "center" ? "group" : undefined}
                 style={{
                   position: "absolute",
                   width: CARD_W,
@@ -194,7 +195,18 @@ export default function Projects() {
                   else go(offset < 0 ? "left" : "right");
                 }}
               >
-                <CardFace project={project} />
+                {slot !== "center" ? (
+                  <div className="relative">
+                    <CardFace project={project} />
+                    <div className="absolute inset-0 rounded-2xl flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none">
+                      <span className="bg-black/50 text-white text-xs font-medium px-3 py-1.5 rounded-full">
+                        {offset < 0 ? "← 이전" : "다음 →"}
+                      </span>
+                    </div>
+                  </div>
+                ) : (
+                  <CardFace project={project} />
+                )}
               </motion.div>
             ))}
           </AnimatePresence>
@@ -211,19 +223,25 @@ export default function Projects() {
           </motion.button>
         </div>
 
-        <div className="flex justify-center gap-2 mt-8">
-          {Array.from({ length: count }).map((_, i) => (
-            <button
-              key={i}
-              onClick={() => {
-                setDirection(i > activeIndex ? 1 : -1);
-                setActiveIndex(i);
-              }}
-              className={`h-1.5 rounded-full transition-all duration-300 ${
-                i === activeIndex ? "w-6 bg-brand-blue" : "w-1.5 bg-border"
-              }`}
-            />
-          ))}
+        <div className="flex flex-col items-center gap-3 mt-8">
+          <span className="text-xs text-text-subtle tabular-nums">
+            {activeIndex + 1} / {count}
+          </span>
+          <div className="flex items-center gap-2">
+            {Array.from({ length: count }).map((_, i) => (
+              <button
+                key={i}
+                aria-label={`프로젝트 ${i + 1}로 이동`}
+                onClick={() => {
+                  setDirection(i > activeIndex ? 1 : -1);
+                  setActiveIndex(i);
+                }}
+                className={`h-1.5 rounded-full transition-all duration-300 ${
+                  i === activeIndex ? "w-6 bg-brand-blue" : "w-1.5 bg-border"
+                }`}
+              />
+            ))}
+          </div>
         </div>
       </section>
 
