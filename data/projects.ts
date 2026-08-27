@@ -160,9 +160,24 @@ export const projects: Project[] = [
     ],
     media: [{ type: "youtube", src: "https://youtu.be/oy63--lXUtQ" }],
     contributions: [
-      "설정·공지·FAQ 도메인 전담 구현",
-      "알람 설정 Optimistic Update + 에러 시 롤백 패턴 구현",
+      "설정·공지·FAQ 도메인 전담 구현, 웹·모바일 네브바 구현",
+      "FAQItem에 aria-expanded·aria-controls 적용한 접근성 준수 아코디언 구현",
+      "알람 토글 즉시 반응 + 전체 상태 PATCH로 동시 요청 충돌 방지, onError에서 prev 스냅샷 복구로 롤백 구현",
       "EditableInputBox·PasswordEdit·ToggleSwitch 공통 컴포넌트 설계",
+    ],
+    troubleshooting: [
+      {
+        problem:
+          "ToggleSwitch 내부 isOn과 부모 AlarmSetting 상태가 이중으로 존재해, 에러 시 어디서 롤백해야 하는지 불명확",
+        solution:
+          "부모에서만 prev 스냅샷 복구(setAlarmSetting(prev))하고, ToggleSwitch는 value prop → useEffect 동기화 구조로 설계해 부모 상태 복구 한 번으로 자식 UI가 자동 롤백되는 단방향 흐름 구성",
+      },
+      {
+        problem:
+          "FAQ 검색·목록 모드 전환 시 조건부 훅 호출 구조로는 Rules of Hooks 위반 발생",
+        solution:
+          "두 훅을 항상 호출하되 enabled 플래그로 실제 요청 제어, keepPreviousData로 전환 중 이전 데이터 유지해 깜빡임 방지",
+      },
     ],
   },
 ];

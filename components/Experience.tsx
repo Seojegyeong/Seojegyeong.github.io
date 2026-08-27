@@ -36,7 +36,7 @@ const items: {
     type: "경험",
     sub: "Computer Science",
     href: "https://olemiss.edu/",
-    desc: "Java, 컴퓨터 구조 등 CS 전공 수업을 영어 강의 환경에서 이수하며 전 과목 A+를 달성했습니다.",
+    desc: "Java와 컴퓨터 구조 CS 전공 수업을 영어 강의 환경에서 이수하며 전 과목 A+를 달성했습니다.",
   },
   {
     period: "2026.09",
