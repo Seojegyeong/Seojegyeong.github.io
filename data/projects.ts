@@ -43,9 +43,10 @@ export const projects: Project[] = [
     ],
     contributions: [
       "Skeleton UI 적용으로 다중 API 로딩 빈 화면 문제 해결, LCP 1,180ms → 1,048ms(-11%) 개선",
-      "METRIC_REGISTRY로 지표 포맷 로직 단일화, Vitest 51케이스 CI 연동으로 위반 PR 자동 차단",
+      "16개 파일에 분산된 지표 포맷 로직을 METRIC_REGISTRY로 단일화, Vitest 51케이스 CI 연동으로 포맷 위반 PR 자동 차단 — 지표 추가 시 1개 파일 수정만으로 전체 화면 자동 반영",
       "Zustand 메모리 저장 + CloudFront Functions CSP 두 레이어로 XSS 방어, Report-Only 검증 후 Enforcing 전환으로 프로덕션 충돌 없이 정책 배포",
       "useCoreQuery · useCoreMutation 공통 추상화로 TanStack Query 보일러플레이트 해소, 팀원 도메인 집중 환경 구축",
+      "GitHub Actions 3개 워크플로로 PR 검증(ESLint+빌드) · 배포(S3+CloudFront 무효화) · 시각 회귀(Chromatic) 파이프라인 분리, 코드 품질과 배포 안정성 동시 확보",
     ],
     troubleshooting: [
       {
@@ -59,6 +60,12 @@ export const projects: Project[] = [
           "accessToken localStorage 저장 시 XSS 탈취 위험, 메모리 저장만으로는 스크립트 실행 자체를 막을 수 없음",
         solution:
           "Zustand 메모리 저장 + CloudFront Functions CSP 두 레이어로 스크립트 실행 차단과 탈취 피해 최소화 동시 달성",
+      },
+      {
+        problem:
+          "차트 라이브러리 크래시 시 페이지 전체가 흰 화면으로 전환, 정상 위젯 데이터까지 함께 소실",
+        solution:
+          "전역(404/500) · 컴포넌트(차트/카드) 2단계 Error Boundary로 장애 범위 격리, Sentry 모니터링으로 프로덕션 미처리 오류 실시간 수집 — 차트 크래시 시에도 대시보드 프레임 유지",
       },
     ],
     relatedPosts: [
@@ -133,9 +140,10 @@ export const projects: Project[] = [
     team: { type: "solo" },
     contributions: [
       "프론트(Chrome Extension)부터 백엔드(Node.js + Express + Claude API)까지 1인 풀스택 개발",
-      "Figma MCP + Claude Code로 기획 문서 기반 초안 자동 생성, 자연어 피드백 반복 수정으로 기획·디자인·구현 전 과정 단독 완성",
-      "Shadow DOM에 React를 마운트하고 Emotion 캐시를 Shadow Root에 바인딩해 미디어 사이트 전역 CSS·z-index 충돌 완전 격리",
+      "Figma MCP + Claude Code로 기획 문서 기반 초안 생성, 자연어 피드백 반복 수정으로 기획·디자인·구현 전 과정 단독 완성",
+      "Shadow DOM + Emotion 캐시 바인딩으로 미디어 사이트 전역 CSS·z-index 충돌 완전 격리",
       "사전 등록 용어는 Map O(1) 반환, 미등록 용어는 Claude API + Promise.all 병렬 처리로 API 비용과 응답 속도 동시 최적화",
+      "150ms 디바운싱 + 이벤트 위임으로 span 수천 개 개별 리스너를 컨테이너 2개로 축소해 DOM 이벤트 메모리 사용량 최소화",
     ],
     troubleshooting: [
       {
