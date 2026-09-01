@@ -35,7 +35,7 @@ export const projects: Project[] = [
       "AWS",
     ],
     github: "https://github.com/WhereYouAd/WhereYouAd-Frontend",
-    media: [{ type: "youtube", src: "https://youtu.be/sTcq1MLCJAY" }],
+    media: [{ type: "youtube", src: "https://youtu.be/zW1o8vfdBno" }],
     team: { type: "team", size: 6, roles: ["FE 3", "BE 3"] },
     awards: [
       "상명대학교 교내 창업아이디어 경진대회 대상",
