@@ -2,7 +2,7 @@
 
 import { motion } from "framer-motion";
 
-type Post = { title: string; link: string; date: string };
+type Post = { title: string; link: string; date: string; summary: string };
 
 const ease = [0.22, 1, 0.36, 1] as const;
 
@@ -47,14 +47,21 @@ export default function BlogList({ posts }: { posts: Post[] }) {
             href={post.link}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex flex-col gap-1 py-5 group sm:flex-row sm:items-center sm:justify-between"
+            className="flex flex-col gap-1 py-5 group sm:flex-row sm:items-start sm:justify-between"
             whileHover={{ x: 4 }}
             transition={{ duration: 0.2, ease }}
           >
-            <span className="text-text-primary font-semibold group-hover:text-brand-blue transition-colors">
-              {post.title}
-            </span>
-            <span className="text-sm text-text-subtle shrink-0 sm:ml-6">
+            <div className="flex flex-col gap-1">
+              <span className="text-text-primary font-semibold group-hover:text-brand-blue transition-colors">
+                {post.title}
+              </span>
+              {post.summary && (
+                <span className="text-sm text-text-muted line-clamp-1 break-keep">
+                  {post.summary}
+                </span>
+              )}
+            </div>
+            <span className="text-sm text-text-subtle shrink-0 sm:ml-6 sm:pt-0.5">
               {post.date}
             </span>
           </motion.a>

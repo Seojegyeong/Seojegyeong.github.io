@@ -2,6 +2,7 @@ type Post = {
   title: string;
   link: string;
   date: string;
+  summary: string;
 };
 
 async function getPosts(): Promise<Post[]> {
@@ -34,14 +35,15 @@ async function getPosts(): Promise<Post[]> {
           })
         : "";
 
-      return { title, link, date };
-    });
+      return { title, link, date, summary: summaries[link] ?? "" };
+    }).filter((post) => post.link in summaries);
   } catch {
     return [];
   }
 }
 
 import BlogList from "./BlogList";
+import summaries from "@/data/blog-summaries";
 
 export default async function Blog() {
   const posts = await getPosts();
