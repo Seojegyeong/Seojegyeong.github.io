@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { Users } from "lucide-react";
 import ProjectModal from "./ProjectModal";
 import { projects, type Project } from "@/data/projects";
 
@@ -42,8 +43,16 @@ function CardFace({ project }: { project: Project }) {
         )}
       </div>
       <div className="flex flex-col gap-3 p-6">
-        <h3 className="font-bold text-lg">{project.title}</h3>
-        <p className="text-sm text-text-muted leading-relaxed line-clamp-2">
+        <div className="flex items-start justify-between gap-2">
+          <h3 className="font-bold text-lg">{project.title}</h3>
+          {project.team && (
+            <span className="shrink-0 flex items-center gap-1 text-xs text-text-subtle pt-0.5">
+              <Users className="w-3 h-3" />
+              {project.team.type === "solo" ? "개인" : `팀 ${project.team.size}인`}
+            </span>
+          )}
+        </div>
+<p className="text-sm text-text-muted leading-relaxed line-clamp-2">
           {project.description}
         </p>
         <div className="flex flex-wrap gap-2">
