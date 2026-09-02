@@ -48,7 +48,7 @@ const items: {
     period: "2025.01",
     title: "AWS Certified Cloud Practitioner",
     type: "자격증",
-    desc: "AWS 클라우드 핵심 서비스와 아키텍처를 다루는 공식 입문 자격증을 취득하여 클라우드 기본 지식을 다졌습니다.",
+    desc: "AWS 클라우드 핵심 서비스와 아키텍처를 다루는 공식 자격증을 취득하여 클라우드 기본 지식을 다졌습니다.",
   },
   {
     period: "2025.01",
