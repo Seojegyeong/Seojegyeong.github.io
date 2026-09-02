@@ -52,7 +52,7 @@ function CardFace({ project }: { project: Project }) {
             </span>
           )}
         </div>
-<p className="text-sm text-text-muted leading-relaxed line-clamp-2">
+        <p className="text-sm text-text-muted leading-relaxed line-clamp-2 break-keep whitespace-pre-line">
           {project.description}
         </p>
         <div className="flex flex-wrap gap-2">

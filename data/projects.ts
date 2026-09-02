@@ -25,7 +25,7 @@ export const projects: Project[] = [
   {
     title: "WhereYouAd",
     description:
-      "Google·Naver·Meta 광고 성과를 단일 대시보드에 통합하고, AI 분석 리포트를 생성·저장하는 팀 협업 B2B SaaS.",
+      "Google·Naver·Meta 광고 성과를 단일 대시보드에 통합하고,\nAI 분석 리포트를 생성·저장하는 팀 협업 B2B SaaS.",
     tags: [
       "React",
       "TypeScript",
@@ -91,7 +91,7 @@ export const projects: Project[] = [
   {
     title: "Roome",
     description:
-      "인테리어 취향에 맞는 레퍼런스 피드를 탐색하고, 가구 쇼핑과 AI 챗봇 상담까지 한 곳에서 제공하는 앱.",
+      "인테리어 취향에 맞는 레퍼런스 피드를 탐색하고,\n가구 쇼핑과 AI 챗봇 상담까지 한 곳에서 제공하는 앱.",
     tags: [
       "React",
       "TypeScript",
@@ -132,7 +132,7 @@ export const projects: Project[] = [
   {
     title: "Light",
     description:
-      "경제 뉴스 금융 용어를 자동 감지해 호버 툴팁으로 즉시 설명하는 Chrome 확장 프로그램.",
+      "경제 뉴스 금융 용어를 자동 감지해 호버 툴팁으로 즉시 설명하는\nChrome 확장 프로그램.",
     tags: ["TypeScript", "React", "Chrome Extension", "Claude AI", "Node.js"],
     github: "https://github.com/Seojegyeong/Light",
     demo: "https://chromewebstore.google.com/detail/light/oakngefnlimlmgcoadomekojacbminco",
@@ -175,7 +175,7 @@ export const projects: Project[] = [
   {
     title: "WithTime",
     description:
-      "데이트 취향 테스트로 나만의 데이트 타입을 진단하고, 날씨와 AI 기반으로 맞춤 데이트 코스를 추천·생성하는 서비스.",
+      "데이트 취향 테스트로 나만의 데이트 타입을 진단하고,\n날씨와 AI 기반으로 맞춤 데이트 코스를 추천·생성하는 서비스.",
     tags: [
       "React",
       "TypeScript",
