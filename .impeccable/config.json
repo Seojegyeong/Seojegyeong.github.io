@@ -32,6 +32,42 @@
         "value": "rgba(0,0,0,0.35)",
         "createdAt": "2026-08-27T03:36:54.224Z",
         "reason": "mobile menu dim overlay — standard scrim pattern, not a brand color; inline black/alpha is appropriate for this utility layer"
+      },
+      {
+        "rule": "design-system-font-size",
+        "value": "18px",
+        "createdAt": "2026-09-02T11:22:31.953Z",
+        "reason": "Originkit-delivered template; intentional design from original component"
+      },
+      {
+        "rule": "design-system-font-size",
+        "value": "16px",
+        "createdAt": "2026-09-02T11:22:32.052Z",
+        "reason": "Originkit-delivered template; intentional design from original component"
+      },
+      {
+        "rule": "design-system-font-size",
+        "value": "22px",
+        "createdAt": "2026-09-02T11:22:32.146Z",
+        "reason": "Originkit-delivered template; intentional design from original component"
+      },
+      {
+        "rule": "design-system-font-size",
+        "value": "13px",
+        "createdAt": "2026-09-02T11:22:32.242Z",
+        "reason": "Originkit-delivered template; intentional design from original component"
+      },
+      {
+        "rule": "design-system-font-size",
+        "value": "14px",
+        "createdAt": "2026-09-02T11:22:32.337Z",
+        "reason": "Originkit-delivered template; intentional design from original component"
+      },
+      {
+        "rule": "design-system-font-size",
+        "value": "12px",
+        "createdAt": "2026-09-02T11:22:32.438Z",
+        "reason": "Originkit-delivered template; intentional design from original component"
       }
     ]
   }

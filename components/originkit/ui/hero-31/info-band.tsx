@@ -89,6 +89,7 @@ export const InfoBand = () => (
           {[
             { label: "GitHub", href: "https://github.com/Seojegyeong" },
             { label: "Blog", href: "https://seojegyeong.tistory.com" },
+            { label: "LinkedIn", href: "https://www.linkedin.com/in/jegyeong" },
             { label: "YouTube", href: "https://youtube.com/channel/UCQYWIWTp1ntBK6Z9ecjdj9w" },
           ].map(({ label, href }) => (
             <li key={label}>
