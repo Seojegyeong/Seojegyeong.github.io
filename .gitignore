@@ -24,6 +24,10 @@
 .DS_Store
 *.pem
 CLAUDE.md
+AGENTS.md
+DESIGN.md
+.claude/
+.impeccable/
 
 # debug
 npm-debug.log*
