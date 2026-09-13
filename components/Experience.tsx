@@ -42,18 +42,21 @@ const items: {
     period: "2026.09",
     title: "정보처리기사",
     type: "자격증",
-    desc: "취득 예정 (2026년 9월) — 소프트웨어 개발·운영 전반을 검증하는 IT 분야 국가기술자격입니다.",
+    href: "/정처기_실기_서제경.pdf",
+    desc: "소프트웨어 개발·운영 전반을 검증하는 IT 분야 국가기술자격을 취득했습니다.",
   },
   {
     period: "2025.01",
     title: "AWS Certified Cloud Practitioner",
     type: "자격증",
+    href: "/AWS_Certified_Cloud_Practitioner.pdf",
     desc: "AWS 클라우드 핵심 서비스와 아키텍처를 다루는 공식 자격증을 취득하여 클라우드 기본 지식을 다졌습니다.",
   },
   {
     period: "2025.01",
     title: "OPIc IH",
     type: "자격증",
+    href: "/Opic_서제경.pdf",
     desc: "영어 말하기 공인 시험에서 Intermediate High 등급을 취득했습니다.",
   },
   {
@@ -61,6 +64,7 @@ const items: {
     title: "상명대학교 교내 창업아이디어 경진대회 대상",
     type: "수상",
     sub: "WhereYouAd",
+    href: "/창업아이디어경진대회_수상확인서.pdf",
     desc: "교내 창업 아이디어 경진대회에서 서비스 기획·팜플렛 디자인을 주도하며 대상을 수상했습니다.",
   },
   {
@@ -132,18 +136,34 @@ export default function Experience() {
                 </span>
               </div>
               <div className="flex flex-col gap-1">
-                {item.href ? (
-                  <a
-                    href={item.href}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="font-semibold text-text-primary hover:text-brand-blue transition-colors"
-                  >
-                    {item.title}
-                  </a>
-                ) : (
-                  <span className="font-semibold text-text-primary">{item.title}</span>
-                )}
+                <div className="flex items-center gap-2 flex-wrap">
+                  {item.href && item.type === "경험" ? (
+                    <a
+                      href={item.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="font-semibold text-text-primary hover:text-brand-blue transition-colors"
+                    >
+                      {item.title}
+                    </a>
+                  ) : (
+                    <span className="font-semibold text-text-primary">{item.title}</span>
+                  )}
+                  {item.href && item.type !== "경험" && (
+                    <a
+                      href={item.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-0.5 text-xs text-text-subtle hover:text-text-primary transition-colors shrink-0"
+                    >
+                      <svg width="11" height="11" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M2 2h4v1H3v6h6V7h1v2a1 1 0 01-1 1H3a1 1 0 01-1-1V3a1 1 0 011-1z" fill="currentColor"/>
+                        <path d="M7 2h3v3h-1V3.7L5.4 7.3l-.7-.7L8.3 3H7V2z" fill="currentColor"/>
+                      </svg>
+                      확인서
+                    </a>
+                  )}
+                </div>
                 {item.sub && (
                   <span className="text-xs text-text-subtle">{item.sub}</span>
                 )}
