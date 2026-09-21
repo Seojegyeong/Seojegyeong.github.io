@@ -5,7 +5,10 @@ import dynamic from "next/dynamic";
 
 const ReactGitHubCalendar = dynamic(
   () => import("react-github-calendar").then((m) => m.GitHubCalendar),
-  { ssr: false }
+  {
+    ssr: false,
+    loading: () => <div className="h-36 rounded-xl bg-gray-50 animate-pulse" />,
+  }
 );
 
 const ease = [0.22, 1, 0.36, 1] as const;
