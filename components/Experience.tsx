@@ -9,6 +9,7 @@ const items: {
   title: string;
   type: Category;
   href?: string;
+  certHref?: string;
   sub?: string;
   desc?: string;
 }[] = [
@@ -36,6 +37,7 @@ const items: {
     type: "경험",
     sub: "Computer Science",
     href: "https://olemiss.edu/",
+    certHref: "/SAF_참가확인서_서제경.pdf",
     desc: "Java와 컴퓨터 구조 CS 전공 수업을 영어 강의 환경에서 이수하며 전 과목 A+를 달성했습니다.",
   },
   {
@@ -149,9 +151,9 @@ export default function Experience() {
                   ) : (
                     <span className="font-semibold text-text-primary">{item.title}</span>
                   )}
-                  {item.href && item.type !== "경험" && (
+                  {(item.certHref ?? (item.href && item.type !== "경험")) && (
                     <a
-                      href={item.href}
+                      href={item.certHref ?? item.href}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="inline-flex items-center gap-0.5 text-xs text-text-subtle hover:text-text-primary transition-colors shrink-0"

@@ -43,7 +43,8 @@ export const projects: Project[] = [
     ],
     contributions: [
       "Skeleton UI 적용으로 다중 API 로딩 빈 화면 문제 해결, LCP 1,180ms → 1,048ms(-11%) 개선",
-      "16개 파일에 분산된 지표 포맷 로직을 METRIC_REGISTRY로 단일화, Vitest 51케이스 CI 연동으로 포맷 위반 PR 자동 차단 — 지표 추가 시 1개 파일 수정만으로 전체 화면 자동 반영",
+      "16개 파일에 흩어진 지표 포맷 로직이 화면마다 수치를 다르게 표시하는 원인임을 발견 — enum 분기 대신 REGISTRY 패턴으로 포맷 정의를 단일 소스화, Vitest 51케이스 CI 연동으로 포맷 위반 PR 자동 차단. 지표 추가 시 다른 파일 수정 없이 1개 파일만 수정하면 전체 화면 자동 반영",
+      "초기 로딩 시 불필요한 차트·에디터 라이브러리가 번들에 포함됨을 확인 — React.lazy + Suspense로 대시보드 위젯 단위 코드 스플리팅 적용해 번들 615kB → 136kB(-78%), 초기 JS -39% 감소",
       "Zustand 메모리 저장 + CloudFront Functions CSP 두 레이어로 XSS 방어, Report-Only 검증 후 Enforcing 전환으로 프로덕션 충돌 없이 정책 배포",
       "useCoreQuery · useCoreMutation 공통 추상화로 TanStack Query 보일러플레이트 해소, 팀원 도메인 집중 환경 구축",
       "GitHub Actions 3개 워크플로로 PR 검증(ESLint+빌드) · 배포(S3+CloudFront 무효화) · 시각 회귀(Chromatic) 파이프라인 분리, 코드 품질과 배포 안정성 동시 확보",
@@ -51,7 +52,7 @@ export const projects: Project[] = [
     troubleshooting: [
       {
         problem:
-          "Sentry가 포착한 프로덕션 SSE 401 침묵 오류 — SSE가 axios 인터셉터를 우회하는 구조",
+          "Sentry 로그에서 간헐적 강제 로그아웃을 추적 → SSE는 axios와 달리 Fetch API를 직접 사용해 인터셉터를 우회한다는 것을 발견. 3개 SSE 스트림이 동시에 401을 받으면 각자 reissue를 시도해 토큰 갱신 경쟁이 발생",
         solution:
           "sseRefreshPromise 싱글턴으로 3개 동시 SSE 인스턴스의 중복 reissue를 차단해 강제 로그아웃 방지",
       },
@@ -105,7 +106,7 @@ export const projects: Project[] = [
     team: { type: "team", size: 6, roles: ["PM 1", "FE 2", "BE 3"] },
     contributions: [
       "FE 2인 팀에서 프로젝트 셋업·API 인프라·Feed/Shop·온보딩·배포 전담",
-      "필터 조합별 InfiniteData 캐시 낙관적 업데이트로 좋아요·스크랩 4종 즉각 반응 구현, 에러 시 자동 rollback 처리",
+      "좋아요·스크랩 클릭 후 서버 왕복 지연이 체감되는 UX 문제 — 필터 조합마다 독립된 InfiniteData 캐시를 낙관적으로 업데이트해 즉각 반응 구현. 4종 인터랙션 전체에 onError rollback을 추가해 네트워크 실패 시 이전 상태로 자동 복구",
       "목록 → 상세 전환 시 initialData 즉시 주입 + initialDataUpdatedAt: 0 stale 처리로 전환 지연 없이 즉시 화면 표시",
       "UT 결과 기반으로 태그 드롭다운·사용 제품 미리보기 UI 직접 제안·구현해 레퍼런스 등록 흐름 개선",
     ],
@@ -141,7 +142,7 @@ export const projects: Project[] = [
     contributions: [
       "프론트(Chrome Extension)부터 백엔드(Node.js + Express + Claude API)까지 1인 풀스택 개발",
       "Figma MCP + Claude Code로 기획 문서 기반 초안 생성, 자연어 피드백 반복 수정으로 기획·디자인·구현 전 과정 단독 완성",
-      "Shadow DOM + Emotion 캐시 바인딩으로 미디어 사이트 전역 CSS·z-index 충돌 완전 격리",
+      "뉴스 사이트 전역 CSS가 툴팁 z-index와 충돌해 레이어가 안 뜨는 문제 발생 — iframe은 도메인 정책·포커스 이벤트 문제, :host-context는 브라우저 지원 미비로 배제 → Shadow DOM + Emotion 캐시 바인딩으로 스타일 완전 격리. 어느 뉴스 사이트에서도 충돌 없이 동작",
       "사전 등록 용어는 Map O(1) 반환, 미등록 용어는 Claude API + Promise.all 병렬 처리로 API 비용과 응답 속도 동시 최적화",
       "150ms 디바운싱 + 이벤트 위임으로 span 수천 개 개별 리스너를 컨테이너 2개로 축소해 DOM 이벤트 메모리 사용량 최소화",
     ],
@@ -156,7 +157,7 @@ export const projects: Project[] = [
         problem:
           "페이지 새로고침마다 설정이 초기화되고 비동기 Race Condition으로 설정 손실 위험",
         solution:
-          "Chrome Storage Sync(영속) / React Context(전역) / useState(UI) 3계층 분리 + isLoadedRef로 초기화 전 setSettings 호출 차단",
+          "새로고침마다 설정이 초기화되는 버그 추적 → Chrome Storage Sync를 SSoT로, React Context를 런타임 전역 상태로, useState를 UI 렌더링 트리거로 역할 분리. isLoadedRef 가드로 비동기 로딩 전 setSettings 호출 차단해 Race Condition으로 인한 설정 소실 방지",
       },
       {
         problem:
