@@ -30,6 +30,7 @@ function CardFace({ project }: { project: Project }) {
           <img
             src={thumb}
             alt={project.title}
+            loading="lazy"
             className="w-full h-full object-cover"
             onError={(e) => {
               const id = project.media[0].src.match(/(?:youtu\.be\/|v=)([^&?/]+)/)?.[1];
@@ -105,25 +106,17 @@ export default function Projects() {
             className="grid grid-cols-1 sm:grid-cols-2 gap-6"
           >
             {projects.map((project) => (
-              <motion.div
+              <motion.button
                 key={project.title}
                 variants={cardItem}
                 whileHover={{ y: -4 }}
                 transition={{ duration: 0.2, ease }}
-                role="button"
-                tabIndex={0}
                 aria-label={`${project.title} 프로젝트 상세 보기`}
-                className="cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue focus-visible:ring-offset-2 rounded-2xl"
+                className="w-full text-left cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue focus-visible:ring-offset-2 rounded-2xl"
                 onClick={() => setSelected(project)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" || e.key === " ") {
-                    e.preventDefault();
-                    setSelected(project);
-                  }
-                }}
               >
                 <CardFace project={project} />
-              </motion.div>
+              </motion.button>
             ))}
           </motion.div>
         </div>
