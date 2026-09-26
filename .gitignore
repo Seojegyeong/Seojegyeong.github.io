@@ -25,6 +25,7 @@
 *.pem
 AGENTS.md
 DESIGN.md
+PRODUCT.md
 .claude/
 .impeccable/
 
