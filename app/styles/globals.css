@@ -1,6 +1,6 @@
 @import "tailwindcss";
+@plugin "@tailwindcss/typography";
 @source "../components/originkit";
-@import "./originkit-section-themes.css";
 @import "./originkit-section-theme.css";
 
 /* ============================================================
@@ -73,4 +73,58 @@ body {
 .scrollbar-hide {
   -ms-overflow-style: none;
   scrollbar-width: none;
+}
+
+/* prose table */
+.not-prose table thead {
+  background-color: #f6f8fa;
+}
+.not-prose table thead th {
+  @apply px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider;
+  border-bottom: 1px solid #e5e7eb;
+}
+.not-prose table tbody tr + tr td {
+  border-top: 1px solid #f3f4f6;
+}
+.not-prose table tbody td {
+  @apply px-5 py-3 text-gray-700;
+}
+
+/* prose section spacing */
+.prose h2 {
+  margin-top: 5rem;
+}
+
+/* inline code */
+.prose :not(pre) > code {
+  background-color: #f3f4f6;
+  border: 1px solid #e5e7eb;
+  border-radius: 4px;
+  padding: 0.1em 0.45em;
+  font-size: 0.875em;
+  font-weight: 500;
+  color: inherit;
+}
+.prose :not(pre) > code::before,
+.prose :not(pre) > code::after {
+  content: none;
+}
+
+/* rehype-pretty-code */
+[data-rehype-pretty-code-figure] pre {
+  @apply rounded-xl px-0 py-4 text-sm overflow-x-auto;
+  background-color: #f6f8fa;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.07), 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+[data-rehype-pretty-code-figure] code {
+  @apply grid;
+}
+[data-rehype-pretty-code-figure] [data-line] {
+  @apply px-5;
+}
+[data-rehype-pretty-code-figure] [data-highlighted-line] {
+  @apply bg-black/5;
+}
+[data-rehype-pretty-code-figure] [data-rehype-pretty-code-title] {
+  @apply text-xs text-gray-500 bg-[#eaeef2] rounded-t-xl px-4 py-2 border-b border-black/10 font-mono;
 }

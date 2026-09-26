@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Users } from "lucide-react";
-import ProjectModal from "./ProjectModal";
+import ProjectModal from "@/components/home/ProjectModal";
 import { projects, type Project } from "@/data/projects";
 
 const ease = [0.22, 1, 0.36, 1] as const;

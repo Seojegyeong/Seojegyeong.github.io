@@ -1,0 +1,210 @@
+---
+title: "WYAD 인증 플로우 E2E 테스트 도입기 - Playwright MCP로 시나리오 초안 만들기"
+date: "2026-05-18"
+desc: "배포 전 수동 확인에 의존하던 WYAD에 Playwright E2E 테스트를 도입하고, Playwright MCP로 시나리오를 실행해 spec 초안을 만든 과정과 한계를 정리했습니다."
+tags: ["Playwright", "E2E", "Cursor"]
+---
+
+졸업 프로젝트로 진행 중인 **WYAD(Where You Ad)**는 인증, 워크스페이스, 대시보드 등 복잡한 상태 변화와 사용자 흐름이 이어지는 화면들로 구성되어 있습니다.
+
+지금까지의 검증은 ESLint, 빌드 체크, Storybook 중심에 머물러 있었습니다. 이는 정적 코드와 단일 컴포넌트를 확인하는 데는 유용했지만, 여러 화면에 걸쳐 일어나는 실제 브라우저 환경에서의 사용자 시나리오는 보장하기 어려웠습니다. 결국 배포나 시연 직전에 사람이 직접 모든 흐름을 눌러보며 확인해야 했고, 기능과 화면이 늘어날수록 이 수동 QA의 부담도 비례해서 커졌습니다.
+
+이러한 문제를 해결하기 위해 Playwright 기반의 E2E 테스트 환경을 도입했습니다. 특히, 작성 공수가 큰 E2E 테스트의 한계를 극복하고자 Cursor의 Playwright MCP를 활용해 시나리오 초안 작성을 자동화했습니다.
+
+이 글에서는 프로젝트에 E2E 테스트 환경을 구축하고, AI 도구를 결합해 효율적으로 테스트 시나리오를 세팅했던 과정을 기록합니다.
+
+![WYAD + Cursor + Playwright](/blog/playwright/playwright-01.png)
+
+## 1. 접근 방식 — 2단계 워크플로우
+
+Playwright는 Microsoft가 만든 오픈소스 브라우저 자동화 프레임워크로, 웹 애플리케이션의 E2E 테스트를 작성하고 실행하는 데 쓰입니다. 다만 처음부터 모든 선택자를 직접 찾아가며 테스트를 작성하기에는 진입 장벽이 높았습니다.
+
+그래서 Cursor에 Playwright MCP를 연결해, AI가 실제 브라우저에서 시나리오를 먼저 수행하게 했습니다. 그 결과를 바탕으로 실행 가능한 spec 파일을 만들고, 터미널에서 같은 결과가 나오는지 다시 확인하는 흐름입니다.
+
+![시나리오 입력부터 MCP 실행, spec 생성, 터미널 테스트, 결과 비교까지의 2단계 워크플로우](/blog/playwright/playwright-02.png)
+
+첫 단계인 MCP 실행은 AI가 화면을 보며 판단하기 때문에 매번 같은 방식으로 동작한다는 보장이 없습니다. 두 번째 단계에서 spec 파일로 고정하고 터미널에서 재실행해야, **언제 실행해도 같은 결과**를 내는 테스트가 됩니다.
+
+## 2. 적용 과정
+
+### (1) 범위와 환경 정하기
+
+처음부터 모든 화면을 다루지 않고, 깨지면 서비스 이용 자체가 막히는 흐름을 우선 대상으로 정했습니다.
+
+| 대상        | 확인 내용                                              |
+| ----------- | ------------------------------------------------------ |
+| 스모크      | 앱이 뜨고 로그인 페이지가 열리는지                     |
+| 로그인      | 로그인 후 대시보드로 이동하는지                        |
+| 인증 가드   | 비로그인 상태에서 보호 페이지 접근 시 리다이렉트되는지 |
+| 이메일 찾기 | 이메일 찾기 플로우가 완료되는지                        |
+| 네비게이션  | 로그인 후 사이드바 메뉴로 이동되는지                   |
+
+테스트 환경은 로컬 개발 서버(`pnpm dev`), 실제 백엔드 API, 테스트 전용 계정으로 구성했습니다.
+
+### (2) Cursor에 Playwright MCP 연결하기
+
+`Cursor Settings → Tools & MCPs → New MCP Server`에서 `mcp.json`에 Playwright MCP 서버를 추가합니다.
+
+![Cursor Settings → Tools & MCPs에서 playwright MCP 서버가 설치된 화면](/blog/playwright/playwright-04.png)
+
+![mcp.json에 Playwright MCP 서버 설정 — npx @playwright/mcp@latest](/blog/playwright/playwright-03.png)
+
+```json
+{
+  "mcpServers": {
+    "playwright": {
+      "command": "npx",
+      "args": ["@playwright/mcp@latest"]
+    }
+  }
+}
+```
+
+### (3) Playwright 기반 만들기
+
+브라우저 바이너리를 설치하고, `playwright.config.ts`를 앱에 맞게 수정합니다. 이 설정 파일은 `pnpm run test:e2e`를 실행할 때 테스트 대상 URL, 브라우저, 리포트 방식 등을 정합니다.
+
+```bash
+pnpm exec playwright install
+```
+
+가장 먼저 `smoke.spec.ts`를 만들었습니다. 앱이 아예 뜨지 않는 수준의 큰 문제가 없는지 빠르게 확인하는 가장 얇은 테스트입니다.
+
+![smoke.spec.ts — 로그인 페이지가 열리는지 확인하는 기본 스모크 테스트](/blog/playwright/playwright-05.png)
+
+```ts
+import { test, expect } from "@playwright/test";
+
+test("로그인 페이지가 열린다", async ({ page }) => {
+  await page.goto("/login");
+  await expect(page.getByRole("heading", { name: "로그인" })).toBeVisible();
+});
+```
+
+### (4) 시나리오로 spec 초안 만들기
+
+Cursor 채팅에 시나리오를 아래 형식으로 작성해서 넘겼습니다. 대상, 단계, 기대 결과를 나눠 적으면 AI가 무엇을 검증해야 하는지 명확해집니다.
+
+```text
+[대상]
+- BASE_URL: {BASE_URL}
+- 테스트 계정: .env의 E2E_USER_EMAIL / E2E_USER_PASSWORD 사용
+
+[시나리오]
+1. {BASE_URL}/login 으로 이동한다.
+2. heading "로그인"이 보일 때까지 대기한다.
+3. 이메일/비밀번호를 입력한다.
+4. "로그인하기" 버튼을 클릭한다.
+5. URL이 /dashboard 를 포함하는지 확인한다.
+6. 사이드바에 "대시보드" 메뉴가 보이는지 확인한다.
+
+[기대 결과]
+- 로그인 성공 후 /dashboard 에 머문다.
+- 로그인 실패 토스트가 뜨지 않는다.
+```
+
+Playwright MCP는 실제 브라우저를 열어 시나리오를 한 단계씩 실행하고, 그 과정을 바탕으로 spec 파일을 생성합니다.
+
+![Cursor 채팅에서 MCP가 브라우저로 로그인 시나리오를 실행하며 login.spec.ts 초안을 생성하는 화면](/blog/playwright/playwright-06.png)
+
+![Cursor 채팅 — find-email.spec.ts (이메일 찾기 플로우) 생성](/blog/playwright/playwright-07.png)
+
+![Cursor 채팅 — auth-guard.spec.ts (비로그인 리다이렉트) 생성](/blog/playwright/playwright-08.png)
+
+![Cursor 채팅 — navigation.spec.ts (로그인 후 사이드바 네비게이션) 생성](/blog/playwright/playwright-09.png)
+
+같은 방식으로 나머지 시나리오도 spec 파일로 만들었습니다.
+
+```text
+e2e/
+  smoke.spec.ts        # 로그인 페이지 진입
+  login.spec.ts        # 로그인 → 대시보드
+  auth-guard.spec.ts   # 비로그인 리다이렉트
+  find-email.spec.ts   # 이메일 찾기 플로우
+  navigation.spec.ts   # 로그인 후 사이드바 네비게이션
+```
+
+### (5) 터미널에서 실행하고 리포트 확인하기
+
+```bash
+pnpm run test:e2e
+pnpm exec playwright show-report
+```
+
+![터미널에서 pnpm run test:e2e 실행 — auth-guard.spec.ts 포함 5개 테스트 수행 중](/blog/playwright/playwright-10.png)
+
+터미널에서 5개 테스트를 실행한 뒤, HTML 리포트로 결과를 확인했습니다.
+
+![Playwright Test Report에서 smoke, login, auth-guard, find-email, navigation 5개 테스트가 모두 통과한 화면](/blog/playwright/playwright-11.png)
+
+MCP로 실행했을 때와 같은 결과가 spec 파일로도 재현되는 것을 확인했습니다.
+
+현재 설정은 테스트가 실패할 때만 스크린샷과 영상을 리포트에 첨부합니다. 성공한 테스트의 실행 과정도 남기려면 아래처럼 옵션을 켜면 됩니다.
+
+```ts
+use: {
+  trace: process.env.CI ? 'on-first-retry' : 'on', // Trace Viewer용 기록
+  screenshot: 'on',                                 // 리포트에 스크린샷 첨부
+  video: 'on',                                      // 리포트에 영상 첨부
+},
+```
+
+<Callout type="info">
+  `trace`는 스크린샷이나 영상이 아니라 Trace Viewer로 열어보는 실행
+  기록(`trace.zip`)을 남기는 옵션입니다. 리포트에 이미지와 영상을 붙이려면
+  `screenshot`, `video` 옵션을 따로 설정해야 합니다.
+</Callout>
+
+## 3. 트러블슈팅 — UI 상태를 잘못 가정한 테스트
+
+`navigation.spec.ts`의 "통합 대시보드 화면을 확인한다" 테스트가 30초 타임아웃으로 실패했습니다.
+
+![Test Report에서 통합 대시보드 확인 테스트 1건이 Test timeout of 30000ms exceeded로 실패한 화면](/blog/playwright/playwright-13.png)
+
+처음에는 대시보드 로딩이 느린 것으로 의심했습니다. Trace Viewer로 실패 지점을 따라가 보니, 원인은 로딩 속도가 아니라 사이드바 하위 메뉴를 여는 단계에 있었습니다.
+
+![Trace Viewer에서 navigation.spec.ts가 사이드바 하위 메뉴를 여는 단계에서 멈춘 모습](/blog/playwright/playwright-12.png)
+
+로그인 후 `/dashboard`로 이동하면 사이드바의 대시보드 메뉴는 이미 펼쳐진 상태입니다. 테스트는 이 메뉴가 닫혀 있다고 가정하고 다시 펼치려 했고, 그 결과 기대한 하위 메뉴를 찾지 못한 채 대기하다 타임아웃이 발생했습니다.
+
+```ts
+const dashboardMenu = page.getByRole("button", { name: "대시보드" });
+
+// 이미 펼쳐져 있으면 클릭하지 않는다
+if ((await dashboardMenu.getAttribute("aria-expanded")) !== "true") {
+  await dashboardMenu.click();
+}
+await expect(page.getByRole("link", { name: "통합 대시보드" })).toBeVisible();
+```
+
+이 실패에서 얻은 교훈은 테스트가 UI를 토글하는 것이 아니라 **원하는 상태를 보장**해야 한다는 점입니다. 현재 상태와 무관하게 같은 결과에 도달하도록 작성해야 화면 흐름이 바뀌어도 테스트가 깨지지 않습니다.
+
+## 4. 회고
+
+### (1) 좋았던 점
+
+"로그인 → 대시보드", "비로그인 시 리다이렉트" 같은 흐름을 실제 화면을 보면서 시나리오로 잡고, 이를 바탕으로 spec 초안을 만드는 속도가 빨랐습니다. Playwright 문서만 읽으며 선택자를 하나씩 찾는 것보다 진입 장벽이 낮았습니다.
+
+핵심 흐름 5개가 자동으로 검증되면서 배포 전 불안감도 확실히 줄었습니다.
+
+### (2) 아쉬운 점
+
+Playwright MCP는 초안 작성과 화면 탐색에는 강하지만, 생성된 코드를 그대로 유지보수 가능한 테스트로 쓰기에는 부족했습니다. 트러블슈팅 사례처럼 UI 상태에 대한 가정이 코드에 그대로 들어가기 때문입니다. MCP는 테스트를 **빠르게 시작하는 도구**로 쓰고, 최종 코드는 직접 검토해야 합니다.
+
+### (3) 한계와 다음 단계
+
+현재 테스트는 실제 백엔드 API와 테스트 계정에 의존합니다. 서버 상태나 데이터에 따라 결과가 달라질 수 있고, CI에서 실행하려면 계정 정보를 시크릿으로 관리해야 합니다.
+
+다음 단계로는 GitHub Actions에서 PR마다 E2E 테스트가 자동 실행되도록 연동할 예정입니다. 매 테스트마다 반복되는 로그인은 Playwright의 `storageState`로 로그인 상태를 저장해 재사용하는 방향으로 개선해볼 계획입니다.
+
+| 단계                | 역할                                           |
+| ------------------- | ---------------------------------------------- |
+| Playwright MCP 실행 | 실제 화면을 보며 시나리오 탐색, spec 초안 생성 |
+| spec 파일 재실행    | 같은 결과가 재현되는지 확인하고 테스트로 고정  |
+| 직접 검토           | UI 상태 가정 제거, 유지보수 가능한 코드로 수정 |
+
+> AI는 테스트의 초안을 빠르게 만들어 주지만, 무엇을 어떤 상태로 보장할지는 여전히 개발자가 정해야 합니다.
+
+### 🔗 관련 PR
+
+- [WhereYouAd-Frontend #222: Playwright E2E 도입 및 Cursor MCP로 시나리오 초안 만들기](https://github.com/WhereYouAd/WhereYouAd-Frontend/pull/224)

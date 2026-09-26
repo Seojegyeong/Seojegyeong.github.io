@@ -1,10 +1,10 @@
-import Hero from "@/components/Hero";
-import Experience from "@/components/Experience";
-import Projects from "@/components/Projects";
-import Blog from "@/components/Blog";
-import GitHubCalendar from "@/components/GitHubCalendar";
-import Contact from "@/components/Contact";
-import Navbar from "@/components/Navbar";
+import Hero from "@/components/home/Hero";
+import Experience from "@/components/home/Experience";
+import Projects from "@/components/home/Projects";
+import Blog from "@/components/home/Blog";
+import GitHubCalendar from "@/components/home/GitHubCalendar";
+import Contact from "@/components/home/Contact";
+import Navbar from "@/components/common/Navbar";
 
 export default function Home() {
   return (

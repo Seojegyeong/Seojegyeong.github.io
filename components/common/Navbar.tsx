@@ -81,6 +81,10 @@ export default function Navbar() {
               <a
                 key={href}
                 href={href}
+                onClick={(e) => {
+                  e.preventDefault();
+                  document.getElementById(href.slice(1))?.scrollIntoView({ behavior: "smooth" });
+                }}
                 className="group relative rounded-full px-4 py-1.5 text-base font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue focus-visible:ring-offset-1"
               >
                 <span
@@ -154,7 +158,11 @@ export default function Navbar() {
                   <a
                     key={href}
                     href={href}
-                    onClick={() => setOpen(false)}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      setOpen(false);
+                      document.getElementById(href.slice(1))?.scrollIntoView({ behavior: "smooth" });
+                    }}
                     className="rounded-xl px-4 py-3.5 text-sm font-medium text-text-primary hover:bg-surface-subtle transition-colors duration-150 text-center"
                   >
                     {label}

@@ -1,4 +1,3 @@
-// Delivered by Originkit · stack: nextjs · styling: tailwind
 "use client";
 
 import { InfoBand } from "@/components/originkit/ui/hero-31/info-band";

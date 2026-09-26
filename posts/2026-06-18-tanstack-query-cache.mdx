@@ -1,0 +1,160 @@
+---
+title: "queryKey 하나로 캐시 이해하기"
+date: "2026-06-18"
+desc: "queryKey 오타로 invalidate가 동작하지 않는 문제를 계기로 캐시 hit/miss 원리를 파악하고, 키를 상수로 중앙 관리하는 구조로 리팩토링한 과정 회고."
+tags: ["TanStack Query", "React", "캐시"]
+---
+
+<Intro>
+프로젝트에서 useQuery를 쓰긴 했는데, 정작 안에서 무슨 일이 일어나는지 설명하라면 막막했습니다.
+queryKey를 상수로 정리하는 리팩토링을 하면서 이해한 것들을 정리해봤습니다.
+</Intro>
+
+## 들어가며: useEffect + fetch의 한계
+
+React에서 서버 데이터를 가져오는 가장 익숙한 방법은 useEffect입니다.
+
+```ts
+const [data, setData] = useState(null);
+const [isLoading, setIsLoading] = useState(true);
+
+useEffect(() => {
+  fetch("/api/overview")
+    .then((res) => res.json())
+    .then((res) => setData(res))
+    .finally(() => setIsLoading(false));
+}, []);
+```
+
+동작은 하지만 화면이 커질수록 문제점이 따라옵니다.
+
+- 중복 요청 — 같은 데이터를 여러 컴포넌트에서 각자 따로 부르는 경우가 있습니다
+- 상태 관리의 반복 — 로딩, 에러, 데이터 state를 컴포넌트마다 또 만들어야 합니다.
+- 갱신 추적이 어려움 — 데이터가 바뀌었을 때 어디서 다시 불러야 하는지를 쉽게 추적할 수 없습니다.
+
+> TanStack Query는 이걸 캐시로 해결합니다.
+
+## useQuery: 데이터를 가져와서 캐시에 넣는 도구
+
+```ts
+const { data, isLoading, isError } = useQuery({
+  queryKey: ["overview", "metrics", 1],   // 이 데이터의 이름표
+  queryFn: () => getOverview(1),          // 데이터 가져오는 함수
+});
+```
+
+useQuery는 명령보다는 **선언** 이라고 생각하면 쉽습니다. 이 키로 된 데이터가 필요하다고 적어두면, 컴포넌트가 렌더링될 때 알아서 동작합니다.
+
+## queryKey: 캐시를 구분하는 주소
+
+TanStack Query는 데이터를 **배열 키** 로 구분해서 저장합니다.
+
+```ts
+["overview", "metrics", 1]  // 워크스페이스 1번의 지표 캐시
+["overview", "metrics", 2]  // 워크스페이스 2번의 지표 캐시
+```
+
+orgId가 다르면 완전히 다른 캐시로 취급합니다. 즉 **"queryKey = 캐시의 주소"** 입니다. 이 주소가 같으면 같은 캐시를 가리키고, 한 글자라도 다르면 다른 캐시가 됩니다.
+
+## 캐시의 핵심: hit과 miss + fresh와 stale
+
+useQuery가 호출되면 두 가지를 차례로 따집니다.
+
+1. 이 키의 데이터가 캐시에 있는가
+2. 있다면 그 데이터가 아직 신선한가(fresh)
+
+먼저 캐시에 키가 **없으면(miss)** queryFn을 실행해 서버에서 받아오고, 그 응답을 캐시에 저장합니다.
+
+캐시에 **있으면(hit)** 한 단계 더 들어갑니다.
+
+- **fresh** (staleTime 이내) → 캐시 데이터를 즉시 반환하고, 서버는 부르지 않습니다.
+- **stale** (staleTime 경과) → 캐시 데이터를 **일단 즉시 보여주고**, 동시에 백그라운드에서 조용히 refetch합니다.
+
+이 "오래된 데이터를 먼저 보여주고 뒤에서 갱신한다"가 **stale-while-revalidate** 패턴입니다!
+
+![hit/miss/fresh/stale 흐름도](/blog/tanstack-query/tanstack-query-01.png)
+
+## 캐시 수명 설정: staleTime과 gcTime
+
+```ts
+export const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: 1,
+      staleTime: 1000 * 60 * 5,
+      gcTime: 1000 * 60 * 10,
+    },
+  },
+});
+```
+
+**staleTime** — 데이터를 받아온 뒤 5분 동안은 fresh 상태입니다. 이 안에 같은 화면을 다시 열면 서버를 부르지 않고 캐시를 즉시 돌려줍니다.
+
+**gcTime** — 그 키를 쓰던 컴포넌트가 전부 언마운트되면 gcTime 뒤에 캐시를 삭제합니다. 화면을 떠나도 10분 안에 돌아오면 캐시가 살아있어 즉시 보이고, 10분이 지나면 캐시가 비워져 다음 방문 때 miss로 새로 받아옵니다.
+
+## invalidate: 캐시를 만료시켜 갱신을 부른다
+
+데이터가 바뀌면(예: 워크스페이스 이름 수정) 캐시는 구버전이 됩니다. 이때 invalidateQueries를 부릅니다.
+
+```ts
+queryClient.invalidateQueries({
+  queryKey: ["overview", "metrics", 1]
+});
+```
+
+1. invalidate는 해당 키의 캐시에 **이제 신선하지 않음(stale)** 표시를 붙입니다.
+2. 그 키를 지금 화면에서 구독 중인(active) 쿼리가 있으면, **표시와 동시에 즉시 refetch** 가 발생합니다.
+3. 구독 중인 컴포넌트가 없으면(inactive) 즉시 요청하지 않고, **다음에 그 키가 마운트될 때** stale 상태이므로 새로 받아옵니다.
+
+![invalidate 흐름도](/blog/tanstack-query/tanstack-query-02.png)
+
+## queryKey가 둘을 연결한다
+
+> useQuery → 데이터를 가져와 캐시에 넣음
+> invalidate → 캐시를 만료시켜 useQuery를 다시 실행시킴
+> queryKey → 둘이 같은 캐시를 가리키게 묶어주는 이름표
+
+useQuery만 있고 invalidate가 없으면 데이터가 바뀌어도 화면이 안 바뀝니다. invalidate만 있고 그 키를 구독하는 useQuery가 없으면 아무 일도 안 일어납니다. **둘이 같은 queryKey로 연결되어야** 비로소 의미가 생깁니다.
+
+## 그래서 queryKey를 한곳에 모았다
+
+invalidate와 useQuery가 **정확히 같은 키** 를 가리켜야 하는데, 키를 문자열로 직접 쓰면 이게 보장되지 않습니다.
+
+```ts
+// useQuery
+useQuery({ queryKey: ["overview", "metrics", 1], ... });
+
+// invalidate (오타!)
+queryClient.invalidateQueries({ queryKey: ["overview", "metric", 1] });
+//                                                    ↑ "metrics" → "metric"
+// 에러도 안 나고, 캐시가 조용히 무효화되지 않는다
+```
+
+TypeScript는 "metrics"와 "metric"의 차이를 잡아주지 못합니다! 실제로 우리 프로젝트는 "my-workspaces" 하나가 4개 파일에, "campaigns"가 2개 파일에 문자열로 흩어져 있었습니다.
+
+그래서 모든 queryKey를 상수로 중앙 관리하기로 했습니다.
+
+![QUERY_KEYS 상수 중앙 관리 코드](/blog/tanstack-query/tanstack-query-03.png)
+
+두 가지 설계 포인트가 있습니다.
+
+1. **함수로 정의한 이유** — orgId 같은 파라미터를 받아야 하는 키가 있기 때문입니다. (orgId) => [...] 형태로 만들면 파라미터를 타입 안전하게 넘길 수 있습니다.
+2. **as const를 붙인 이유** — 반환 타입이 string[]이 아니라 readonly ["my-workspaces"]처럼 구체적인 튜플로 추론됩니다.
+
+```ts
+// Before
+useCoreQuery(["my-workspaces"], getMyWorkspaces);
+queryClient.invalidateQueries({ queryKey: ["my-workspaces"] });
+
+// After
+useCoreQuery(QUERY_KEYS.workspace.list(), getMyWorkspaces);
+queryClient.invalidateQueries({ queryKey: QUERY_KEYS.workspace.list() });
+```
+
+useQuery와 invalidate가 **동일한 함수 호출** 을 참조하므로, 키가 달라지는 실수 자체가 불가능해집니다.
+
+## 마치며
+
+useQuery를 처음 배울 때는 "데이터 가져오는 훅" 정도로만 알았습니다. 하지만 그 안에는 queryKey라는 주소로 hit/miss를 가르는 캐시가 있고, invalidate가 그 주소를 만료시켜 갱신을 트리거하는 구조가 있었습니다.
+
+이 구조를 이해하고 나니, queryKey를 왜 한곳에서 관리해야 하는지가 단순한 "코드 컨벤션"이 아니라 **캐시가 깨지지 않게 만드는 안전장치** 라는 게 보였습니다.
