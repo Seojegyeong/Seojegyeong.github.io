@@ -9,6 +9,8 @@ axios 인터셉터로 병렬 401 큐 패턴을 구현한 뒤 한동안 인증이
 
 Network 탭을 확인하니 `/api/auth/reissue`가 3번 연달아 호출되고 있었습니다. 세 번째 요청부터는 401을 응답했습니다. 원인은 SSE였습니다.
 
+Sentry를 더 들여다보니 문제는 하나가 아니었습니다. 토큰 중복 재발급으로 인한 강제 로그아웃이 첫 번째, `onerror`에서 발생한 unhandled promise rejection이 두 번째였습니다. 이 글은 두 문제를 모두 해결한 과정을 다룹니다.
+
 ## SSE는 axios 인터셉터를 통과하지 않는다
 
 `@microsoft/fetch-event-source` 라이브러리는 `fetch` API 기반입니다. axios로 감싸지 않기 때문에 인터셉터가 전혀 개입하지 못합니다. 401을 받아도 큐에 등록되지 않습니다.
@@ -127,6 +129,69 @@ useEffect(() => {
 
 `setAccessToken(newToken)`이 호출되면 `accessToken`이 바뀌고, `useEffect`가 재실행되어 새 토큰으로 SSE 연결을 다시 엽니다.
 
+## onerror — throw 대신 abort로 unhandled rejection 제거
+
+`onopen` 401 처리가 해결됐지만 Sentry에는 또 다른 패턴의 에러가 남아있었습니다. `fetchEventSource` 내부에서 발생하는 unhandled promise rejection이었습니다.
+
+기존 `onerror`를 보면 MAX_RETRIES 초과 시 `throw err`로 에러를 다시 던집니다.
+
+```ts
+onerror(err) {
+  retryCountRef.current += 1;
+  if (retryCountRef.current >= MAX_RETRIES) {
+    setIsError(true);
+    throw err;  // fetchEventSource 내부 Promise가 reject → unhandled rejection
+  }
+}
+```
+
+`fetchEventSource`의 `onerror` 안에서 `throw`하면 라이브러리의 내부 Promise 전체가 reject됩니다. 이 Promise를 호출 측에서 별도로 catch하지 않으면 unhandled promise rejection이 되어 Sentry에 에러가 쌓입니다.
+
+`throw err` 대신 `controller.abort()`를 호출하면 됩니다. abort는 정상 종료이므로 에러로 전파되지 않습니다.
+
+```ts
+onerror(err) {
+  retryCountRef.current += 1;
+  if (retryCountRef.current >= MAX_RETRIES) {
+    setIsError(true);
+    controller.abort();  // throw 대신 abort → unhandled rejection 없이 연결 종료
+    return;
+  }
+}
+```
+
+## AbortError를 onerror에서 구분해야 하는 이유
+
+`onopen`에서 `controller.abort()`를 호출하면 `onerror`가 `DOMException(AbortError)`를 받습니다. `fetchEventSource`는 abort를 감지하면 내부적으로 AbortError를 throw하고, 이것이 `onerror`로 전달되기 때문입니다.
+
+AbortError를 별도로 처리하지 않으면 예상치 못한 흐름이 생깁니다.
+
+- `retryCountRef.current`가 증가합니다
+- MAX_RETRIES에 도달하면 `setIsError(true)`가 실행됩니다
+- 401 재발급 후 정상적인 재연결 시나리오인데 에러 상태로 처리되는 모순이 생깁니다
+
+```ts
+onerror(err) {
+  // abort() 호출로 인한 정상 종료 — 재시도 없이 무시
+  if (err instanceof DOMException && err.name === "AbortError") return;
+
+  retryCountRef.current += 1;
+  if (retryCountRef.current >= MAX_RETRIES) {
+    setIsError(true);
+    controller.abort();
+    return;
+  }
+}
+```
+
+이 두 수정으로 `onerror`가 다루는 케이스가 명확히 분리됩니다.
+
+| 상황 | 처리 |
+|------|------|
+| abort()로 인한 AbortError | 무시 (정상 종료) |
+| 네트워크 에러 (MAX_RETRIES 미만) | retryCount 증가, 라이브러리 기본 재시도 |
+| 네트워크 에러 (MAX_RETRIES 초과) | `setIsError` + abort (unhandled rejection 없이 종료) |
+
 ## axios 레이어와 락 공유
 
 `isRefreshing`(axios)과 `sseRefreshPromise`(SSE)는 서로 다른 락입니다. axios 401과 SSE 401이 동시에 발생하면 두 레이어가 각자 재발급을 시도합니다.
@@ -204,3 +269,8 @@ Sentry에 `reissue 401` 에러가 올라오지 않았다면 찾기 어려운 버
 - [`EventSource`](https://developer.mozilla.org/en-US/docs/Web/API/EventSource)
 - [`AbortController`](https://developer.mozilla.org/en-US/docs/Web/API/AbortController)
 - [`Authorization` 헤더](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Authorization)
+
+## 관련 PR
+
+- [**[Bugfix/#352] SSE 연결 중 accessToken 만료 시 401 자동 갱신 및 Sentry 에러 전파 방지**](https://github.com/WhereYouAd/WhereYouAd-Frontend/pull/353)  
+  `src/hooks/dashboard/useClickStream.ts` — `sseRefreshPromise` 싱글턴 추가, onopen 401 처리, onerror AbortError 분기 및 MAX_RETRIES 초과 시 abort 전환

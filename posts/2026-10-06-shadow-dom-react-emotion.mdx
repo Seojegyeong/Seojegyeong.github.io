@@ -31,6 +31,52 @@ div { position: relative; }
 
 인터파크 같은 오래된 커머스 사이트는 전역 스타일이 특히 공격적입니다. `font-size`, `line-height`, `color`를 `*` 셀렉터로 강제하는 경우가 많습니다.
 
+## Shadow DOM이란
+
+Shadow DOM은 브라우저가 DOM 트리 안에 만들 수 있는 **격리된 하위 트리**입니다. 일반 DOM과 달리 외부의 CSS 선택자가 내부 요소를 대상으로 삼지 못합니다.
+
+사실 브라우저 기본 요소들이 이미 Shadow DOM을 사용하고 있습니다. `<input type="range">`의 슬라이더 트랙, `<video>`의 재생 버튼과 볼륨 바가 일반 CSS로 스타일을 바꾸기 어려운 이유가 바로 Shadow DOM 안에 구현돼 있기 때문입니다. DevTools에서 "Show user agent shadow DOM" 옵션을 켜면 이 내부 구조를 직접 확인할 수 있습니다.
+
+구성 요소는 세 가지입니다.
+
+| 용어 | 역할 |
+|------|------|
+| **Shadow Host** | 일반 DOM에 존재하는 평범한 요소. Shadow Tree를 품고 있는 겉모습 |
+| **Shadow Root** | `attachShadow()`로 생성되는 Shadow Tree의 시작점 |
+| **Shadow Boundary** | Shadow Root와 외부 DOM 사이의 경계. CSS 선택자가 이 선을 넘지 못함 |
+
+아파트 비유로 생각하면 이렇습니다. 단지 공용 방송(전역 CSS)은 모든 세대에 울려 퍼지지만, 각 세대의 내부 인테리어(Shadow Tree 안 스타일)는 서로 간섭하지 않습니다. Shadow Host가 현관문, Shadow Root가 세대 내부입니다.
+
+```mermaid
+---
+config:
+  theme: base
+  themeVariables:
+    primaryColor: "#fbfcfd"
+    primaryBorderColor: "#e6e8ea"
+    fontFamily: "Pretendard, sans-serif"
+    clusterBkg: "#fbfcfd"
+    clusterBorder: "#d6d7da"
+---
+flowchart TB
+  subgraph doc["일반 DOM (대상 사이트)"]
+    body["body"]
+    host["div#light-root\nShadow Host"]
+  end
+  body --> host
+
+  host -. "attachShadow()" .-> sr
+
+  subgraph shadow["Shadow Tree — 격리된 공간"]
+    sr["Shadow Root"]
+    container["div (container)"]
+    react["React 컴포넌트 트리"]
+  end
+  sr --> container --> react
+```
+
+일반 DOM 안의 요소는 대상 사이트 CSS에 영향을 받습니다. Shadow Root 아래의 요소는 받지 않습니다. 이 경계를 **Shadow Boundary**라고 부릅니다.
+
 ## 해결: Shadow DOM으로 스타일 격리
 
 Shadow DOM은 DOM의 캡슐화 단위입니다. 외부 CSS 선택자가 Shadow Root 안쪽 요소를 대상으로 삼는 것을 막습니다. 반대로 Shadow Root 안에 작성한 스타일은 바깥 DOM을 오염시키지 않습니다.
@@ -161,14 +207,18 @@ function TooltipLayer() {
 
 익스텐션 콘텐츠 스크립트에서는 `'open'`이 디버깅하기 편합니다. DevTools에서 Shadow Root 내부 요소를 선택하고 스타일을 검사할 수 있습니다. 보안상 중요한 UI라면 `'closed'`를 쓰지만, 콘텐츠 스크립트 수준에서 클로즈드 모드가 제공하는 보안 이점은 제한적입니다.
 
-## 정리
+## 회고
 
-| 문제 | 해결 |
-|------|------|
-| 대상 사이트 CSS 선택자가 컴포넌트를 덮어씀 | `attachShadow`로 Shadow Root 생성 후 그 안에 React 마운트 |
-| 상속 속성(`font-family`, `color` 등)이 전파됨 | `:host { all: initial; }` 리셋 |
-| Emotion 스타일이 Shadow Root 안에 적용 안 됨 | `createCache({ container: shadowRoot })`로 삽입 위치 변경 |
-| Shadow Boundary 이벤트 retargeting | 이벤트 리스너는 바깥(`document`), 렌더는 안(Shadow Root) 분리 |
-| 툴팁 위치 어긋남 | `getBoundingClientRect()`는 뷰포트 기준 → 툴팁에 `position: fixed` 필수 |
+처음에는 Shadow DOM 하나면 충분하다고 생각했습니다. `attachShadow`를 붙이면 CSS 문제가 깔끔하게 끝날 줄 알았습니다. 그런데 수정할 때마다 다음 레이어가 드러났습니다.
 
-크롬 익스텐션처럼 제어할 수 없는 환경의 페이지에 React를 주입해야 할 때, Shadow DOM은 스타일 충돌 문제를 근본적으로 해결하는 가장 가벼운 방법입니다. iframe은 완전한 문서 격리가 가능하지만 통신 비용이 크고 렌더링 비용도 높습니다.
+Shadow DOM으로 선택자 오염을 막았더니 상속 속성이 여전히 넘어왔습니다. `:host { all: initial }`로 초기화했더니 Emotion 스타일이 사라졌습니다. `createCache`로 삽입 위치를 바꿨더니 이번엔 이벤트 retargeting 문제가 생겼습니다.
+
+각 단계에서 "이제 됐다"고 느꼈다가 다음 문제를 만나는 패턴이 반복됐습니다. 돌아보면 당연한 구조였습니다. 격리가 필요한 레이어가 세 곳이었으니까요.
+
+- **DOM 구조** — `attachShadow`로 선택자 격리
+- **CSS 상속** — `:host { all: initial }`로 전파 차단
+- **CSS-in-JS 런타임** — `createCache`로 스타일 주입 위치 변경
+
+처음부터 이 세 레이어를 순서대로 풀어야 한다고 인식했다면 훨씬 빠르게 해결했을 것입니다. 하지만 그러려면 Shadow DOM이 "무엇을 막고 무엇을 막지 않는지"를 미리 알고 있어야 했습니다. 직접 부딪히기 전까지는 상속 속성이 Shadow Boundary를 넘는다는 사실도, Emotion이 `<head>`에 스타일을 심는다는 사실도 의식하지 않았습니다.
+
+이 경험 이후로 "격리"를 구현할 때 무엇을 격리하는지를 먼저 물어보게 됐습니다. 선택자인지, 상속인지, 런타임 동작인지. 한 단어로 부르는 격리가 실제로는 여러 레이어에 걸쳐 있을 때 빠진 레이어가 버그가 됩니다.
