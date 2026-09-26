@@ -1,0 +1,122 @@
+"use client";
+
+import { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Users } from "lucide-react";
+import ProjectModal from "@/components/home/ProjectModal";
+import { projects, type Project } from "@/data/projects";
+import { ease, fadeUp, staggerContainer } from "@/lib/motion";
+
+function getYouTubeThumbnail(src: string): string | null {
+  const id = src.match(/(?:youtu\.be\/|v=)([^&?/]+)/)?.[1];
+  return id ? `https://img.youtube.com/vi/${id}/maxresdefault.jpg` : null;
+}
+
+function getThumbnail(project: Project): string | null {
+  for (const m of project.media) {
+    if (m.type === "youtube") return getYouTubeThumbnail(m.src);
+    if (m.type === "image") return m.src;
+  }
+  return null;
+}
+
+function CardFace({ project }: { project: Project }) {
+  const thumb = getThumbnail(project);
+  return (
+    <div className="bg-white rounded-2xl border border-border overflow-hidden flex flex-col h-full">
+      <div className="aspect-video w-full bg-brand-50 overflow-hidden">
+        {thumb ? (
+          <img
+            src={thumb}
+            alt={project.title}
+            loading="lazy"
+            className="w-full h-full object-cover"
+            onError={(e) => {
+              const id = project.media[0].src.match(/(?:youtu\.be\/|v=)([^&?/]+)/)?.[1];
+              if (id)
+                (e.currentTarget as HTMLImageElement).src =
+                  `https://img.youtube.com/vi/${id}/hqdefault.jpg`;
+            }}
+          />
+        ) : (
+          <div className="w-full h-full bg-brand-50" />
+        )}
+      </div>
+      <div className="flex flex-col gap-3 p-6">
+        <div className="flex items-start justify-between gap-2">
+          <h3 className="font-bold text-lg">{project.title}</h3>
+          {project.team && (
+            <span className="shrink-0 flex items-center gap-1 text-xs text-text-subtle pt-0.5">
+              <Users className="w-3 h-3" />
+              {project.team.type === "solo" ? "개인" : `팀 ${project.team.size}인`}
+            </span>
+          )}
+        </div>
+        <p className="text-sm text-text-muted leading-relaxed line-clamp-2 break-keep whitespace-pre-line">
+          {project.description}
+        </p>
+        <div className="flex flex-wrap gap-2">
+          {project.tags.map((tag) => (
+            <span
+              key={tag}
+              className="px-2 py-1 rounded-md bg-brand-50 text-brand-blue text-xs font-medium"
+            >
+              {tag}
+            </span>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+
+export default function Projects() {
+  const [selected, setSelected] = useState<Project | null>(null);
+
+  return (
+    <>
+      <section id="projects" className="py-40 bg-white">
+        <div className="max-w-5xl mx-auto px-6">
+          <motion.h2
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+            variants={fadeUp}
+            className="text-3xl font-bold mb-12"
+          >
+            프로젝트
+          </motion.h2>
+
+          <motion.div
+            variants={staggerContainer}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: "-40px" }}
+            className="grid grid-cols-1 sm:grid-cols-2 gap-6"
+          >
+            {projects.map((project) => (
+              <motion.button
+                key={project.title}
+                variants={fadeUp}
+                whileHover={{ y: -4 }}
+                transition={{ duration: 0.2, ease }}
+                aria-label={`${project.title} 프로젝트 상세 보기`}
+                className="w-full text-left cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue focus-visible:ring-offset-2 rounded-2xl"
+                onClick={() => setSelected(project)}
+              >
+                <CardFace project={project} />
+              </motion.button>
+            ))}
+          </motion.div>
+        </div>
+      </section>
+
+      <AnimatePresence>
+        {selected && (
+          <ProjectModal key="modal" project={selected} onClose={() => setSelected(null)} />
+        )}
+      </AnimatePresence>
+    </>
+  );
+}

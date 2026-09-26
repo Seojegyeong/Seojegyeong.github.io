@@ -1,0 +1,145 @@
+@import "tailwindcss";
+@plugin "@tailwindcss/typography";
+@source "../components/originkit";
+@import "./originkit-section-theme.css";
+
+/* ============================================================
+   Design Tokens
+   ============================================================ */
+
+@theme {
+  /* Brand — 히어로 웨이브 팔레트 */
+  --color-brand-blue:    #002fff;   /* 딥 블루 · 배경·도트·페이드 */
+  --color-brand-cyan:    #00bcff;   /* 시안    · 웨이브 필드 배경 */
+  --color-brand-mid:     #0050ff;   /* 미드 블루 · 도트 최대 커버리지 */
+
+  /* Brand tints (white blend) */
+  --color-brand-50:  #eef2ff;
+  --color-brand-100: #e0eaff;
+  --color-brand-200: #c7d7fe;
+  --color-brand-300: #a5b4fc;
+  --color-brand-400: #6d7eff;
+  --color-brand-500: #002fff;   /* = brand-blue */
+  --color-brand-600: #0026cc;
+  --color-brand-700: #001d99;
+  --color-brand-800: #001366;
+  --color-brand-900: #000a33;
+
+  /* Neutral */
+  --color-surface:        #ffffff;
+  --color-surface-subtle: #f8faff;  /* 브랜드 컬러 극미량 */
+
+  /* Text — 라이트 모드 위계 */
+  --color-text-primary:   #0a0a14;   /* 제목·강조 — 블루 베이스 극미량 가미 */
+  --color-text-secondary: #374151;   /* 본문 */
+  --color-text-muted:     #6b7280;   /* 보조 설명·날짜 */
+  --color-text-subtle:    #9ca3af;   /* 플레이스홀더·비활성 */
+
+  /* Text — 브랜드 배경(파란 히어로) 위에 올라가는 텍스트 */
+  --color-text-on-brand:          #ffffff;              /* 메인 제목 */
+  --color-text-on-brand-secondary: rgba(255,255,255,0.75); /* 부제목·직함 */
+  --color-text-on-brand-muted:    rgba(255,255,255,0.50);  /* 캡션·메타 */
+
+  /* Border */
+  --color-border:         #e5e7eb;
+  --color-border-subtle:  #dde3f0;
+}
+
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+}
+
+html {
+  scroll-padding-top: 4rem;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+}
+
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-pretendard), "Pretendard", sans-serif;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* prose table */
+.not-prose table thead {
+  background-color: #f6f8fa;
+}
+.not-prose table thead th {
+  @apply px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider;
+  border-bottom: 1px solid #e5e7eb;
+}
+.not-prose table tbody tr + tr td {
+  border-top: 1px solid #f3f4f6;
+}
+.not-prose table tbody td {
+  @apply px-5 py-3 text-gray-700;
+}
+
+/* blog post fade-in */
+@keyframes blog-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.blog-article-fade {
+  animation: blog-fade-in 0.4s ease both;
+}
+
+/* prose section spacing */
+.prose h2 {
+  margin-top: 5rem;
+}
+
+/* inline code */
+.prose :not(pre) > code {
+  background-color: #f3f4f6;
+  border: 1px solid #e5e7eb;
+  border-radius: 4px;
+  padding: 0.1em 0.45em;
+  font-size: 0.875em;
+  font-weight: 500;
+  color: inherit;
+}
+.prose :not(pre) > code::before,
+.prose :not(pre) > code::after {
+  content: none;
+}
+
+/* rehype-pretty-code */
+.not-prose > pre {
+  @apply rounded-xl px-0 py-4 text-sm overflow-x-auto;
+  background-color: #f6f8fa;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.07), 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+[data-rehype-pretty-code-figure] pre {
+  @apply rounded-xl px-0 py-4 text-sm overflow-x-auto;
+  background-color: #f6f8fa;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.07), 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+[data-rehype-pretty-code-figure] code {
+  @apply grid;
+}
+[data-rehype-pretty-code-figure] [data-line] {
+  @apply px-5;
+}
+[data-rehype-pretty-code-figure] [data-highlighted-line] {
+  @apply bg-black/5;
+}
+[data-rehype-pretty-code-figure] [data-rehype-pretty-code-title] {
+  @apply text-xs text-gray-500 bg-[#eaeef2] rounded-t-xl px-4 py-2 border-b border-black/10 font-mono;
+}

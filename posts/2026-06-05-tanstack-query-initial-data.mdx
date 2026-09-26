@@ -1,0 +1,98 @@
+---
+title: "TanStack Query initialData로 목록-상세 전환 빈 화면 없애기"
+date: "2026-06-05"
+desc: "인테리어 레퍼런스 목록에서 상세 페이지로 이동할 때 스피너가 보이는 문제를 TanStack Query의 initialData로 해결한 과정을 정리했다."
+tags: ["TanStack Query", "React", "캐시"]
+---
+
+Roome 프로젝트에서 인테리어 레퍼런스 피드를 개발하면서 불필요한 로딩 스피너 문제를 마주쳤습니다.
+
+목록 카드에는 이미지, 제목, 가격이 이미 보입니다. 카드를 클릭하면 상세 페이지로 이동합니다. 그런데 상세 페이지가 열리는 순간 화면이 비어 버립니다. 사용자는 방금 카드에서 이미 그 정보를 봤는데, 다시 요청하는 동안 기다려야 합니다.
+
+## 문제: 두 번 보는 로딩
+
+```text
+FeedPage (목록)       → ShopDetailPage (상세)
+─────────────────────────────────────────────
+카드: 이미지·제목·가격  →  빈 화면 + 스피너 (풀 데이터 요청 중)
+```
+
+목록 API로 이미 이미지, 제목, 가격을 받았습니다. 상세 API는 거기에 설명, 브랜드, 구매처 링크, 연관 상품 등을 추가로 담습니다. 이 추가 정보는 필요하지만, 그것을 받아오는 동안 이미 알고 있는 기본 정보까지 숨길 이유는 없습니다.
+
+## 해결: 리스트 캐시를 initialData로 주입하기
+
+TanStack Query의 `initialData` 옵션을 사용하면 쿼리가 처음 실행될 때 즉시 채울 초기 데이터를 지정할 수 있습니다. 목록 캐시에서 해당 아이템을 찾아 넣으면, 상세 페이지가 열리는 순간 기본 정보가 이미 화면에 있습니다.
+
+```ts
+// src/hooks/useProductDetail.ts
+export function useProductDetail(productId: number | undefined) {
+  const queryClient = useQueryClient()
+
+  const getInitialData = (): ProductDetail | undefined => {
+    if (!productId) return undefined
+
+    // 필터 조합이 달라도 productKeys.lists() 접두사로 모든 목록 캐시를 순회
+    for (const [, data] of queryClient.getQueriesData<InfiniteData<ProductPage>>({
+      queryKey: productKeys.lists(),
+    })) {
+      for (const page of data?.pages ?? []) {
+        const found = page.content?.find((p) => p.productId === productId)
+        if (found) {
+          return {
+            productId: found.productId,
+            name: found.name,
+            price: found.price,
+            imageUrls: found.thumbnailUrl ? [found.thumbnailUrl] : [],
+            liked: found.liked ?? false,
+            scraped: found.scraped ?? false,
+            // 상세 전용 필드: 빈 기본값으로 채워두고 풀 패치 후 교체
+            description: '',
+            brand: '',
+            purchaseUrl: '',
+            relatedProducts: [],
+            relatedReferences: [],
+          } satisfies ProductDetail
+        }
+      }
+    }
+    return undefined
+  }
+
+  return useQuery({
+    queryKey: productKeys.detail(productId!),
+    queryFn: () => ProductApi.fetchProductDetail(productId!),
+    enabled: !!productId,
+    initialData: getInitialData,
+    initialDataUpdatedAt: 0,  // 항상 stale → 즉시 백그라운드 패치
+    select: (data) => data.data,
+  })
+}
+```
+
+두 가지 포인트가 있습니다.
+
+**`getQueriesData`로 모든 목록 캐시 순회**
+
+Shop 페이지에는 키워드, 무드, 용도, 정렬이 다양하게 조합됩니다. 필터 조합마다 별도 캐시 키가 있습니다. `productKeys.detail(id)` 하나만 조회하면 사용자가 어떤 필터로 보다가 넘어왔는지에 따라 캐시를 찾지 못할 수 있습니다. `productKeys.lists()` 접두사로 모든 목록 캐시를 한 번에 순회합니다.
+
+**`initialDataUpdatedAt: 0`이 필요한 이유**
+
+`initialData`가 있으면 TanStack Query는 기본적으로 그 데이터가 충분히 신선하다고 판단해 즉시 백그라운드 패치를 하지 않을 수 있습니다. `0`으로 설정하면 이 데이터의 "갱신 시각"을 epoch(오래전)으로 만들어 항상 stale 상태로 처리합니다. 화면을 즉시 그리면서 동시에 풀 데이터도 바로 요청합니다.
+
+## 결과
+
+```text
+FeedPage (목록)       → ShopDetailPage (상세)
+─────────────────────────────────────────────
+카드: 이미지·제목·가격  →  즉시: 이미지·제목·가격 표시
+                           동시에: 상세 API 백그라운드 요청
+                           완료 시: 설명·연관상품 채워짐
+```
+
+빈 화면이 사라졌습니다. 상세 전용 데이터(설명, 연관 상품)는 백그라운드에서 채워지고, 기본 정보는 전환 즉시 표시됩니다.
+
+## 배운 것
+
+TanStack Query 캐시는 "요청 결과를 저장하는 곳"이지만, 동시에 "앱 전체가 공유하는 데이터 저장소"이기도 합니다. `initialData`는 이미 있는 데이터를 다시 요청하지 않고 활용하는 방법입니다. 목록과 상세가 공유하는 필드가 있다면, 목록 캐시를 상세 페이지의 출발점으로 쓸 수 있습니다.
+
+`initialDataUpdatedAt: 0`이라는 작은 설정 하나가 "즉시 보여주면서 정확한 데이터도 요청한다"는 두 목표를 동시에 달성해줬습니다.

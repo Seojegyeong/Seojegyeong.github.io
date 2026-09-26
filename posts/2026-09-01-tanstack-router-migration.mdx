@@ -1,0 +1,474 @@
+---
+title: "TanStack Router 마이그레이션 — react-router-dom과의 차이 정리"
+date: "2026-09-01"
+desc: "MOA의 라우팅을 react-router-dom에서 TanStack Router로 옮기며 이해한 컴파일 타임 타입 안전성, beforeLoad·loader 실행 순서, routerContext 의존성 주입, queryOptions 조합 정리."
+tags: ["TanStack Router", "TypeScript", "React"]
+---
+
+진행 중인 프로젝트의 라우팅을 react-router-dom에서 TanStack Router로 옮겼습니다. 처음에는 설정할 것이 많아 보여서 망설였지만, 옮기고 나니 "왜 이렇게 설계했는지"가 하나씩 보이기 시작했습니다.
+
+이 글은 마이그레이션하면서 이해한 개념을 순서대로 정리한 것입니다. 단순히 API를 나열하기보다, 각 기능이 **어떤 문제를 해결하려고 존재하는지**에 초점을 맞췄습니다.
+
+## 왜 TanStack Router로 바꿨나
+
+### 컴파일 타임 타입 안전성
+
+react-router-dom에서 경로는 그냥 문자열입니다. `navigate`나 `<Link>`에 넘기는 경로에 오타가 있어도 TypeScript는 아무 말도 하지 않습니다. 문제는 실제로 그 링크를 눌러 404 화면을 볼 때가 되어서야 발견됩니다.
+
+URL 파라미터도 마찬가지입니다. `useParams()`는 현재 라우트에 어떤 파라미터가 있는지 모르기 때문에, 모든 값을 `string | undefined`로 돌려줍니다. 그래서 값이 분명히 있는 상황에서도 매번 `undefined` 처리를 해줘야 합니다.
+
+```ts
+// react-router-dom — 오타여도 TS 에러 없음, 런타임에서 404
+navigate('/cads')
+<Link to="/settigns" />
+
+// 어떤 파라미터가 있는지 타입 정보 없음
+const { id } = useParams()  // id: string | undefined
+```
+
+TanStack Router는 라우트를 정의할 때 적은 정보(경로, 파라미터, search params 스키마)를 TypeScript 타입으로 끌어올립니다. 그 결과 **등록되지 않은 경로는 에디터에서 빨간 줄로 막히고**, 파라미터와 search params도 정확한 타입으로 추론됩니다.
+
+```ts
+// 경로 오타 → 컴파일 타임 TS 에러
+navigate({ to: "/cads" }); // ❌ '/cads'는 등록된 경로가 아님
+
+// 동적 파라미터 타입 자동 추론
+const { cardId } = Route.useParams(); // cardId: string
+
+// search params도 스키마 기반으로 타입 추론
+const { page, filter } = Route.useSearch();
+```
+
+런타임에 발견되던 실수를 코드를 쓰는 시점으로 앞당긴다는 것, 이것이 가장 큰 이유였습니다.
+
+### CSR에 맞는 단순한 구조
+
+TanStack Router는 CSR 환경에서도 **"페이지에 들어가기 전에 무엇을 먼저 할지"** 를 라우트 단위로 선언할 수 있습니다.
+
+이때 쓰는 것이 `beforeLoad`와 `loader`입니다.
+
+- `beforeLoad`: 라우트에 진입하기 전 가장 먼저 실행됩니다. 인증 확인처럼 "들어가도 되는지"를 판단하는 곳입니다
+- `loader`: `beforeLoad`를 통과한 뒤 실행됩니다. 페이지에 필요한 데이터를 미리 불러오는 곳입니다
+
+```ts
+const protectedRoute = createRoute({
+  beforeLoad: () => {
+    if (!isAuthenticated) throw redirect({ to: "/login" });
+  },
+  loader: ({ context: { queryClient } }) => {
+    return queryClient.ensureQueryData(cardsQueryOptions);
+  },
+});
+```
+
+실행 순서가 항상 `beforeLoad → loader → component`로 고정되어 있습니다. 인증 체크와 데이터 로딩이 컴포넌트 내부 `useEffect`에 흩어지지 않고, 라우트 정의 한 곳에 순서대로 모입니다.
+
+### SSR로의 확장성
+
+TanStack Router는 처음부터 SSR을 고려해 설계되었고, 같은 팀이 이 라우터를 기반으로 한 풀스택 프레임워크인 **TanStack Start**를 만들고 있습니다. 지금은 CSR로 충분하지만, 나중에 SSR이 필요해지면 라우트 정의를 크게 바꾸지 않고 옮겨갈 수 있다는 점도 선택 이유였습니다.
+
+---
+
+## 기본 구조 — 배열에서 트리로
+
+react-router-dom은 라우트를 **객체 배열**로 정의합니다.
+
+```ts
+// react-router-dom
+createBrowserRouter([
+  { path: '/login', element: <LoginPage /> },
+  {
+    element: <AppLayout />,
+    children: [
+      { path: '/', element: <HomePage /> },
+    ],
+  },
+])
+```
+
+TanStack Router는 라우트 하나하나를 `createRoute`로 따로 만들고, 이를 **트리로 조립**합니다.
+
+```ts
+// TanStack Router
+const rootRoute = createRootRoute({ component: Outlet });
+
+const appLayoutRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  id: "app",
+  component: AppLayout,
+});
+
+const homeRoute = createRoute({
+  getParentRoute: () => appLayoutRoute,
+  path: "/",
+  component: HomePage,
+});
+
+const routeTree = rootRoute.addChildren([
+  appLayoutRoute.addChildren([homeRoute]),
+]);
+
+const router = createRouter({ routeTree });
+```
+
+- `createRootRoute`: 트리의 최상단. 모든 라우트는 이 루트 아래에 붙습니다
+- `getParentRoute`: 이 라우트의 부모가 누구인지 알려줍니다. 함수 형태인 이유는 선언 순서 문제를 피하기 위해서입니다
+- `id`: `path` 없이 레이아웃만 담당하는 라우트에 붙이는 식별자. URL에는 영향을 주지 않습니다
+- `addChildren`: 부모에 자식 라우트를 연결해 트리를 완성합니다
+
+설정이 길어 보이지만 이유가 있습니다. **부모-자식 관계가 코드에 명시되어 있어야 부모의 타입 정보(파라미터, 컨텍스트 등)가 자식으로 전파됩니다.** 이 구조가 이후에 나오는 모든 타입 추론의 기반입니다.
+
+---
+
+## 타입 등록 — declare module
+
+라우터를 만들었다고 해서 바로 타입 추론이 되는 것은 아닙니다. `Link`나 `useNavigate`는 라이브러리에서 import하는 범용 함수라서, **내 프로젝트에 어떤 라우터가 있는지** 따로 알려줘야 합니다.
+
+```ts
+export const router = createRouter({ routeTree });
+
+declare module "@tanstack/react-router" {
+  interface Register {
+    router: typeof router;
+  }
+}
+```
+
+`declare module`은 라이브러리의 타입 선언을 확장하는 TypeScript 문법입니다. 라이브러리가 비워둔 `Register` 인터페이스에 내 라우터의 타입을 채워 넣는 것입니다.
+
+이 등록이 없으면 `to` 프롭은 그냥 `string`으로 추론되어 react-router-dom과 다를 바가 없습니다. 등록하고 나면 프로젝트 전체의 `Link`, `navigate`가 등록된 경로만 허용하고 자동완성도 제공합니다.
+
+---
+
+## 동적 파라미터 — `$` prefix
+
+URL 중 바뀌는 부분은 경로에서 `$`로 시작하는 세그먼트로 선언합니다. react-router-dom의 `:paramName`에 해당합니다.
+
+```ts
+const postRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/posts/$postId",
+  component: PostComponent,
+});
+```
+
+컴포넌트에서는 해당 라우트 객체의 `useParams()`로 꺼냅니다.
+
+```tsx
+function PostComponent() {
+  const { postId } = Route.useParams(); // postId: string
+  return <div>Post ID: {postId}</div>;
+}
+```
+
+경로에 `$postId`가 선언되어 있으므로, 이 라우트에 도달했다면 `postId`는 반드시 존재합니다. 그래서 `string | undefined`가 아니라 `string`으로 좁혀집니다. `loader`에서도 같은 파라미터를 받을 수 있습니다.
+
+```ts
+const postRoute = createRoute({
+  path: "/posts/$postId",
+  loader: ({ params }) => fetchPost(params.postId), // params.postId: string
+  component: PostComponent,
+});
+```
+
+### 복수 파라미터와 Splat
+
+```ts
+// 복수 파라미터
+path: "/posts/$postId/$revisionId";
+// → { postId: string, revisionId: string }
+
+// Splat (catch-all) — $ 단독 사용
+path: "/files/$";
+// /files/documents/hello-world → { _splat: 'documents/hello-world' }
+```
+
+### 링크에서 파라미터 넘기기
+
+파라미터가 있는 경로로 이동할 때는 경로 템플릿과 파라미터 값을 분리해서 넘깁니다.
+
+```tsx
+<Link to="/posts/$postId" params={{ postId: post.id }} />;
+navigate({ to: "/posts/$postId", params: { postId: post.id } });
+```
+
+TypeScript가 "이 경로에는 `postId`가 필요하다"는 것을 알고, 빠뜨리면 에러를 냅니다.
+
+## Search Params — URL에 담긴 상태
+
+search params는 URL의 `?` 뒤에 붙는 값입니다. TanStack Router는 search params를 "URL에 저장되는 `useState`"처럼 다룹니다. 유효성 검사를 거쳐 들어오며, 숫자나 배열 같은 값도 JSON 형태로 직렬화됩니다.
+
+### validateSearch — 스키마 선언
+
+```ts
+import { z } from "zod";
+
+const cardsRoute = createRoute({
+  getParentRoute: () => appLayoutRoute,
+  path: "/cards",
+  validateSearch: (search) =>
+    z
+      .object({
+        page: z.number().optional().default(1),
+        filter: z.string().optional(),
+      })
+      .parse(search),
+  component: CardsPage,
+});
+```
+
+zod를 쓰면 스키마 선언과 타입 추론이 한 번에 해결됩니다. `default(1)`을 지정해두면 URL에 `page`가 없을 때도 컴포넌트는 항상 숫자를 받습니다.
+
+### useSearch와 navigate
+
+```tsx
+function CardsPage() {
+  const { page, filter } = Route.useSearch();
+  // page: number, filter: string | undefined
+}
+```
+
+```ts
+navigate({
+  to: "/cards",
+  search: (prev) => ({ ...prev, page: prev.page + 1 }),
+});
+```
+
+`search`에 함수를 넘기면 이전 값(`prev`)을 받아 새 값을 만들 수 있습니다. `setState`의 함수형 업데이트와 같은 방식입니다.
+
+react-router-dom의 `useSearchParams`는 모든 값을 문자열로 돌려줍니다. TanStack Router는 파싱과 검증의 책임을 컴포넌트에서 라우트 정의로 옮깁니다.
+
+## navigate — 객체 기반 API
+
+react-router-dom에서 가장 많이 바뀌는 부분입니다. 문자열 대신 **옵션 객체**를 넘깁니다.
+
+```ts
+// react-router-dom
+navigate("/cards");
+navigate("/cards", { replace: true });
+navigate(-1);
+
+// TanStack Router
+navigate({ to: "/cards" });
+navigate({ to: "/cards", replace: true });
+router.history.back(); // 뒤로가기
+```
+
+`navigate(-1)`처럼 숫자로 히스토리를 이동하는 기능은 `navigate`에 없습니다. 뒤로가기는 라우터 인스턴스의 `history`를 직접 사용합니다.
+
+```ts
+import { useRouter } from "@tanstack/react-router";
+
+const router = useRouter();
+router.history.back();
+```
+
+`navigate`는 "어느 경로로 갈지"를, `history`는 "브라우저 기록을 어떻게 움직일지"를 담당하도록 역할이 나뉘어 있습니다.
+
+## 인증 처리 — 컴포넌트 가드에서 라우트 가드로
+
+react-router-dom에서는 보통 가드 컴포넌트 안에서 `<Navigate>`를 렌더링해 로그인 페이지로 보냈습니다.
+
+```tsx
+// react-router-dom
+if (!accessToken) return <Navigate to="/login" replace />;
+```
+
+TanStack Router에도 `<Navigate>` 컴포넌트가 있어서, import 경로만 바꾸면 같은 방식을 그대로 쓸 수 있습니다. 하지만 TanStack Router가 권장하는 방식은 인증 확인을 컴포넌트 밖, 라우트의 `beforeLoad`로 옮기는 것입니다.
+
+```ts
+const protectedRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  id: "protected",
+  beforeLoad: () => {
+    const { accessToken } = useAuthStore.getState();
+    if (!accessToken) {
+      throw redirect({ to: "/login" });
+    }
+  },
+});
+```
+
+`redirect()`를 `throw`하면 라우터가 이를 받아 즉시 이동시킵니다. 보호된 페이지의 컴포넌트는 아예 렌더링되지 않고, `loader`도 실행되지 않습니다. 보호가 필요한 라우트들을 `protectedRoute` 아래 자식으로 두면, 한 곳에서 전부 막을 수 있습니다.
+
+<Callout type="warning">
+  `beforeLoad`는 React 컴포넌트가 아니므로 훅(`useAuthStore()`)을 쓸 수
+  없습니다. 스토어의 `getState()`처럼 훅이 아닌 방법으로 상태를 읽어야 합니다.
+  또한 앱 시작 시 토큰 재발급이 비동기로 진행된다면, 재발급이 끝나기 전에
+  `beforeLoad`가 실행되어 로그인 페이지로 튕길 수 있습니다. 이 경우
+  `beforeLoad`를 `async`로 만들어 재발급을 기다리거나, 재발급이 끝난 뒤 라우터를
+  렌더링하도록 순서를 잡아야 합니다.
+</Callout>
+
+## routerContext — queryClient 주입
+
+TanStack Router와 TanStack Query를 함께 쓸 때 가장 유용한 기능입니다.
+
+`loader`에서 `queryClient`를 직접 import하면 라우터가 특정 인스턴스에 고정됩니다. 테스트에서 다른 인스턴스로 바꾸기 어렵고, 파일 간 의존 관계도 얽힙니다. `routerContext`는 이 문제를 **의존성 주입**으로 풉니다.
+
+**1단계: QueryClient 인스턴스를 별도 파일로 분리합니다**
+
+```ts
+// src/lib/query-client.ts
+import { QueryClient } from "@tanstack/react-query";
+export const queryClient = new QueryClient();
+```
+
+`main.tsx`의 `QueryClientProvider`와 라우터는 **반드시 같은 인스턴스**를 써야 합니다. 인스턴스가 다르면 캐시도 따로 존재해서, `loader`가 불러온 데이터를 컴포넌트가 보지 못합니다.
+
+**2단계: 루트 라우트를 `createRootRouteWithContext`로 만듭니다**
+
+```ts
+interface RouterContext {
+  queryClient: QueryClient;
+}
+
+const rootRoute = createRootRouteWithContext<RouterContext>()({
+  component: Outlet,
+});
+```
+
+**3단계: 라우터를 만들 때 실제 값을 넣습니다**
+
+```ts
+export const router = createRouter({
+  routeTree,
+  context: { queryClient },
+});
+```
+
+**4단계: loader에서 context로 꺼내 씁니다**
+
+```ts
+const cardsRoute = createRoute({
+  getParentRoute: () => appLayoutRoute,
+  path: "/cards",
+  loader: ({ context: { queryClient } }) =>
+    queryClient.ensureQueryData(cardsQueryOptions),
+  component: CardsPage,
+});
+```
+
+컨텍스트는 루트에서 한 번만 정의하면 **모든 하위 라우트에 자동으로 전달**됩니다.
+
+---
+
+## loader + ensureQueryData — 프리페칭
+
+`loader`는 라우트로 이동할 때 **컴포넌트가 마운트되기 전에** 실행됩니다. 여기서 데이터를 불러와 캐시에 넣어두면, 컴포넌트가 처음 렌더링될 때 이미 데이터가 준비되어 있습니다.
+
+```ts
+loader: ({ context: { queryClient } }) =>
+  queryClient.ensureQueryData(cardsQueryOptions);
+```
+
+`ensureQueryData`의 동작은 "데이터가 있음을 보장한다"는 것입니다.
+
+- 캐시에 데이터가 있으면 요청을 보내지 않고 캐시 값을 반환합니다
+- 캐시에 데이터가 없으면 요청을 보내고, 받은 데이터를 캐시에 저장한 뒤 반환합니다
+
+`prefetchQuery`는 캐시를 채우기만 하고 아무것도 반환하지 않습니다. `ensureQueryData`는 데이터를 반환하므로 `loader`의 반환값으로도 활용할 수 있습니다.
+
+<Callout type="info">
+  TanStack Query와 함께 쓸 때는 라우터 생성 옵션에 `defaultPreloadStaleTime:
+  0`을 주는 것이 공식 권장 사항입니다. 데이터가 신선한지 여부는 TanStack Query의
+  `staleTime`만 보고 결정하게 하기 위해서입니다.
+</Callout>
+
+## queryOptions — 쿼리 정의를 한 곳에
+
+`loader`와 `useQuery`가 같은 데이터를 쓰려면 `queryKey`가 완전히 같아야 합니다. 양쪽에 따로 적으면 같은 내용을 두 번 쓰게 되고, 한쪽만 수정하면 캐시가 공유되지 않습니다.
+
+```ts
+// ❌ 이중 정의 — 어긋나면 캐시 공유 안 됨
+useQuery({
+  queryKey: ["cards", "list"],
+  queryFn: () => apiClient.get("/cards").then((r) => r.data),
+});
+
+queryClient.ensureQueryData({
+  queryKey: ["cards", "list"],
+  queryFn: () => apiClient.get("/cards").then((r) => r.data),
+});
+```
+
+`queryOptions`로 한 번만 정의하고 양쪽에서 가져다 씁니다.
+
+```ts
+// src/queries/cards.ts
+export const cardsQueryOptions = queryOptions({
+  queryKey: QUERY_KEYS.cards.list(),
+  queryFn: () => apiClient.get<CreditCard[]>("/cards").then((r) => r.data),
+});
+```
+
+```ts
+// useCards.ts
+export function useCards() {
+  return useQuery(cardsQueryOptions);
+}
+
+// router.tsx — 같은 객체 → 캐시 공유 보장
+loader: ({ context: { queryClient } }) =>
+  queryClient.ensureQueryData(cardsQueryOptions);
+```
+
+정의가 한 곳뿐이니 어긋날 수가 없습니다. `queryOptions`로 만든 객체는 `queryFn`의 반환 타입을 기억하기 때문에, `useQuery`와 `ensureQueryData` 양쪽 모두 데이터 타입이 자동으로 추론됩니다.
+
+## 내장 캐시 vs TanStack Query
+
+TanStack Router에도 자체 데이터 캐시가 있습니다. `loader`의 결과를 저장해두고, 일정 시간 동안은 다시 요청하지 않는 방식(SWR)입니다.
+
+|               | 라우터 내장 캐시      | TanStack Query                    |
+| ------------- | --------------------- | --------------------------------- |
+| 설치          | 별도 패키지 없음      | `@tanstack/react-query` 필요      |
+| 캐시 전략     | loader 기반 SWR       | `staleTime` / `gcTime` 세밀 제어  |
+| 무효화        | `router.invalidate()` | `queryClient.invalidateQueries()` |
+| 전용 devtools | 없음                  | React Query Devtools              |
+| 적합한 경우   | 단순한 데이터 로딩    | 복잡한 캐시 전략, 낙관적 업데이트 |
+
+이 프로젝트는 이미 TanStack Query를 쓰고 있었기 때문에, 내장 캐시 대신 TanStack Query를 routerContext로 연결했습니다. `loader`와 컴포넌트가 같은 `queryClient` 캐시를 보므로, 프리페칭한 데이터를 `useQuery`가 그대로 이어받습니다.
+
+## 파일 구조
+
+```
+src/
+  router.tsx            # 라우트 트리 + createRouter + declare module
+  App.tsx               # RouterProvider + 토큰 재발급
+  lib/
+    query-client.ts     # QueryClient 인스턴스 (router·main 공유)
+  queries/
+    cards.ts            # cardsQueryOptions
+    transactions.ts
+    analytics.ts
+  hooks/
+    useCards.ts         # useQuery(cardsQueryOptions)
+    useTransactions.ts
+    useAnalytics.ts
+```
+
+쿼리 정의를 훅과 분리해 `queries/` 폴더에 둔 이유는, 훅은 컴포넌트 안에서만 쓸 수 있지만 `queryOptions` 객체는 `loader`처럼 컴포넌트 밖에서도 써야 하기 때문입니다.
+
+## react-router-dom과 달라진 점 한눈에 보기
+
+| 항목            | react-router-dom                    | TanStack Router                                |
+| --------------- | ----------------------------------- | ---------------------------------------------- |
+| 라우트 정의     | 배열 (`createBrowserRouter`)        | 트리 (`createRoute` + `addChildren`)           |
+| 경로 타입       | `string`                            | 등록된 경로만 허용 (컴파일 타임 검증)          |
+| 동적 파라미터   | `:paramName`, `string \| undefined` | `$paramName`, `string`으로 추론                |
+| 파라미터 전달   | 경로 문자열에 직접 삽입             | `to` 템플릿 + `params` 객체                    |
+| search params   | `useSearchParams()` + 수동 파싱     | `validateSearch` + `Route.useSearch()`         |
+| `navigate`      | `navigate('/path')`                 | `navigate({ to: '/path' })`                    |
+| 뒤로가기        | `navigate(-1)`                      | `router.history.back()`                        |
+| 인증 리다이렉트 | `<Navigate>` 컴포넌트               | `beforeLoad` + `redirect()` (권장)             |
+| 데이터 프리페칭 | loader (v6.4+)                      | loader + `context.queryClient.ensureQueryData` |
+| context 주입    | 없음                                | `createRootRouteWithContext` + 하위 자동 상속  |
+
+## 마치며
+
+처음에는 `createBrowserRouter`보다 설정할 것이 많아 번거롭게 느껴졌습니다. 하지만 그 설정 하나하나가 결국 **타입 정보를 라우터에 알려주는 과정**이었습니다. 한 번 세팅하고 나니 경로 오타, 빠진 파라미터, 잘못된 search params를 코드를 쓰는 순간 잡아줍니다.
+
+TanStack Query와 함께 쓸 때는 `routerContext`와 `queryOptions` 조합이 특히 좋았습니다. 라우트 `loader`와 컴포넌트가 같은 쿼리 정의를 공유하니 캐시 불일치 문제를 구조적으로 막을 수 있습니다.
+
+인증 처리는 아직 컴포넌트 안의 `useEffect` 방식으로 남아 있습니다. 다음 단계로 `beforeLoad` + `redirect()` 패턴으로 옮겨, 인증 확인을 라우트 정의 쪽으로 모을 예정입니다.

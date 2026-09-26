@@ -71,21 +71,32 @@ export const projects: Project[] = [
     ],
     relatedPosts: [
       {
-        title:
-          "[Vite] IP로 접속하면 로그인이 자꾸 풀리는 이유 (feat. Secure 쿠키)",
-        url: "https://seojegyeong.tistory.com/8",
+        title: "IP로 접속하면 로그인이 자꾸 풀리는 이유 (feat. Secure 쿠키)",
+        url: "/blog/2026-08-10-vite-host-secure-cookie",
       },
       {
-        title: "[TypeScript] 대시보드 지표 포맷팅, 하나로 흐르게 만들기",
-        url: "https://seojegyeong.tistory.com/7",
+        title: "대시보드 지표 포맷팅, 하나로 흐르게 만들기",
+        url: "/blog/2026-06-23-typescript-metric-formatting",
       },
       {
-        title: "[TanStack Query] queryKey 하나로 캐시 이해하기",
-        url: "https://seojegyeong.tistory.com/6",
+        title: "queryKey 하나로 캐시 이해하기",
+        url: "/blog/2026-06-18-tanstack-query-cache",
       },
       {
-        title: "[Playwright] Cursor와 Playwright로 테스트 자동화 하기",
-        url: "https://seojegyeong.tistory.com/5",
+        title: "병렬 401을 단 1번의 재발급으로 처리하는 큐 패턴",
+        url: "/blog/2026-09-22-axios-401-refresh-queue",
+      },
+      {
+        title: "SSE 401 재발급을 1번으로 보장하는 싱글턴 패턴",
+        url: "/blog/2026-10-13-sse-401-refresh-singleton",
+      },
+      {
+        title: "React.lazy와 loadable 헬퍼로 초기 번들 78% 줄이기",
+        url: "/blog/2026-09-29-react-lazy-code-splitting",
+      },
+      {
+        title: "Cursor와 Playwright로 테스트 자동화하기",
+        url: "/blog/2026-05-18-playwright-cursor-e2e",
       },
     ],
   },
@@ -129,6 +140,12 @@ export const projects: Project[] = [
           "routes 대신 rewrites 사용 — URL 유지하면서 index.html 서빙해 React Router 정상 동작",
       },
     ],
+    relatedPosts: [
+      {
+        title: "TanStack Query initialData로 목록-상세 전환 빈 화면 없애기",
+        url: "/blog/2026-06-05-tanstack-query-initial-data",
+      },
+    ],
   },
   {
     title: "Light",
@@ -168,8 +185,12 @@ export const projects: Project[] = [
     ],
     relatedPosts: [
       {
-        title: "[JS] 크롬 확장 프로그램에서 이벤트를 다루는 방법",
-        url: "https://seojegyeong.tistory.com/9",
+        title: "크롬 확장 프로그램에서 이벤트를 다루는 방법",
+        url: "/blog/2026-08-13-event-delegation",
+      },
+      {
+        title: "Shadow DOM과 Emotion으로 크롬 확장 스타일 격리하기",
+        url: "/blog/2026-10-06-shadow-dom-react-emotion",
       },
     ],
   },
@@ -206,6 +227,12 @@ export const projects: Project[] = [
           "FAQ 검색·목록 모드 전환 시 조건부 훅 호출 구조로는 Rules of Hooks 위반 발생",
         solution:
           "두 훅을 항상 호출하되 enabled 플래그로 실제 요청 제어, keepPreviousData로 전환 중 이전 데이터 유지해 깜빡임 방지",
+      },
+    ],
+    relatedPosts: [
+      {
+        title: "TanStack Query Optimistic Update로 토글 버튼 즉시 반응하게 만들기",
+        url: "/blog/2026-04-20-tanstack-query-optimistic-update",
       },
     ],
   },

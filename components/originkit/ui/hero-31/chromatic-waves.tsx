@@ -288,6 +288,7 @@ interface DottedBg2Props {
   gamma?: number;
   paletteBias?: number;
   style?: CSSProperties;
+  play?: boolean;
 }
 
 export default function DottedBg2({
@@ -299,6 +300,7 @@ export default function DottedBg2({
   gamma = 6,
   paletteBias = -3,
   style,
+  play = true,
 }: DottedBg2Props) {
   const paletteColors =
     Array.isArray(colors) && colors.length > 0 ? colors : DEFAULT_COLORS;
@@ -309,7 +311,7 @@ export default function DottedBg2({
   const palette = buildPaletteUniforms(paletteColors);
   const paletteKey = paletteColors.slice(0, MAX_COLORS).join("|");
 
-  const effectivePlay = true;
+  const effectivePlay = play;
 
   const containerRef = useRef<HTMLDivElement>(null);
   const perlinProgramRef = useRef<any>(null);

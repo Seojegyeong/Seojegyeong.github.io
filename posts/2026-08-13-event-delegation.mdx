@@ -1,0 +1,142 @@
+---
+title: "크롬 확장 프로그램에서 이벤트를 다루는 방법"
+date: "2026-08-13"
+desc: "span마다 리스너를 개별 부착하는 방식의 한계를 발견하고, 이벤트 위임으로 타사 페이지 성능 부담을 최소화한 설계 과정 회고."
+tags: ["JavaScript", "DOM", "이벤트위임"]
+---
+
+Light는 경제 뉴스 속 금융 용어를 자동 감지해 툴팁으로 보여주는 Chrome 확장 프로그램입니다. content script가 실행되면 `TreeWalker`로 기사 텍스트를 순회하며 금융 용어를 찾고, 해당 부분을 `<span data-light>` 태그로 감쌉니다.
+
+이벤트 처리 방식을 설계할 때 세 가지 제약이 동시에 걸렸습니다.
+
+## content script 환경의 세 가지 제약
+
+### (1) span이 페이지 로드 시점에 존재하지 않는다
+
+스크립트가 실시간으로 텍스트를 훑으며 금융 용어를 찾아 span으로 감쌉니다. 페이지 로드 시점에 `querySelectorAll('[data-light]')`를 실행하면 아무것도 나오지 않습니다. span이 만들어지는 시점에 맞춰 리스너를 달려고 하면 span 개수만큼 리스너가 생깁니다. 기사 한 편에 금융 용어가 수십 개라면 리스너도 수십 개가 타사 페이지에 심어집니다.
+
+### (2) 공통 부모 컨테이너가 없다
+
+내가 만든 페이지였다면 `<div id="app">` 같은 루트 요소 하나에 리스너를 달면 됩니다. 하지만 Light는 기사 본문, 사이드바의 관련 기사 링크 등 페이지 어디서든 금융 용어가 나올 수 있어서, 이 모든 span을 아우르는 단일 컨테이너가 존재하지 않습니다. 리스너를 달 수 있는 공통 지점은 `document` 뿐입니다.
+
+### (3) 타사 페이지의 성능에도 영향을 준다
+
+네이버 뉴스가 내부적으로 어떤 리스너를 얼마나 달아두었는지 알 수 없습니다. 내가 추가로 심는 리스너는 최소한이어야 합니다. span마다 리스너를 달면 그 수만큼 이벤트 처리 부담이 늘어납니다.
+
+## 해결: document 레벨 이벤트 위임
+
+세 제약을 동시에 해결하는 방법은 리스너를 `document`에 딱 두 개만 다는 것입니다.
+
+```text
+span N개 × 리스너 2개 = N×2개의 리스너  (사용하지 않음)
+document × 리스너 2개 = 2개의 리스너    (사용함)
+```
+
+이것이 가능한 이유는 이벤트 버블링 때문입니다. 이벤트가 발생하면 브라우저는 발생 요소(target)에서 `document` 방향으로 이벤트를 전파(버블링)시킵니다. `<span data-light>`에서 발생한 `mouseover`는 결국 `document`까지 도달합니다.
+
+```js
+document.addEventListener('mouseover', (e) => {
+  const span = e.target.closest('[data-light]')
+  if (!span) return // 내가 만든 span이 아니면 무시
+
+  showTooltip(span)
+})
+
+document.addEventListener('mouseout', () => {
+  hideTooltip()
+})
+```
+
+span이 나중에 새로 생겨도 문제가 없습니다. 리스너가 개별 span이 아니라 `document`에 있기 때문에, 새로 추가된 span에서 발생한 이벤트도 버블링을 통해 그대로 잡힙니다. 리스너 개수는 span이 몇 개든 항상 2개로 고정됩니다.
+
+## 이벤트 대상을 정확히 특정하기 — `closest()`
+
+이벤트가 실제 발생한 요소는 `e.target`입니다. 그런데 `<span data-light>` 안에 자식 요소(예: `<strong>`)가 있을 때, 그 자식에 마우스를 올리면 `e.target`이 `strong`이 됩니다.
+
+```js
+document.addEventListener('mouseover', (e) => {
+  if (e.target.matches('[data-light]')) {
+    // 자식 요소가 이벤트 타깃이면 이 조건은 통과하지 못한다
+  }
+})
+```
+
+`closest(selector)`가 이 문제를 해결합니다. 이벤트가 발생한 요소 자신부터 시작해 부모 방향으로 올라가며, 조건에 맞는 첫 번째 요소를 반환합니다.
+
+```js
+document.addEventListener('mouseover', (e) => {
+  const span = e.target.closest('[data-light]')
+  if (!span) return
+
+  showTooltip(span) // 자식 요소를 호버해도 부모 span을 찾아 처리
+})
+```
+
+## 빠른 마우스 이동 — 디바운싱
+
+`document`에 위임을 적용하고 나니 새로운 문제가 생겼습니다. 기사를 가로질러 이동할 때마다 `mouseover`가 연속으로 발생하는 것입니다. 여러 span을 스치며 지나가면 툴팁이 깜빡이고, 불필요한 API 요청이 발생합니다.
+
+150ms 디바운싱으로 해결했습니다.
+
+```js
+let timer = null
+
+document.addEventListener('mouseover', (e) => {
+  const span = e.target.closest('[data-light]')
+  if (!span) return
+
+  clearTimeout(timer)
+  timer = setTimeout(() => {
+    showTooltip(span)
+  }, 150)
+})
+
+document.addEventListener('mouseout', (e) => {
+  const span = e.target.closest('[data-light]')
+  if (!span) return
+
+  clearTimeout(timer)
+  hideTooltip()
+})
+```
+
+150ms는 여러 번 테스트하면서 정한 값입니다. 너무 짧으면 스쳐 지나가는 마우스에도 반응하고, 너무 길면 툴팁이 느리게 뜬다고 느껴집니다.
+
+## mouseover를 선택한 이유
+
+처음에는 `mouseenter`/`mouseleave`를 고려했습니다. 이 이벤트는 요소 안으로 진입·이탈할 때 정확히 한 번씩 발생해서 `mouseover`의 연속 발화 문제가 없습니다.
+
+그런데 `mouseenter`와 `mouseleave`는 버블링하지 않습니다. 이벤트가 발생한 요소 자체에서만 처리되고 부모 방향으로 전파되지 않습니다. `document` 위임의 핵심은 버블링인데, 버블링이 없으면 위임이 불가능합니다.
+
+Light는 공통 부모 컨테이너 없이 `document`에서 위임해야 하므로 버블링하는 `mouseover`/`mouseout`을 선택했습니다. 디바운싱은 그로 인한 연속 발화 문제를 별도로 해결합니다.
+
+## 툴팁 렌더링은 Shadow DOM 안에서 일어납니다
+
+이벤트는 일반 DOM에서 잡지만, 툴팁 UI는 Shadow DOM 안에서 렌더링됩니다.
+
+네이버 뉴스 같은 미디어 사이트는 전역 CSS가 복잡합니다. Light의 툴팁 스타일이 그 CSS에 영향을 받아 깨지거나, 반대로 Light가 넣은 CSS가 뉴스 페이지의 레이아웃을 건드릴 위험이 있습니다. Shadow DOM은 외부 선택자의 영향을 막기 때문에 이를 방지하기 위해 사용합니다.
+
+```text
+[일반 DOM]
+  ├── <span data-light>금융 용어</span>  ← 이벤트 발생
+  └── <div id="light-extension-root">
+       └── #shadow-root
+            └── <TooltipLayer />  ← 여기서 렌더링
+
+document 리스너 → span mouseover 감지 → Shadow Root 안 React 상태 업데이트 → 툴팁 표시
+```
+
+## 정리
+
+| 제약 | 해결 |
+| --- | --- |
+| span이 동적으로 생성된다 | 생성 시점 리스너를 달지 않고 `document` 위임 |
+| 공통 부모 컨테이너가 없다 | `document` 레벨에서 위임 |
+| 타사 페이지 성능 영향 최소화 | 리스너를 2개로 고정 |
+| 마우스가 빠르게 지나갈 때 | 150ms 디바운싱 |
+| `mouseenter` 대신 `mouseover` 선택 | `document` 위임에는 버블링하는 이벤트가 필수 |
+
+**MDN 참고**
+- [`Element.closest()`](https://developer.mozilla.org/en-US/docs/Web/API/Element/closest)
+- [`TreeWalker`](https://developer.mozilla.org/en-US/docs/Web/API/TreeWalker)
+- [Shadow DOM 사용하기](https://developer.mozilla.org/en-US/docs/Web/API/Web_components/Using_shadow_DOM)

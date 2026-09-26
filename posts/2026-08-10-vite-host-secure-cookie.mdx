@@ -1,0 +1,179 @@
+---
+title: "IP로 접속하면 로그인이 자꾸 풀리는 이유 (feat. Secure 쿠키)"
+date: "2026-08-10"
+desc: "Vite 개발 서버의 Network URL(IP 주소)로 접속 시 Secure 쿠키가 비보안 컨텍스트로 판단되어 새로고침 때마다 로그아웃되는 원인을 분석한 기록."
+tags: ["Vite", "쿠키", "보안"]
+---
+
+로컬에서 개발하다 보면 터미널에 이런 출력이 뜰 때가 있습니다.
+
+```bash
+Local:   http://localhost:5173/
+Network: http://192.168.0.18:5173/
+```
+
+Network URL로 접속했는데 로그인 후 새로고침하는 순간 갑자기 로그아웃이 되는 경험 있으신가요?
+
+## 1. Local URL과 Network URL, 왜 둘 다 뜨는 걸까
+
+### (1) 인터페이스가 여러 개다
+
+컴퓨터는 네트워크와 연결되는 인터페이스를 여러 개 가지고 있습니다.
+
+| 인터페이스 | 주소 | 설명 |
+| --- | --- | --- |
+| 루프백(loopback) | 127.0.0.1 / localhost | 자기 자신하고만 통신하는 내부 전용 창구. 외부에서 접근 불가. |
+| LAN | 192.168.0.18 같은 사설 IP | 같은 공유기(Wi-Fi)에 연결된 기기들이 접근할 수 있는 창구. |
+
+### (2) host: "0.0.0.0"이 하는 일
+
+```ts
+server: {
+  host: "0.0.0.0",
+  port: 5173,
+}
+```
+
+"0.0.0.0"은 모든 인터페이스에서 오는 요청을 다 받겠다는 의미입니다. 루프백(localhost) 뿐만 아니라 LAN 인터페이스에도 동시에 서버를 열겠다는 의미입니다.
+
+따라서 URL이 두 개 뜨는 겁니다. 같은 서버지만 두 인터페이스에서 각각 수신하는 상태입니다.
+
+```bash
+Local:   http://localhost:5173/     ← 루프백에서 열린 서버
+Network: http://192.168.0.18:5173/  ← LAN에서 열린 서버
+```
+
+## 2. IP 주소로 접속하면 쿠키가 사라지는 이유
+
+### (1) Secure 속성이 붙은 쿠키
+
+refreshToken은 JSON이 아니라 응답 헤더의 `Set-Cookie`를 통해 별도로 내려옵니다.
+
+```http
+Set-Cookie: refresh_token=abc123; Secure; HttpOnly
+```
+
+`Secure` 속성은 브라우저에게 두 가지를 지시합니다. 첫째, 보안 컨텍스트에서만 이 쿠키를 저장하라. 둘째, 보안 컨텍스트에서만 서버로 전송하라.
+
+### (2) 보안 컨텍스트란
+
+브라우저가 이 연결은 안전하다고 판단하는 기준입니다.
+
+| 접속 방식 | 보안 컨텍스트 | Secure 쿠키 저장 |
+| --- | --- | --- |
+| https:// 모든 도메인 | ✅ | 저장됨 |
+| http://localhost | ✅ (예외 적용) | 저장됨 |
+| http://192.168.0.18 | ❌ | 저장 거부 |
+
+### (3) 쿠키가 저장 자체가 안 된다
+
+Chrome 80(2020년 2월) 이후로 Chrome과 Firefox는 비보안 출처(HTTP + 비-localhost)에서 수신한 `Set-Cookie` 헤더에 `Secure` 속성이 있으면 저장을 아예 거부합니다. 기존에 "저장은 하지만 전송은 안 한다"고 알려진 내용은 구식 브라우저의 동작입니다.
+
+즉, `http://192.168.0.18:5173`으로 접속해 로그인하면 서버가 `Set-Cookie: refresh_token=...; Secure`를 보내더라도 브라우저가 이를 무시합니다. refreshToken 쿠키는 브라우저에 저장되지 않습니다.
+
+> 핵심: 비보안 컨텍스트(HTTP + IP 주소)에서는 Secure 쿠키의 저장 자체가 거부된다. 쿠키가 없으니 이후 요청에도 포함되지 않는다.
+
+### (4) localhost만 특별한 이유
+
+localhost는 W3C 보안 컨텍스트 스펙에서 잠재적으로 신뢰 가능한 출처로 명시적으로 정의되어 있습니다. HTTP임에도 불구하고 예외를 적용해 Secure 쿠키 저장을 허용합니다.
+
+반면 192.168.0.18 같은 IP 주소는 이 예외 목록에 없습니다.
+
+## 3. 에러가 발생하는 흐름
+
+```text
+① 브라우저 → http://192.168.0.18:5173/api/login 요청
+② 서버 응답: Set-Cookie: refresh_token=...; Secure; HttpOnly
+③ 브라우저 내부 판단: "HTTP + IP 주소 = 비보안 컨텍스트 → Secure 쿠키 저장 거부"
+④ refreshToken 쿠키가 저장되지 않음
+⑤ 이후 /api/auth/reissue 요청 → 쿠키 없음
+⑥ 서버 응답 ← 401: "refreshToken이 없습니다"
+```
+
+## 4. 해결 방법
+
+### (1) localhost로 접속
+
+로컬에서 개발할 때는 Network URL 말고 Local URL로 접속합니다. localhost는 HTTP여도 보안 컨텍스트이기 때문에 Secure 쿠키가 정상적으로 저장되고 전송됩니다. 대부분의 경우 이것만으로 충분합니다.
+
+### (2) host 설정 제거
+
+다른 기기에서의 접속이 아예 필요 없다면 `vite.config.ts`에서 `host: "0.0.0.0"` 설정을 제거합니다.
+
+```ts
+// 변경 전
+server: {
+  host: "0.0.0.0",
+  port: 5173,
+}
+
+// 변경 후 — host를 생략하면 기본값이 localhost
+server: {
+  port: 5173,
+}
+```
+
+이렇게 하면 Network URL 자체가 뜨지 않아서 실수로 IP 주소로 접속하는 일이 없어집니다.
+
+### (3) HTTPS 개발 서버
+
+다른 기기(모바일, 태블릿)에서 Secure 쿠키가 제대로 동작하는지 테스트해야 한다면, 개발 서버를 HTTPS로 올리는 방법이 있습니다.
+
+가장 빠른 방법은 `@vitejs/plugin-basic-ssl`입니다. 자체 서명 인증서를 자동으로 생성해줍니다. 브라우저가 "연결이 안전하지 않습니다" 경고를 표시하지만 개발 용도로는 충분합니다.
+
+```bash
+pnpm add -D @vitejs/plugin-basic-ssl
+```
+
+```ts
+// vite.config.ts
+import basicSsl from '@vitejs/plugin-basic-ssl'
+
+export default defineConfig({
+  plugins: [react(), basicSsl()],
+  server: {
+    host: '0.0.0.0',
+    port: 5173,
+  },
+})
+```
+
+브라우저 경고 없이 사용하려면 `mkcert`로 로컬 신뢰 인증서를 발급할 수 있습니다.
+
+```bash
+# mkcert 설치 (macOS)
+brew install mkcert && mkcert -install
+
+# 로컬 IP 인증서 발급
+mkcert localhost 192.168.0.18
+
+# 생성된 .pem 파일을 vite.config.ts에 연결
+```
+
+```ts
+// vite.config.ts
+import fs from 'fs'
+
+export default defineConfig({
+  server: {
+    host: '0.0.0.0',
+    https: {
+      key: fs.readFileSync('./localhost+1-key.pem'),
+      cert: fs.readFileSync('./localhost+1.pem'),
+    },
+  },
+})
+```
+
+## 정리
+
+| 상황 | 원인 | 해결 |
+| --- | --- | --- |
+| IP 주소 접속 시 로그인 풀림 | 비보안 컨텍스트에서 Secure 쿠키 저장 거부 | localhost로 접속 |
+| Network URL 자체를 없애고 싶다 | `host: "0.0.0.0"` 설정 | host 설정 제거 |
+| 다른 기기에서도 Secure 쿠키 테스트 | 비보안 컨텍스트 문제 동일 | HTTPS 개발 서버 구성 |
+
+**MDN 참고**
+- [`Set-Cookie`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Set-Cookie)
+- [`Secure` 쿠키 속성](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Set-Cookie#secure)
+- [보안 컨텍스트(Secure contexts)](https://developer.mozilla.org/en-US/docs/Web/Security/Secure_Contexts)

@@ -1,0 +1,183 @@
+---
+title: "React.lazy와 loadable 헬퍼로 초기 번들 78% 줄이기"
+date: "2026-09-29"
+desc: "16개 라우트를 정적 import하면 index 청크가 615kB에 달했다. React.lazy + Suspense로 동적 import를 적용하고 loadable 헬퍼로 반복을 제거해 136kB(-78%)로 줄인 과정을 정리했다."
+tags: ["React", "코드스플리팅"]
+---
+
+B2B 광고 대시보드 프로젝트에서 초기 로딩 성능을 측정해봤습니다. 16개 라우트를 정적 `import`로 연결한 상태에서 빌드하면 index 청크가 **615kB**였습니다. 코드 스플리팅 적용 후 **136kB**로 줄었습니다. 78% 감소입니다.
+
+## 번들과 청크
+
+Vite 같은 번들러는 `import`로 연결된 파일들을 따라가며 하나의 파일로 합칩니다. 이 결과물을 **번들(bundle)** 이라고 부릅니다.
+
+번들러는 하나의 번들을 만드는 대신 여러 개로 나눌 수 있습니다. 이 조각 하나하나를 **청크(chunk)** 라고 합니다. 코드 스플리팅은 번들을 여러 청크로 분리하는 작업입니다.
+
+```text
+코드 스플리팅 전               코드 스플리팅 후
+
+index.js (615kB)              index.js (136kB)
+└── LoginPage                 ├── login.[hash].js  (16kB)
+└── DashboardPage             ├── dashboard.[hash].js  (89kB)
+└── CampaignPage       →      ├── campaign.[hash].js  (44kB)
+└── ...16개 라우트             └── ...각 라우트별 청크
+```
+
+브라우저는 JS 파일을 내려받은 즉시 파싱하고 실행합니다. 615kB는 네트워크 전송 시간뿐 아니라 파싱·실행 비용까지 포함합니다. 로그인 페이지만 쓰는 사용자가 대시보드·캠페인·리포트 코드를 모두 처리하고 나서야 첫 화면을 볼 수 있다는 뜻입니다. 모바일 기기일수록 CPU 파싱 비용이 크게 차이납니다.
+
+## 문제: 정적 import의 비용
+
+```ts
+// Before — 모든 페이지 코드가 하나의 번들로 합쳐진다
+import LoginPage from '@/pages/auth/LoginPage'
+import DashboardPage from '@/pages/dashboard/DashboardPage'
+import CampaignPage from '@/pages/campaign/CampaignPage'
+// ... 16개 라우트
+```
+
+Vite 번들러는 정적 `import`로 연결된 모듈을 하나의 청크로 묶습니다. 로그인 페이지만 방문해도 사용자는 16개 페이지 코드를 모두 파싱하고 나서야 첫 화면을 볼 수 있습니다.
+
+라우트를 잘 짜거나 컴포넌트를 분리해도 해결되지 않습니다. 번들러 구조의 문제이기 때문입니다.
+
+## 해결: React.lazy + Suspense
+
+### 동적 import — 필요할 때 가져온다
+
+정적 `import`와 동적 `import()`는 문법이 비슷해 보이지만 동작이 다릅니다.
+
+```ts
+// 정적 import — 파일이 로드되는 순간 즉시 실행된다
+import DashboardPage from '@/pages/dashboard/DashboardPage'
+
+// 동적 import — 호출하는 시점에 Promise를 반환한다
+const module = await import('@/pages/dashboard/DashboardPage')
+const DashboardPage = module.default
+```
+
+정적 `import`는 파일이 실행되기 전에 모두 해결(resolve)됩니다. 번들러는 이 관계를 정적으로 분석해서 하나의 청크로 합칩니다.
+
+동적 `import()`는 런타임에 실행됩니다. 번들러는 동적 `import()`가 가리키는 모듈을 **별도 청크로 분리**하고, 브라우저는 그 코드가 실제로 필요한 시점에 해당 청크를 요청합니다.
+
+`React.lazy`는 이 동적 import를 React 컴포넌트와 연결하는 래퍼입니다. 컴포넌트가 실제로 렌더링되어야 하는 시점에 비로소 청크를 요청합니다.
+
+```ts
+// After — 라우트 진입 시점에 청크를 요청한다
+const LoginPage = lazy(() => import('@/pages/auth/LoginPage'))
+const DashboardPage = lazy(() => import('@/pages/dashboard/DashboardPage'))
+```
+
+### Suspense — 비동기 로딩을 React에 알린다
+
+React는 기본적으로 동기적으로 렌더링합니다. `lazy`로 만든 컴포넌트를 렌더링할 때 청크가 아직 도착하지 않았다면, React는 이 상황을 에러 없이 처리할 방법이 필요합니다.
+
+이를 위해 React는 "아직 준비되지 않았다"는 신호를 받으면 가장 가까운 부모 `<Suspense>`를 찾아 fallback UI를 대신 렌더링합니다. 청크 로드가 완료되면 fallback을 치우고 원래 컴포넌트를 보여줍니다. `Suspense` 없이 `lazy` 컴포넌트를 쓰면 React가 이 대기 상태를 처리할 경계를 찾지 못해 에러를 던집니다.
+
+```tsx
+<Suspense fallback={null}>
+  <DashboardPage />
+</Suspense>
+```
+
+## loadable 헬퍼로 반복 제거
+
+16개 라우트 각각에 `Suspense`를 감싸면 선언이 단조롭게 반복됩니다.
+
+```tsx
+// 라우트마다 이 패턴이 반복된다
+const WorkspacePage = lazy(() => import('@/pages/workspace/WorkspacePage'))
+
+// 라우트 트리에서
+<Suspense fallback={<WorkspaceListLoading />}>
+  <WorkspacePage />
+</Suspense>
+```
+
+`loadable()` 헬퍼를 만들어 이 패턴을 1줄로 줄였습니다.
+
+```tsx
+// src/lib/loadable.tsx
+type TPropsOf<T> = T extends ComponentType<infer P> ? P : never
+
+export function loadable<T extends ComponentType<any>>(
+  Component: T,
+  fallback: ReactNode = null,
+) {
+  function Wrapped(props: TPropsOf<T>) {
+    return (
+      <Suspense fallback={fallback}>
+        <Component {...props} />
+      </Suspense>
+    )
+  }
+  // React.lazy()로 만든 컴포넌트는 name이 없다. displayName을 명시적으로 설정하려면
+  // lazy 선언 전에 컴포넌트에 displayName을 지정하거나, 별도 인자로 전달해야 한다.
+  Wrapped.displayName = `Loadable(${(Component as any).displayName ?? 'Component'})`
+  return Wrapped
+}
+```
+
+사용 시에는 `lazy`와 `loadable`을 같이 씁니다.
+
+```tsx
+// 선언 — 1줄
+const OverviewDashboard = loadable(
+  lazy(() => import('@/pages/dashboard/overview/OverviewDashboard'))
+)
+
+// 페이지별 로딩 UI가 필요한 경우
+const Workspace = loadable(
+  lazy(() => import('@/pages/workspace/Workspace')),
+  <WorkspaceListLoading />
+)
+```
+
+라우트 트리에서는 일반 컴포넌트처럼 쓰면 됩니다.
+
+```tsx
+<Route path="/dashboard" element={<OverviewDashboard />} />
+<Route path="/workspace" element={<Workspace />} />
+```
+
+`displayName`을 지정한 이유는 React DevTools에서 `Wrapped`가 아니라 `Loadable(...)`로 표시되게 하기 위해서입니다. `React.lazy()`로 만든 컴포넌트는 `name`이 없으므로, 더 구체적인 이름이 필요하다면 lazy 컴포넌트에 `displayName`을 따로 설정해야 합니다.
+
+## 수치 측정
+
+적용 전후를 정확히 비교하기 위해 `perf/no-splitting` 브랜치를 따로 만들었습니다. `loadable`을 제거하고 전부 정적 `import`로 되돌린 후 빌드해서 비교했습니다. 아래 수치는 빌드 직후 기준(gzip 전)입니다.
+
+| 구분 | Before | After (감소) |
+|------|:------:|:------------:|
+| index 청크 | 615 kB | **136 kB (−78%)** |
+| 초기 JS 전체 | 1,225 kB | **746 kB (−39%)** |
+
+`vendor` / `react-vendor` 청크(각 403kB / 207kB)는 스플리팅 여부와 무관하게 동일합니다. React 자체와 서드파티 라이브러리는 항상 함께 로드됩니다.
+
+인증 5개 + 메인 11개 = 16개 라우트 전체에 일관 적용했습니다.
+
+## 주의할 점
+
+### 1. lazy는 default export에만 동작합니다
+
+```ts
+// ✅ default export
+export default function DashboardPage() { ... }
+const DashboardPage = lazy(() => import('@/pages/dashboard/DashboardPage'))
+
+// ❌ named export — 동작하지 않는다
+export function DashboardPage() { ... }
+const DashboardPage = lazy(() => import('@/pages/dashboard/DashboardPage'))
+// → .then(m => ({ default: m.DashboardPage })) 형태로 감싸야 한다
+```
+
+### 2. Suspense 경계는 적절히 배치해야 합니다
+
+`loadable`의 fallback을 `null`로 두면 청크를 불러오는 동안 아무것도 표시되지 않습니다. 사용자 입장에서는 화면이 멈춘 것처럼 보입니다. 페이지 전환 애니메이션이나 로딩 UI가 있다면 그것을 fallback으로 전달하는 것이 낫습니다.
+
+### 3. 이 프로젝트에서는 라우트 단위 스플리팅이 가장 효과적이었습니다
+
+컴포넌트 단위로 스플리팅하면 네트워크 요청 횟수가 늘어납니다. 이 프로젝트에서는 라우트 단위가 코드 분리 효과와 네트워크 비용의 균형이 가장 좋았습니다. 프로젝트 규모나 구조에 따라 최적 단위가 달라질 수 있습니다.
+
+## 코드 스플리팅 이후
+
+초기 번들을 줄였다면 다음 단계는 각 페이지 청크 자체를 최적화하는 것입니다. 이 프로젝트에서는 Skeleton UI를 도입해 청크가 로드되는 동안의 체감 대기 시간도 줄였습니다. Lighthouse로 LCP를 실측하면 Skeleton 적용 전 1,180ms에서 적용 후 1,048ms로 11% 줄어든 것을 확인할 수 있었습니다.
+
+> 코드 스플리팅이 "실제로 필요한 코드만 내려받게 하는 것"이라면, Skeleton UI는 "내려받는 동안 사용자가 기다리지 않는 것처럼 느끼게 하는 것"입니다. 둘은 성격이 다른 최적화이고 함께 쓸 때 효과가 큽니다.
