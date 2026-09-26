@@ -2,6 +2,7 @@
 
 import { motion } from "framer-motion";
 import { Mail } from "lucide-react";
+import { ease, fadeUp } from "@/lib/motion";
 
 const socials = [
   {
@@ -29,16 +30,14 @@ const socials = [
   },
 ];
 
-const ease = [0.22, 1, 0.36, 1] as const;
-
 export default function Contact() {
   return (
     <footer id="contact">
       <motion.div
-        initial={{ opacity: 0, y: 16 }}
-        whileInView={{ opacity: 1, y: 0 }}
+        initial="hidden"
+        whileInView="visible"
         viewport={{ once: true }}
-        transition={{ duration: 0.5, ease }}
+        variants={fadeUp}
         className="max-w-5xl mx-auto px-6 py-14 flex flex-col sm:flex-row items-center justify-between gap-6 border-t border-border"
       >
         <div className="text-sm text-text-muted">

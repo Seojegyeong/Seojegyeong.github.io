@@ -51,7 +51,6 @@
 }
 
 html {
-  scroll-behavior: smooth;
   scroll-padding-top: 4rem;
 }
 
@@ -64,7 +63,7 @@ html {
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: "Pretendard", sans-serif;
+  font-family: var(--font-pretendard), "Pretendard", sans-serif;
 }
 
 .scrollbar-hide::-webkit-scrollbar {
@@ -90,6 +89,16 @@ body {
   @apply px-5 py-3 text-gray-700;
 }
 
+/* blog post fade-in */
+@keyframes blog-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.blog-article-fade {
+  animation: blog-fade-in 0.4s ease both;
+}
+
 /* prose section spacing */
 .prose h2 {
   margin-top: 5rem;
@@ -111,6 +120,12 @@ body {
 }
 
 /* rehype-pretty-code */
+.not-prose > pre {
+  @apply rounded-xl px-0 py-4 text-sm overflow-x-auto;
+  background-color: #f6f8fa;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.07), 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
 [data-rehype-pretty-code-figure] pre {
   @apply rounded-xl px-0 py-4 text-sm overflow-x-auto;
   background-color: #f6f8fa;

@@ -1,6 +1,8 @@
 "use client";
 
 import { motion } from "framer-motion";
+import { ExternalLink } from "lucide-react";
+import { ease, fadeUp, staggerContainerSlow } from "@/lib/motion";
 
 type Category = "경험" | "자격증" | "수상";
 
@@ -92,41 +94,29 @@ const BADGE: Record<Category, string> = {
   수상: "bg-amber-50 text-amber-700",
 };
 
-const ease = [0.22, 1, 0.36, 1] as const;
-
-const container = {
-  hidden: {},
-  visible: { transition: { staggerChildren: 0.07 } },
-};
-
-const listItem = {
-  hidden: { opacity: 0, y: 16 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease } },
-};
-
 export default function Experience() {
   return (
     <section id="experience" className="py-36 px-6">
       <div className="max-w-5xl mx-auto">
         <motion.h2
-          initial={{ opacity: 0, y: 16 }}
-          whileInView={{ opacity: 1, y: 0 }}
+          initial="hidden"
+          whileInView="visible"
           viewport={{ once: true }}
-          transition={{ duration: 0.5, ease }}
+          variants={fadeUp}
           className="text-3xl font-bold mb-10"
         >
           경험
         </motion.h2>
 
         <motion.ul
-          variants={container}
+          variants={staggerContainerSlow}
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true, margin: "-40px" }}
           className="flex flex-col gap-9"
         >
           {sorted.map((item) => (
-            <motion.li key={item.title} variants={listItem} className="flex flex-col gap-1.5 sm:flex-row sm:gap-5 sm:items-start">
+            <motion.li key={item.title} variants={fadeUp} className="flex flex-col gap-1.5 sm:flex-row sm:gap-5 sm:items-start">
               <div className="flex items-center gap-2 sm:contents">
                 <span className="text-xs text-text-subtle shrink-0 sm:text-sm sm:pt-0.5 sm:w-36">
                   {item.period}
@@ -158,10 +148,7 @@ export default function Experience() {
                       rel="noopener noreferrer"
                       className="inline-flex items-center gap-0.5 text-xs text-text-subtle hover:text-text-primary transition-colors shrink-0"
                     >
-                      <svg width="11" height="11" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M2 2h4v1H3v6h6V7h1v2a1 1 0 01-1 1H3a1 1 0 01-1-1V3a1 1 0 011-1z" fill="currentColor"/>
-                        <path d="M7 2h3v3h-1V3.7L5.4 7.3l-.7-.7L8.3 3H7V2z" fill="currentColor"/>
-                      </svg>
+                      <ExternalLink size={11} />
                       확인서
                     </a>
                   )}

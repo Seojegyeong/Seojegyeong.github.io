@@ -36,6 +36,8 @@ export const WaveField = () => {
     };
   }, []);
 
+  const playing = onScreen && tabVisible && !reduceMotion;
+
   return (
     <div
       ref={hostRef}
@@ -51,6 +53,7 @@ export const WaveField = () => {
           gamma={6}
           paletteBias={10}
           speed={0.8}
+          play={playing}
         />
       )}
     </div>

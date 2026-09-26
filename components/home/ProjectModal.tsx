@@ -2,15 +2,14 @@
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import { motion } from "framer-motion";
-import { X, ChevronLeft, ChevronRight, Trophy } from "lucide-react";
+import { X, ChevronLeft, ChevronRight, Trophy, ArrowRight, ExternalLink } from "lucide-react";
+import { ease } from "@/lib/motion";
 import type { Project } from "@/data/projects";
 
 type Props = {
   project: Project;
   onClose: () => void;
 };
-
-const ease = [0.22, 1, 0.36, 1] as const;
 
 export default function ProjectModal({ project, onClose }: Props) {
   const [mediaIndex, setMediaIndex] = useState(0);
@@ -255,9 +254,9 @@ export default function ProjectModal({ project, onClose }: Props) {
                           href={post.url}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="text-sm text-text-secondary hover:text-brand-blue transition"
+                          className="flex items-center gap-1 text-sm text-text-secondary hover:text-brand-blue transition"
                         >
-                          {post.title} →
+                          {post.title} <ArrowRight size={12} />
                         </a>
                       </li>
                     ))}
@@ -272,9 +271,9 @@ export default function ProjectModal({ project, onClose }: Props) {
                       href={project.demo}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-sm font-medium text-brand-blue border border-brand-blue px-4 py-1.5 rounded-lg hover:bg-brand-50 transition"
+                      className="flex items-center gap-1.5 text-sm font-medium text-brand-blue border border-brand-blue px-4 py-1.5 rounded-lg hover:bg-brand-50 transition"
                     >
-                      Live Demo →
+                      Live Demo <ExternalLink size={12} />
                     </a>
                   )}
                   {project.github && (
@@ -282,9 +281,9 @@ export default function ProjectModal({ project, onClose }: Props) {
                       href={project.github}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-sm font-medium text-text-secondary border border-border px-4 py-1.5 rounded-lg hover:bg-surface-subtle hover:text-text-primary transition"
+                      className="flex items-center gap-1.5 text-sm font-medium text-text-secondary border border-border px-4 py-1.5 rounded-lg hover:bg-surface-subtle hover:text-text-primary transition"
                     >
-                      GitHub →
+                      GitHub <ExternalLink size={12} />
                     </a>
                   )}
                 </div>

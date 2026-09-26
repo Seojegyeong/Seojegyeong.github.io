@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { ArrowRight } from "lucide-react";
 import { getAllPosts } from "@/lib/posts";
 import BlogList from "@/components/blog/BlogList";
 
@@ -12,9 +13,9 @@ export default function Blog() {
           <h2 className="text-3xl font-bold">블로그</h2>
           <Link
             href="/blog"
-            className="text-sm text-text-muted hover:text-text-primary transition-colors"
+            className="flex items-center gap-1.5 text-sm text-text-muted hover:text-text-primary transition-colors"
           >
-            전체 글 보기 →
+            전체 글 보기 <ArrowRight size={14} />
           </Link>
         </div>
 

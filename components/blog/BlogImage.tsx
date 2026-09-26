@@ -1,5 +1,3 @@
-import Image from "next/image";
-
 export default function BlogImage({
   src,
   alt,
@@ -10,12 +8,11 @@ export default function BlogImage({
   if (!src) return null;
   return (
     <figure className="not-prose my-8">
-      <Image
+      <img
         src={src}
         alt={alt ?? ""}
-        width={0}
-        height={0}
-        sizes="100vw"
+        loading="lazy"
+        decoding="async"
         className="rounded-xl w-full h-auto"
       />
       {alt && (

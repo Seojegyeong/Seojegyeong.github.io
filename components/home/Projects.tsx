@@ -5,8 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Users } from "lucide-react";
 import ProjectModal from "@/components/home/ProjectModal";
 import { projects, type Project } from "@/data/projects";
-
-const ease = [0.22, 1, 0.36, 1] as const;
+import { ease, fadeUp, staggerContainer } from "@/lib/motion";
 
 function getYouTubeThumbnail(src: string): string | null {
   const id = src.match(/(?:youtu\.be\/|v=)([^&?/]+)/)?.[1];
@@ -71,15 +70,6 @@ function CardFace({ project }: { project: Project }) {
   );
 }
 
-const container = {
-  hidden: {},
-  visible: { transition: { staggerChildren: 0.08 } },
-};
-
-const cardItem = {
-  hidden: { opacity: 0, y: 20 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease } },
-};
 
 export default function Projects() {
   const [selected, setSelected] = useState<Project | null>(null);
@@ -89,17 +79,17 @@ export default function Projects() {
       <section id="projects" className="py-40 bg-white">
         <div className="max-w-5xl mx-auto px-6">
           <motion.h2
-            initial={{ opacity: 0, y: 16 }}
-            whileInView={{ opacity: 1, y: 0 }}
+            initial="hidden"
+            whileInView="visible"
             viewport={{ once: true }}
-            transition={{ duration: 0.5, ease }}
+            variants={fadeUp}
             className="text-3xl font-bold mb-12"
           >
             프로젝트
           </motion.h2>
 
           <motion.div
-            variants={container}
+            variants={staggerContainer}
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true, margin: "-40px" }}
@@ -108,7 +98,7 @@ export default function Projects() {
             {projects.map((project) => (
               <motion.button
                 key={project.title}
-                variants={cardItem}
+                variants={fadeUp}
                 whileHover={{ y: -4 }}
                 transition={{ duration: 0.2, ease }}
                 aria-label={`${project.title} 프로젝트 상세 보기`}

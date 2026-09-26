@@ -1,13 +1,16 @@
 import { getAllPosts, getPostBySlug, extractHeadings } from "@/lib/posts";
 import { MDXRemote } from "next-mdx-remote/rsc";
 import remarkGfm from "remark-gfm";
+import remarkMermaid from "@/lib/remark-mermaid";
 import rehypePrettyCode from "rehype-pretty-code";
 import rehypeSlug from "rehype-slug";
 import Link from "next/link";
+import { ArrowLeft } from "lucide-react";
 import Callout from "@/components/blog/Callout";
 import Intro from "@/components/blog/Intro";
 import BlogImage from "@/components/blog/BlogImage";
 import CodeBlock from "@/components/blog/CodeBlock";
+import MermaidBlock from "@/components/blog/MermaidBlock";
 import TableOfContents from "@/components/blog/TableOfContents";
 import type { Metadata } from "next";
 
@@ -26,9 +29,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 const components = {
   Callout,
   Intro,
+  MermaidBlock,
   pre: CodeBlock,
   img: (props: React.ImgHTMLAttributes<HTMLImageElement>) => (
-    <BlogImage src={typeof props.src === "string" ? props.src : undefined} alt={props.alt} />
+    <BlogImage
+      src={typeof props.src === "string" ? props.src : undefined}
+      alt={props.alt}
+    />
   ),
   table: ({ children, ...props }: React.HTMLAttributes<HTMLTableElement>) => (
     <div className="overflow-hidden rounded-xl border border-gray-200 shadow-sm my-6 not-prose">
@@ -45,35 +52,28 @@ export default async function PostPage({ params }: Props) {
   const headings = extractHeadings(post.content);
 
   return (
-    <main className="min-h-screen bg-white">
+    <main className="min-h-screen bg-white scroll-smooth">
       <div className="max-w-6xl mx-auto px-6 pt-16 pb-28">
         <div className="flex gap-16 items-start">
-          {/* 목차 — 데스크탑만 표시 */}
+          {/* 목차 */}
           <aside className="hidden xl:flex flex-col w-56 shrink-0 sticky top-28 self-start">
             <Link
               href="/#blog"
-              className="text-sm text-text-muted hover:text-text-primary transition-colors mb-6 inline-block"
+              className="flex items-center gap-1.5 text-sm text-text-muted hover:text-text-primary transition-colors mb-6"
             >
-              ← 목록으로
+              <ArrowLeft size={14} />
+              목록으로
             </Link>
             {headings.length > 0 && <TableOfContents headings={headings} />}
           </aside>
 
           {/* 본문 */}
-          <article className="flex-1 min-w-0">
+          <article className="flex-1 min-w-0 blog-article-fade">
             <header className="mb-10">
-              <h1 className="text-3xl font-bold leading-snug mb-3">{post.title}</h1>
-              <div className="flex items-center gap-3 flex-wrap">
-                <span className="text-sm text-text-subtle">{post.date}</span>
-                {post.tags.map((tag) => (
-                  <span
-                    key={tag}
-                    className="text-xs px-2 py-0.5 rounded-full bg-gray-100 text-text-muted"
-                  >
-                    {tag}
-                  </span>
-                ))}
-              </div>
+              <span className="text-sm text-text-subtle">{post.date}</span>
+              <h1 className="text-3xl font-bold leading-snug mb-3">
+                {post.title}
+              </h1>
             </header>
             <div className="prose prose-neutral max-w-none">
               <MDXRemote
@@ -81,7 +81,7 @@ export default async function PostPage({ params }: Props) {
                 components={components}
                 options={{
                   mdxOptions: {
-                    remarkPlugins: [remarkGfm],
+                    remarkPlugins: [remarkGfm, remarkMermaid],
                     rehypePlugins: [
                       rehypeSlug,
                       [

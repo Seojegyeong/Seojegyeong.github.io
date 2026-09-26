@@ -19,18 +19,17 @@ export type Post = PostMeta & {
 export type Heading = { id: string; text: string; level: number };
 
 export function extractHeadings(content: string): Heading[] {
-  const lines = content.split("\n");
-  return lines
-    .filter((line) => /^## /.test(line) && !/^### /.test(line))
+  return content
+    .split("\n")
+    .filter((line) => /^## /.test(line))
     .map((line) => {
-      const level = line.match(/^(#{2,3})/)?.[1].length ?? 2;
-      const text = line.replace(/^#{2,3} /, "").trim();
+      const text = line.replace(/^## /, "").trim();
       const id = text
         .toLowerCase()
         .replace(/[^a-z0-9가-힣\s]/g, "")
         .trim()
         .replace(/\s+/g, "-");
-      return { id, text, level };
+      return { id, text, level: 2 };
     });
 }
 
