@@ -28,12 +28,12 @@ export const InfoBand = () => (
       <div className="pl-5 pr-5 pb-8 ipad:flex ipad:h-72.5 ipad:flex-col ipad:border-b ipad:border-white/40 ipad:pl-14 ipad:pr-14 ipad:pt-8 ipad:pb-8 desktop-sm:h-full desktop-sm:min-w-0 desktop-sm:flex-1 desktop-sm:border-b-0 desktop-sm:border-r desktop-sm:pl-14 desktop-sm:pr-14 desktop-sm:pt-10 desktop-sm:pb-10">
         <p className={`hidden ipad:block ${LABEL}`}>학력</p>
         <div className="flex flex-col gap-2 ipad:mt-auto">
-          <p className="text-white/80 text-[16px] font-semibold ipad:text-[16px] leading-normal">
+          <p className="text-white/90 text-[20px] ipad:text-[22px] font-bold leading-normal">
             컴퓨터과학{" "}
-            <span className="text-[12px] ipad:text-[13px] text-white/60">
+            <span className="text-[12px] ipad:text-[13px] font-normal text-white/60">
               복수전공
             </span>{" "}
-            | 한일문화콘텐츠전공
+            <span className="text-[16px] ipad:text-[16px] font-semibold text-white/80">| 한일문화콘텐츠전공</span>
           </p>
           <p className="text-white/60 text-[13px] ipad:text-[14px]">
             학점 3.91 / 4.5
