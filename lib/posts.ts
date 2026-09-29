@@ -28,7 +28,7 @@ export function extractHeadings(content: string): Heading[] {
         .toLowerCase()
         .replace(/[^a-z0-9가-힣\s]/g, "")
         .trim()
-        .replace(/\s+/g, "-");
+        .replace(/\s/g, "-");
       return { id, text, level: 2 };
     });
 }
