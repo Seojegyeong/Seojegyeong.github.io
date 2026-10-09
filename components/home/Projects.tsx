@@ -76,7 +76,7 @@ export default function Projects() {
 
   return (
     <>
-      <section id="projects" className="py-40 bg-white">
+      <section id="projects" className="py-36 bg-white">
         <div className="max-w-5xl mx-auto px-6">
           <motion.h2
             initial="hidden"

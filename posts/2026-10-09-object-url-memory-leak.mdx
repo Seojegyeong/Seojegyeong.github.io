@@ -1,8 +1,8 @@
 ---
-title: "Object URL 메모리 누수 — useEffect cleanup과 useRef 클로저 함정"
-date: "2026-10-09"
+title: "Object URL 메모리 누수와 useRef 클로저 함정"
+date: "2025-11-26"
 desc: "이미지 업로드 미리보기에서 URL.createObjectURL이 생성한 Blob URL을 해제하지 않아 메모리가 누적되는 문제를, 단일 이미지는 useEffect cleanup으로, 배열 이미지는 useRef로 최신값을 유지하며 일괄 revoke했다."
-tags: ["React", "메모리 누수", "useEffect"]
+tags: ["성능최적화", "메모리 누수"]
 ---
 
 Roome의 레퍼런스 업로드 페이지에서 이미지 미리보기를 구현할 때 [`URL.createObjectURL()`](https://developer.mozilla.org/ko/docs/Web/API/URL/createObjectURL_static)을 사용했습니다. 파일 선택 → 미리보기 → 다른 파일로 교체를 반복하면서 메모리가 계속 증가하는 것을 Chrome DevTools Memory 탭에서 확인했습니다.

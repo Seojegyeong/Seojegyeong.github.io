@@ -1,8 +1,8 @@
 ---
-title: "아코디언 애니메이션 — height:auto CSS transition 우회와 접근성"
-date: "2026-10-09"
+title: "아코디언 height:auto 트랜지션 우회와 접근성"
+date: "2025-07-24"
 desc: "height:auto에 CSS transition이 적용되지 않는 문제를 max-height 트랜지션으로 우회하고, aria-expanded·aria-controls·role=region으로 스크린리더 접근성을 확보한 FAQ 아코디언 구현 기록."
-tags: ["CSS", "접근성", "React"]
+tags: ["CSS", "접근성"]
 ---
 
 withTime FAQ 섹션을 구현하면서 아코디언 애니메이션에서 예상치 못한 문제를 만났습니다. 닫힌 상태(`height: 0`)에서 열린 상태(`height: auto`)로 전환할 때 transition이 작동하지 않았습니다. 즉시 열려버립니다.

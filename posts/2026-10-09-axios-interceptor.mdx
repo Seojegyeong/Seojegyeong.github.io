@@ -1,8 +1,8 @@
 ---
-title: "axios 인터셉터 — success/isSuccess 혼재 대응과 FormData Content-Type 자동화"
-date: "2026-10-09"
+title: "axios 인터셉터 성공 처리 통일과 FormData 자동화"
+date: "2025-11-24"
 desc: "서버 응답 키가 success와 isSuccess로 혼재하는 환경에서 양쪽을 동시에 처리하고, FormData 자동 감지로 Content-Type을 삭제하며 AUTH_FREE_PATHS 화이트리스트로 토큰 주입을 제어하는 인터셉터를 설계했다."
-tags: ["axios", "TypeScript", "API 설계"]
+tags: ["axios", "TypeScript"]
 ---
 
 Roome 개발 초반에 일부 API에서 성공 응답인데도 에러로 처리되는 버그가 있었습니다. 원인을 찾고 보니 서버가 성공 여부를 나타내는 키를 `success`와 `isSuccess` 두 가지로 반환하고 있었습니다. 서버 개발 초기에 `isSuccess`로 시작했다가 중간에 `success`로 변경했는데, 두 버전이 혼재된 상태로 배포된 것이었습니다.

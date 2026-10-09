@@ -1,8 +1,8 @@
 ---
-title: "enabled 듀얼 쿼리 — 검색어 유무에 따른 API 조건부 전환"
-date: "2026-10-09"
+title: "검색어 유무에 따른 enabled 듀얼 쿼리"
+date: "2025-08-04"
 desc: "검색어 유무에 따라 다른 API를 호출해야 하는 공지사항 페이지에서 두 useQuery를 enabled 플래그로 상호 배타적으로 전환하고 useMemo로 쿼리 키 안정 참조를 보장했다."
-tags: ["TanStack Query", "React"]
+tags: ["TanStack Query"]
 ---
 
 withTime 공지사항 페이지에는 두 가지 모드가 있습니다. 검색어가 없으면 전체 목록을 보여주고, 검색어가 있으면 검색 결과를 보여줍니다. 문제는 두 모드가 서로 다른 API 엔드포인트를 사용한다는 점입니다.

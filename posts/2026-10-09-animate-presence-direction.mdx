@@ -1,8 +1,8 @@
 ---
-title: "Framer Motion AnimatePresence — custom prop으로 방향 슬라이드 구현"
-date: "2026-10-09"
+title: "AnimatePresence custom prop으로 방향별 슬라이드 구현"
+date: "2026-01-07"
 desc: "온보딩 6단계의 앞/뒤 이동이 동일한 방향으로 전환되어 진행 방향이 모호한 문제를, AnimatePresence의 custom prop으로 direction을 variants에 주입해 이동 방향에 맞는 슬라이드를 구현했다."
-tags: ["React", "Framer Motion", "애니메이션", "UX"]
+tags: ["Framer Motion"]
 ---
 
 Roome 온보딩은 6단계로 구성됩니다. 이전·다음 버튼으로 단계를 이동할 수 있습니다. 처음 구현했을 때는 단순 페이드로 전환했는데, "이전" 버튼을 누를 때도 "다음" 버튼을 누를 때와 같은 방향으로 전환됐습니다. 사용자가 앞으로 가는지 뒤로 가는지 공간적 맥락을 파악하기 어려웠습니다.

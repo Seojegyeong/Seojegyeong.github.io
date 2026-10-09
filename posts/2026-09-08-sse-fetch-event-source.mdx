@@ -1,8 +1,8 @@
 ---
-title: "JWT 인증이 필요한 SSE — FetchEventSource 도입기"
+title: "JWT 인증이 필요한 SSE FetchEventSource 도입기"
 date: "2026-09-08"
 desc: "EventSource의 커스텀 헤더 미지원으로 JWT 인증이 불가능한 문제를 FetchEventSource로 해결하고, useClickStream 훅으로 SSE 연결을 캡슐화한 과정을 정리했다."
-tags: ["SSE", "React", "실시간"]
+tags: ["SSE", "인증"]
 ---
 
 WhereYouAd 대시보드에서 광고 클릭 스트림을 실시간으로 표시해야 했습니다. 데이터 업데이트 주기는 1초, 서버에서 클라이언트 방향으로만 데이터가 흐르는 구조입니다.

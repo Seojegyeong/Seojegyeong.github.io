@@ -31,7 +31,6 @@ export const projects: Project[] = [
       "TypeScript",
       "TanStack Query",
       "Zustand",
-      "Tailwind CSS",
       "AWS",
     ],
     github: "https://github.com/WhereYouAd/WhereYouAd-Frontend",
@@ -99,23 +98,19 @@ export const projects: Project[] = [
         url: "/blog/2026-05-18-playwright-cursor-e2e",
       },
       {
-        title: "POST + 폴링 복합 패턴 — AI 분석 요청을 단일 훅으로 캡슐화",
+        title: "AI 분석 요청의 POST + 폴링 복합 패턴",
         url: "/blog/2026-10-09-ai-analysis-polling",
       },
       {
-        title: "CloudFront Functions로 CSP 헤더 추가 — XSS 방어 2레이어 완성",
+        title: "CloudFront Functions로 CSP 헤더와 XSS 방어 구성",
         url: "/blog/2026-10-09-csp-cloudfront",
       },
       {
-        title: "팀 개발 시작 전 Sprint 1에 인프라 먼저 — ESLint·CI·Storybook",
-        url: "/blog/2026-10-09-fe-infra-setup",
-      },
-      {
-        title: "TanStack Query 재시도 정책 — 4xx는 즉시 실패, 5xx만 1회 재시도",
+        title: "TanStack Query 재시도 정책",
         url: "/blog/2026-10-09-retry-policy",
       },
       {
-        title: "대시보드 Skeleton UI와 LCP 측정 — 빈 화면 제거와 수치 확보",
+        title: "대시보드 Skeleton UI와 LCP 측정",
         url: "/blog/2026-10-09-skeleton-ui-lcp",
       },
     ],
@@ -130,7 +125,6 @@ export const projects: Project[] = [
       "TanStack Query",
       "Zustand",
       "Framer Motion",
-      "Vercel",
     ],
     github: "https://github.com/ITA-Roome/roome-fe",
     media: [{ type: "youtube", src: "https://youtu.be/gwQPsdBpcwI" }],
@@ -166,23 +160,23 @@ export const projects: Project[] = [
         url: "/blog/2026-06-05-tanstack-query-initial-data",
       },
       {
-        title: "Framer Motion AnimatePresence — custom prop으로 방향 슬라이드 구현",
+        title: "AnimatePresence custom prop으로 방향별 슬라이드 구현",
         url: "/blog/2026-10-09-animate-presence-direction",
       },
       {
-        title: "axios 인터셉터 — success/isSuccess 혼재 대응과 FormData Content-Type 자동화",
+        title: "axios 인터셉터 성공 처리 통일과 FormData 자동화",
         url: "/blog/2026-10-09-axios-interceptor",
       },
       {
-        title: "InfiniteData 낙관적 업데이트 — getQueriesData로 분산 캐시 일괄 동기화",
+        title: "getQueriesData로 InfiniteData 낙관적 업데이트",
         url: "/blog/2026-10-09-infinitedata-optimistic-update",
       },
       {
-        title: "Object URL 메모리 누수 — useEffect cleanup과 useRef 클로저 함정",
+        title: "Object URL 메모리 누수와 useRef 클로저 함정",
         url: "/blog/2026-10-09-object-url-memory-leak",
       },
       {
-        title: "탭 전환 스켈레톤 제거 — onMouseEnter·onTouchStart 프리페칭",
+        title: "hover·touchStart 프리페칭으로 탭 전환 스켈레톤 제거",
         url: "/blog/2026-10-09-prefetching-hover-touchstart",
       },
     ],
@@ -229,23 +223,23 @@ export const projects: Project[] = [
         url: "/blog/2026-08-13-event-delegation",
       },
       {
-        title: "Shadow DOM과 Emotion으로 크롬 확장 스타일 격리하기",
+        title: "Shadow DOM에 React 마운트하기",
         url: "/blog/2026-10-06-shadow-dom-react-emotion",
       },
       {
-        title: "Chrome Storage 비동기 초기화와 Race Condition — isLoadedRef 가드 패턴",
+        title: "Chrome Storage 비동기 초기화와 Race Condition",
         url: "/blog/2026-10-09-chrome-storage-race-condition",
       },
       {
-        title: "Claude API 비용 최적화 — Map O(1) 캐시와 Promise.all 병렬 처리",
+        title: "Claude API Map 캐시와 Promise.all로 비용 최적화",
         url: "/blog/2026-10-09-claude-api-map-cache",
       },
       {
-        title: "Figma MCP + Claude Code — 기획부터 구현까지 단일 컨텍스트로",
+        title: "Figma MCP와 Claude Code 단일 컨텍스트 워크플로",
         url: "/blog/2026-10-09-figma-mcp-workflow",
       },
       {
-        title: "innerHTML 대신 TreeWalker — 뉴스 사이트 이벤트 리스너를 살리면서 텍스트 하이라이팅",
+        title: "innerHTML 대신 TreeWalker로 텍스트 하이라이팅",
         url: "/blog/2026-10-09-treewalker-documentfragment",
       },
     ],
@@ -257,7 +251,6 @@ export const projects: Project[] = [
     tags: [
       "React",
       "TypeScript",
-      "Vite",
       "TanStack Query",
       "Zustand",
       "Firebase",
@@ -291,11 +284,11 @@ export const projects: Project[] = [
         url: "/blog/2026-04-20-tanstack-query-optimistic-update",
       },
       {
-        title: "아코디언 애니메이션 — height:auto CSS transition 우회와 접근성",
+        title: "아코디언 height:auto 트랜지션 우회와 접근성",
         url: "/blog/2026-10-09-accordion-aria-max-height",
       },
       {
-        title: "enabled 듀얼 쿼리 — 검색어 유무에 따른 API 조건부 전환",
+        title: "검색어 유무에 따른 enabled 듀얼 쿼리",
         url: "/blog/2026-10-09-enabled-dual-query",
       },
     ],

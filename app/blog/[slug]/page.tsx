@@ -58,7 +58,7 @@ export default async function PostPage({ params }: Props) {
           {/* 목차 */}
           <aside className="hidden xl:flex flex-col w-56 shrink-0 sticky top-28 self-start">
             <Link
-              href="/#blog"
+              href="/blog"
               className="flex items-center gap-1.5 text-sm text-text-muted hover:text-text-primary transition-colors mb-6"
             >
               <ArrowLeft size={14} />
@@ -69,8 +69,15 @@ export default async function PostPage({ params }: Props) {
 
           {/* 본문 */}
           <article className="flex-1 min-w-0 blog-article-fade">
+            <Link
+              href="/blog"
+              className="xl:hidden inline-flex items-center gap-1.5 text-sm text-text-muted hover:text-text-primary transition-colors mb-8"
+            >
+              <ArrowLeft size={14} />
+              목록으로
+            </Link>
             <header className="mb-10">
-              <span className="text-sm text-text-subtle">{post.date}</span>
+              <span className="text-sm text-text-subtle mb-2 block">{post.date}</span>
               <h1 className="text-3xl font-bold leading-snug mb-3">
                 {post.title}
               </h1>

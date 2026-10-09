@@ -116,7 +116,7 @@ export default function Experience() {
           className="flex flex-col gap-9"
         >
           {sorted.map((item) => (
-            <motion.li key={item.title} variants={fadeUp} className="flex flex-col gap-1.5 sm:flex-row sm:gap-5 sm:items-start">
+            <motion.li key={item.title} variants={fadeUp} className="flex flex-col gap-1.5 sm:flex-row sm:gap-5 sm:items-start rounded-xl px-4 -mx-4 py-3 -my-1.5 hover:bg-surface-subtle transition-colors">
               <div className="flex items-center gap-2 sm:contents">
                 <span className="text-xs text-text-subtle shrink-0 sm:text-sm sm:pt-0.5 sm:w-36">
                   {item.period}

@@ -1,8 +1,8 @@
 ---
-title: "탭 전환 스켈레톤 제거 — onMouseEnter·onTouchStart 프리페칭"
-date: "2026-10-09"
+title: "hover·touchStart 프리페칭으로 탭 전환 스켈레톤 제거"
+date: "2025-11-24"
 desc: "Feed·Shop 탭을 전환할 때마다 스켈레톤이 노출되는 문제를, 탭 호버·터치 시점에 prefetchInfiniteQuery를 연결해 클릭 전에 데이터를 미리 요청했다."
-tags: ["TanStack Query", "UX", "성능최적화"]
+tags: ["TanStack Query", "성능최적화"]
 ---
 
 Roome의 Feed·Shop 탭을 처음 전환하면 스켈레톤 UI가 나타납니다. InfiniteQuery 요청이 완료될 때까지 콘텐츠가 없기 때문입니다. 탭 간 이동이 잦은 앱에서 매번 스켈레톤을 보여주는 것은 UX를 끊깁니다.

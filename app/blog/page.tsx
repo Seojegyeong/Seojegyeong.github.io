@@ -1,6 +1,9 @@
+import { Suspense } from "react";
 import Link from "next/link";
+import { ArrowLeft } from "lucide-react";
 import { getAllPosts } from "@/lib/posts";
 import Navbar from "@/components/common/Navbar";
+import BlogContent from "@/components/blog/BlogContent";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -11,47 +14,29 @@ export const metadata: Metadata = {
 export default function BlogPage() {
   const posts = getAllPosts();
 
+  const allTags = Array.from(new Set(posts.flatMap((p) => p.tags)))
+    .filter((tag) => posts.filter((p) => p.tags.includes(tag)).length >= 2)
+    .sort((a, b) => {
+      const countA = posts.filter((p) => p.tags.includes(a)).length;
+      const countB = posts.filter((p) => p.tags.includes(b)).length;
+      return countB - countA;
+    });
+
   return (
     <main className="min-h-screen bg-white">
       <Navbar />
       <div className="max-w-3xl mx-auto px-6 py-28">
-        <h1 className="text-3xl font-bold mb-12">블로그</h1>
-        <ul className="flex flex-col divide-y divide-border">
-          {posts.map((post) => (
-            <li key={post.slug}>
-              <Link
-                href={`/blog/${post.slug}`}
-                className="flex flex-col gap-1 py-5 group sm:flex-row sm:items-start sm:justify-between hover:opacity-80 transition-opacity"
-              >
-                <div className="flex flex-col gap-1">
-                  <span className="text-text-primary font-semibold group-hover:text-brand-blue transition-colors">
-                    {post.title}
-                  </span>
-                  {post.desc && (
-                    <span className="text-sm text-text-muted line-clamp-1 break-keep">
-                      {post.desc}
-                    </span>
-                  )}
-                  {post.tags.length > 0 && (
-                    <div className="flex gap-1.5 flex-wrap mt-1">
-                      {post.tags.map((tag) => (
-                        <span
-                          key={tag}
-                          className="text-xs px-2 py-0.5 rounded-full bg-gray-100 text-text-muted"
-                        >
-                          {tag}
-                        </span>
-                      ))}
-                    </div>
-                  )}
-                </div>
-                <span className="text-sm text-text-subtle shrink-0 sm:ml-6 sm:pt-0.5">
-                  {post.date}
-                </span>
-              </Link>
-            </li>
-          ))}
-        </ul>
+        <Link
+          href="/"
+          className="inline-flex items-center gap-1.5 text-sm text-text-muted hover:text-text-primary transition-colors mb-8"
+        >
+          <ArrowLeft size={14} />
+          홈으로
+        </Link>
+        <h1 className="text-3xl font-bold mb-8">블로그</h1>
+        <Suspense>
+          <BlogContent posts={posts} allTags={allTags} />
+        </Suspense>
       </div>
     </main>
   );

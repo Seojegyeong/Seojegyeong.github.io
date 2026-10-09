@@ -1,8 +1,8 @@
 ---
-title: "CloudFront Functions로 CSP 헤더 추가 — XSS 방어 2레이어 완성"
-date: "2026-10-09"
+title: "CloudFront Functions로 CSP 헤더와 XSS 방어 구성"
+date: "2026-07-28"
 desc: "accessToken 메모리 저장만으로는 스크립트 실행 자체를 막지 못한다. CloudFront Functions로 CSP 헤더를 추가해 스크립트 실행 차단과 탈취 피해 최소화 두 레이어로 XSS 방어를 완성했다."
-tags: ["보안", "CSP", "CloudFront"]
+tags: ["보안", "CSP"]
 ---
 
 whereYouAd는 accessToken을 Zustand 메모리에만 저장해 XSS 탈취 피해를 최소화했습니다. 그런데 메모리 저장은 2차 방어입니다. 악성 스크립트가 실행된 후 localStorage처럼 직접 접근하지 못하게 막는 것입니다. **1차 방어는 악성 스크립트가 실행되는 것 자체를 막는 것**입니다. Content Security Policy(CSP)가 이 역할을 합니다.

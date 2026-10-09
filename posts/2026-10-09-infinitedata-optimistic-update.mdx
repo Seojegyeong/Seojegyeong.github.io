@@ -1,8 +1,8 @@
 ---
-title: "InfiniteData 낙관적 업데이트 — getQueriesData로 분산 캐시 일괄 동기화"
-date: "2026-10-09"
+title: "getQueriesData로 InfiniteData 낙관적 업데이트"
+date: "2025-12-26"
 desc: "Feed·Shop의 좋아요 버튼이 InfiniteData 중첩 구조와 필터별 독립 캐시 환경에서 서버 응답 없이 즉시 반응하도록, getQueriesData 접두사 매칭으로 모든 관련 캐시를 일괄 업데이트하고 실패 시 전체 rollback했다."
-tags: ["TanStack Query", "React", "낙관적 업데이트"]
+tags: ["TanStack Query", "낙관적 업데이트"]
 ---
 
 Roome Feed·Shop의 제품 목록에서 좋아요·스크랩 버튼을 클릭하면 서버 응답이 올 때까지 버튼 상태가 변하지 않았습니다. ~300ms 대기는 클릭이 됐는지 안 됐는지 모호하게 만들었습니다. 낙관적 업데이트를 적용하려 했는데, InfiniteQuery 구조 때문에 단순히 `setQueryData`를 쓰는 것으로는 해결이 안 됐습니다.
