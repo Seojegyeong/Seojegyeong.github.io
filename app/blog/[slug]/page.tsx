@@ -1,3 +1,4 @@
+import { Children, isValidElement } from "react";
 import { getAllPosts, getPostBySlug, extractHeadings } from "@/lib/posts";
 import { MDXRemote } from "next-mdx-remote/rsc";
 import remarkGfm from "remark-gfm";
@@ -37,6 +38,15 @@ const components = {
       alt={props.alt}
     />
   ),
+  // MDX wraps standalone images in <p>, causing <p><figure> invalid nesting.
+  // Strip <p> when its only child is a block component.
+  p: ({ children }: React.HTMLAttributes<HTMLParagraphElement>) => {
+    const arr = Children.toArray(children);
+    if (arr.length === 1 && isValidElement(arr[0]) && typeof arr[0].type !== "string") {
+      return <>{children}</>;
+    }
+    return <p>{children}</p>;
+  },
   table: ({ children, ...props }: React.HTMLAttributes<HTMLTableElement>) => (
     <div className="overflow-hidden rounded-xl border border-gray-200 shadow-sm my-6 not-prose">
       <table {...props} className="w-full border-collapse text-sm">
