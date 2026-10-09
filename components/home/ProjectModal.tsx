@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
+import Link from "next/link";
 import { motion } from "framer-motion";
 import { X, ChevronLeft, ChevronRight, Trophy, ArrowRight, ExternalLink } from "lucide-react";
 import { ease } from "@/lib/motion";
@@ -250,14 +251,13 @@ export default function ProjectModal({ project, onClose }: Props) {
                   <ul className="flex flex-col gap-2">
                     {project.relatedPosts.map((post) => (
                       <li key={post.url}>
-                        <a
+                        <Link
                           href={post.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
+                          onClick={onClose}
                           className="flex items-center gap-1 text-sm text-text-secondary hover:text-brand-blue transition"
                         >
                           {post.title} <ArrowRight size={12} />
-                        </a>
+                        </Link>
                       </li>
                     ))}
                   </ul>
