@@ -5,7 +5,8 @@ desc: "16개 라우트를 정적 import하면 index 청크가 615kB에 달했다
 tags: ["React", "코드스플리팅"]
 ---
 
-B2B 광고 대시보드 프로젝트에서 초기 로딩 성능을 측정해봤습니다. 16개 라우트를 정적 `import`로 연결한 상태에서 빌드하면 index 청크가 **615kB**였습니다. 코드 스플리팅 적용 후 **136kB**로 줄었습니다. 78% 감소입니다.
+B2B 광고 대시보드 프로젝트에서 초기 로딩 성능을 측정해봤습니다.
+16개 라우트를 정적 `import`로 연결한 상태에서 빌드하면 index 청크가 **615kB**였습니다. 코드 스플리팅 적용 후 78% 감소한 **136kB**였습니다.
 
 ## 번들과 청크
 
@@ -29,9 +30,9 @@ index.js (615kB)              index.js (136kB)
 
 ```ts
 // Before — 모든 페이지 코드가 하나의 번들로 합쳐진다
-import LoginPage from '@/pages/auth/LoginPage'
-import DashboardPage from '@/pages/dashboard/DashboardPage'
-import CampaignPage from '@/pages/campaign/CampaignPage'
+import LoginPage from "@/pages/auth/LoginPage";
+import DashboardPage from "@/pages/dashboard/DashboardPage";
+import CampaignPage from "@/pages/campaign/CampaignPage";
 // ... 16개 라우트
 ```
 
@@ -47,14 +48,14 @@ Vite 번들러는 정적 `import`로 연결된 모듈을 하나의 청크로 묶
 
 ```ts
 // 정적 import — 파일이 로드되는 순간 즉시 실행된다
-import DashboardPage from '@/pages/dashboard/DashboardPage'
+import DashboardPage from "@/pages/dashboard/DashboardPage";
 
 // 동적 import — 호출하는 시점에 Promise를 반환한다
-const module = await import('@/pages/dashboard/DashboardPage')
-const DashboardPage = module.default
+const module = await import("@/pages/dashboard/DashboardPage");
+const DashboardPage = module.default;
 ```
 
-정적 `import`는 파일이 실행되기 전에 모두 해결(resolve)됩니다. 번들러는 이 관계를 정적으로 분석해서 하나의 청크로 합칩니다.
+정적 `import`는 파일이 실행되기 전에 모두 해결됩니다. 번들러는 이 관계를 정적으로 분석해서 하나의 청크로 합칩니다.
 
 동적 `import()`는 런타임에 실행됩니다. 번들러는 동적 `import()`가 가리키는 모듈을 **별도 청크로 분리**하고, 브라우저는 그 코드가 실제로 필요한 시점에 해당 청크를 요청합니다.
 
@@ -62,15 +63,15 @@ const DashboardPage = module.default
 
 ```ts
 // After — 라우트 진입 시점에 청크를 요청한다
-const LoginPage = lazy(() => import('@/pages/auth/LoginPage'))
-const DashboardPage = lazy(() => import('@/pages/dashboard/DashboardPage'))
+const LoginPage = lazy(() => import("@/pages/auth/LoginPage"));
+const DashboardPage = lazy(() => import("@/pages/dashboard/DashboardPage"));
 ```
 
 ### Suspense — 비동기 로딩을 React에 알린다
 
 React는 기본적으로 동기적으로 렌더링합니다. `lazy`로 만든 컴포넌트를 렌더링할 때 청크가 아직 도착하지 않았다면, React는 이 상황을 에러 없이 처리할 방법이 필요합니다.
 
-이를 위해 React는 "아직 준비되지 않았다"는 신호를 받으면 가장 가까운 부모 `<Suspense>`를 찾아 fallback UI를 대신 렌더링합니다. 청크 로드가 완료되면 fallback을 치우고 원래 컴포넌트를 보여줍니다. `Suspense` 없이 `lazy` 컴포넌트를 쓰면 React가 이 대기 상태를 처리할 경계를 찾지 못해 에러를 던집니다.
+이를 위해 React는 "아직 준비되지 않았다"는 신호를 받으면 가장 가까운 부모 `<Suspense>`를 찾아 **fallback UI**를 대신 렌더링합니다. 청크 로드가 완료되면 fallback을 치우고 원래 컴포넌트를 보여줍니다. `Suspense` 없이 `lazy` 컴포넌트를 쓰면 React가 이 대기 상태를 처리할 경계를 찾지 못해 에러를 던집니다.
 
 ```tsx
 <Suspense fallback={null}>
@@ -96,7 +97,7 @@ const WorkspacePage = lazy(() => import('@/pages/workspace/WorkspacePage'))
 
 ```tsx
 // src/lib/loadable.tsx
-type TPropsOf<T> = T extends ComponentType<infer P> ? P : never
+type TPropsOf<T> = T extends ComponentType<infer P> ? P : never;
 
 export function loadable<T extends ComponentType<any>>(
   Component: T,
@@ -107,12 +108,12 @@ export function loadable<T extends ComponentType<any>>(
       <Suspense fallback={fallback}>
         <Component {...props} />
       </Suspense>
-    )
+    );
   }
   // React.lazy()로 만든 컴포넌트는 name이 없다. displayName을 명시적으로 설정하려면
   // lazy 선언 전에 컴포넌트에 displayName을 지정하거나, 별도 인자로 전달해야 한다.
-  Wrapped.displayName = `Loadable(${(Component as any).displayName ?? 'Component'})`
-  return Wrapped
+  Wrapped.displayName = `Loadable(${(Component as any).displayName ?? "Component"})`;
+  return Wrapped;
 }
 ```
 
@@ -121,14 +122,14 @@ export function loadable<T extends ComponentType<any>>(
 ```tsx
 // 선언 — 1줄
 const OverviewDashboard = loadable(
-  lazy(() => import('@/pages/dashboard/overview/OverviewDashboard'))
-)
+  lazy(() => import("@/pages/dashboard/overview/OverviewDashboard")),
+);
 
 // 페이지별 로딩 UI가 필요한 경우
 const Workspace = loadable(
-  lazy(() => import('@/pages/workspace/Workspace')),
-  <WorkspaceListLoading />
-)
+  lazy(() => import("@/pages/workspace/Workspace")),
+  <WorkspaceListLoading />,
+);
 ```
 
 라우트 트리에서는 일반 컴포넌트처럼 쓰면 됩니다.
@@ -144,9 +145,9 @@ const Workspace = loadable(
 
 적용 전후를 정확히 비교하기 위해 `perf/no-splitting` 브랜치를 따로 만들었습니다. `loadable`을 제거하고 전부 정적 `import`로 되돌린 후 빌드해서 비교했습니다. 아래 수치는 빌드 직후 기준(gzip 전)입니다.
 
-| 구분 | Before | After (감소) |
-|------|:------:|:------------:|
-| index 청크 | 615 kB | **136 kB (−78%)** |
+| 구분         |  Before  |   After (감소)    |
+| ------------ | :------: | :---------------: |
+| index 청크   |  615 kB  | **136 kB (−78%)** |
 | 초기 JS 전체 | 1,225 kB | **746 kB (−39%)** |
 
 `vendor` / `react-vendor` 청크(각 403kB / 207kB)는 스플리팅 여부와 무관하게 동일합니다. React 자체와 서드파티 라이브러리는 항상 함께 로드됩니다.
@@ -180,4 +181,4 @@ const DashboardPage = lazy(() => import('@/pages/dashboard/DashboardPage'))
 
 초기 번들을 줄였다면 다음 단계는 각 페이지 청크 자체를 최적화하는 것입니다. 이 프로젝트에서는 Skeleton UI를 도입해 청크가 로드되는 동안의 체감 대기 시간도 줄였습니다. Lighthouse로 LCP를 실측하면 Skeleton 적용 전 1,180ms에서 적용 후 1,048ms로 11% 줄어든 것을 확인할 수 있었습니다.
 
-> 코드 스플리팅이 "실제로 필요한 코드만 내려받게 하는 것"이라면, Skeleton UI는 "내려받는 동안 사용자가 기다리지 않는 것처럼 느끼게 하는 것"입니다. 둘은 성격이 다른 최적화이고 함께 쓸 때 효과가 큽니다.
+> 코드 스플리팅이 "실제로 필요한 코드만 내려받게 하는 것"이라면, Skeleton UI는 "내려받는 동안 사용자가 기다리지 않는 것처럼 느끼게 하는 것"입니다. 둘은 성격이 다른 최적화이고 함께 쓸 때 효과가 큽니다!

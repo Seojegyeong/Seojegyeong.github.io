@@ -1,0 +1,111 @@
+---
+title: "Claude API 비용 최적화 — Map O(1) 캐시와 Promise.all 병렬 처리"
+date: "2026-10-09"
+desc: "뉴스 기사에서 금융 신조어를 감지하는 AI 서버를 구축하면서, 등록 용어는 Map에서 즉시 반환하고 미등록 용어만 Claude API에 병렬로 보내 비용과 응답 속도를 동시에 잡았다."
+tags: ["Node.js", "Claude API", "성능최적화"]
+---
+
+light는 기사에서 금융 용어를 감지해 툴팁을 보여주는 확장 프로그램입니다. ETF·배당수익률처럼 미리 등록된 용어는 사전 데이터로 처리할 수 있습니다. 문제는 "밸류업 프로그램"이나 "중국 공산당 부동산 규제 완화"같은 신조어·복합어입니다. 사전에 없으니 AI가 판단해야 합니다.
+
+처음에는 모든 용어 후보를 Claude API에 전달했습니다. 등록 용어도, 신조어도 구분 없이 함께 보냈습니다. 기사 하나에 용어가 10개 감지되면 API를 10번 호출하는 구조였습니다.
+
+## 등록 용어까지 API에 보내는 것은 낭비다
+
+기사에서 감지된 용어 중 대부분은 이미 `terms.json`에 있는 등록 용어입니다. 이 용어들은 설명이 이미 작성되어 있는데 매번 API를 호출해 다시 설명을 받아오는 것은 비용 낭비입니다. 1인 프로젝트에서 Claude API 비용은 직접 부담이 됩니다.
+
+또한 10개 용어를 직렬로 처리하면 총 응답 시간은 각 API 호출 시간의 합입니다. 용어 하나당 평균 500ms라면 10개에 5,000ms입니다. 툴팁은 즉각성이 중요한 기능이어서 5초 대기는 UX를 망칩니다.
+
+## 2단계 분기: Map 조회 → API 병렬 처리
+
+서버 시작 시 `terms.json`을 Map으로 로드해 둡니다. O(1) 조회가 가능합니다. 요청이 들어오면 등록 여부를 먼저 확인하고, 미등록 용어만 Claude API로 보냅니다.
+
+```ts
+// light-server/src/server.ts
+
+// 서버 시작 시 1회 로드
+const termMap = new Map<string, ITermData>(
+  Object.entries(require("./terms.json"))
+);
+
+app.post("/api/terms", async (req, res) => {
+  const { terms } = req.body as { terms: string[] };
+
+  const results: ITermResult[] = [];
+  const unknownTerms: string[] = [];
+
+  // 1단계: Map 조회 O(1)
+  for (const term of terms) {
+    if (termMap.has(term)) {
+      results.push({ term, data: termMap.get(term)!, source: "registry" });
+    } else {
+      unknownTerms.push(term);
+    }
+  }
+
+  if (unknownTerms.length === 0) {
+    return res.json({ results });
+  }
+
+  // 2단계: 미등록 용어만 Claude API 병렬 처리
+  const aiResults = await Promise.all(
+    unknownTerms.map(async (term) => {
+      const response = await anthropic.messages.create({
+        model: "claude-haiku-4-5-20251001",
+        max_tokens: 200,
+        messages: [{ role: "user", content: `금융 용어 "${term}"을 2-3문장으로 설명해주세요.` }],
+      });
+      const data = {
+        description: response.content[0].type === "text" ? response.content[0].text : "",
+        source: "ai" as const,
+      };
+
+      // AI 처리 결과를 Map에 캐시 → 다음 요청은 API 호출 없음
+      termMap.set(term, data);
+
+      return { term, data };
+    })
+  );
+
+  res.json({ results: [...results, ...aiResults] });
+});
+```
+
+## 직렬 처리와 병렬 처리의 차이
+
+`Promise.all`은 배열의 모든 Promise를 동시에 실행합니다. 미등록 용어 3개를 처리할 때 직렬 처리는 3개를 순서대로 기다리므로 총 시간이 각 호출 시간의 합이 됩니다. `Promise.all`은 3개가 동시에 실행되어 가장 오래 걸리는 것 하나를 기다립니다.
+
+```ts
+// 직렬: 총 시간 = 500ms + 500ms + 500ms = 1,500ms
+for (const term of unknownTerms) {
+  const result = await callClaudeApi(term);
+}
+
+// 병렬: 총 시간 = max(500ms, 500ms, 500ms) ≈ 500ms
+const results = await Promise.all(unknownTerms.map(callClaudeApi));
+```
+
+Map에 캐시하므로 같은 신조어가 다시 요청되면 API를 호출하지 않습니다. 시간이 지날수록 API 호출 비율은 줄어듭니다.
+
+## Claude Haiku를 선택한 이유
+
+Opus·Sonnet 대비 응답 속도가 빠르고 비용이 낮습니다. 금융 용어를 2-3문장으로 설명하는 작업은 복잡한 추론이 필요하지 않습니다. 툴팁은 즉각성이 중요한 UI이므로 응답 속도가 우선이었고, 1인 프로젝트 예산에서 비용도 중요했습니다.
+
+<Callout type="tip">
+`Promise.all`은 하나라도 reject되면 전체가 실패합니다. 일부 용어 API 호출이 실패해도 나머지 결과를 반환하려면 `Promise.allSettled`로 교체하는 것이 더 안전합니다.
+</Callout>
+
+## 트레이드오프
+
+인메모리 Map 캐시는 서버가 재시작되면 소실됩니다. 재시작마다 이미 한 번 처리한 신조어를 다시 API로 호출해야 합니다. 주기적으로 Map 내용을 `terms.json`에 flush하는 로직으로 보완할 수 있습니다.
+
+BYOK(Bring Your Own Key) 구조이므로 사용자가 API 키를 입력하지 않으면 서버가 API를 호출할 수 없습니다. 키가 없는 사용자는 등록 용어만 이용 가능합니다.
+
+## 정리
+
+| 방식 | 등록 용어 비용 | 미등록 용어 응답 시간 | 인프라 |
+|------|--------------|----------------------|--------|
+| 모든 용어 AI 처리 | 낭비 | 직렬 × 용어 수 | 없음 |
+| Redis 캐시 | 절감 | 병렬 | 추가 필요 |
+| **Map 캐시 + Promise.all** | 절감 | 병렬 | 없음 (인메모리) |
+
+등록 용어는 Map에서 O(1)로 반환하고 미등록 용어만 병렬 처리하는 구조로, 추가 인프라 없이 API 비용과 응답 속도 두 가지를 함께 개선했습니다.

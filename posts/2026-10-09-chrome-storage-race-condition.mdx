@@ -1,0 +1,100 @@
+---
+title: "Chrome Storage 비동기 초기화와 Race Condition — isLoadedRef 가드 패턴"
+date: "2026-10-09"
+desc: "Chrome Storage 초기화 완료 전 setSettings 호출 시 설정이 기본값으로 덮어씌워지는 Race Condition을 isLoadedRef 초기화 가드로 차단하고, 3계층 상태 분리로 설정 영속성을 구현했다."
+tags: ["Chrome Extension", "React", "Race Condition"]
+---
+
+light 확장 프로그램은 사용자 설정(다크모드, 툴팁 위치, API 키 등)을 Chrome Storage Sync에 저장합니다. 개발 중 설정을 변경하면 가끔 무시되는 현상이 있었습니다. 다크모드를 켰는데 새로고침하면 꺼져있기도 했습니다. 재현 조건을 찾다가 빠르게 설정을 바꿀 때만 발생한다는 것을 알았습니다.
+
+## 비동기 초기화와 동시 쓰기가 만나는 지점
+
+Chrome Storage는 비동기 API입니다. `chrome.storage.sync.get()`을 호출하면 콜백으로 결과를 받습니다. 앱이 마운트되는 동안 두 가지 일이 동시에 진행됩니다.
+
+```text
+[앱 마운트]
+  ├─ chrome.storage.sync.get() 비동기 시작
+  └─ React 렌더링 시작
+        └─ 하위 컴포넌트 마운트 → 사용자 액션 가능
+              └─ setSettings("darkMode", true) 호출  ← 초기화 완료 전!
+                    ↓
+              storage.get() 완료 → defaultSettings로 덮어씀  ← 설정 손실
+```
+
+`chrome.storage.sync.get()` 응답이 오기 전에 사용자가 설정을 변경하면, 초기화가 완료될 때 가져온 기본값이 변경된 설정을 덮어씁니다. 이것이 Race Condition입니다. 마운트~초기화가 수십 ms이므로 대부분의 경우 발생하지 않지만, 확장 프로그램이 처음 로드될 때 설정 화면이 빠르게 열리면 재현됩니다.
+
+## 3계층 분리와 isLoadedRef 가드
+
+상태를 세 계층으로 분리했습니다.
+
+```text
+[Chrome Storage Sync]  ← 영속 저장소. 브라우저·기기 간 동기화
+        ↕
+[React Context]        ← 전역 공유 상태. 컴포넌트 트리 어디서나 접근
+        ↕
+[useState (UI)]        ← 로컬 UI 상태. Context에서 초기값 받음
+```
+
+초기화 완료 전 `setSettings` 호출을 차단하는 가드를 추가했습니다. `isLoadedRef`가 `true`가 될 때까지 설정 변경을 무시합니다.
+
+```tsx
+// SettingsContext.tsx
+
+export function SettingsProvider({ children }: { children: ReactNode }) {
+  const [settings, setSettingsState] = useState<ISettings>(DEFAULT_SETTINGS);
+  const isLoadedRef = useRef(false);
+
+  useEffect(() => {
+    chrome.storage.sync.get(DEFAULT_SETTINGS, (stored) => {
+      setSettingsState(stored as ISettings);
+      isLoadedRef.current = true; // 초기화 완료 표시
+    });
+  }, []);
+
+  const setSettings = useCallback(
+    (key: keyof ISettings, value: ISettings[typeof key]) => {
+      if (!isLoadedRef.current) {
+        // 초기화 완료 전 호출은 무시
+        return;
+      }
+
+      const updated = { ...settings, [key]: value };
+      setSettingsState(updated);
+      chrome.storage.sync.set({ [key]: value });
+    },
+    [settings]
+  );
+
+  const contextValue = useMemo(
+    () => ({ settings, setSettings, isLoaded: isLoadedRef.current }),
+    [settings, setSettings]
+  );
+
+  return (
+    <SettingsContext.Provider value={contextValue}>
+      {children}
+    </SettingsContext.Provider>
+  );
+}
+```
+
+## useState 대신 useRef를 쓴 이유
+
+초기화 완료 여부를 `useState`로 관리하면 `true`로 변경될 때 리렌더가 발생합니다. 그런데 초기화 완료 시점에는 이미 `setSettingsState`로 settings가 변경되어 리렌더가 1회 발생합니다. `useState`를 쓰면 같은 시점에 리렌더가 2번 발생합니다.
+
+**초기화 완료 여부는 렌더 결과에 영향을 주지 않는 내부 상태입니다.** `setSettings` 가드 역할만 하면 되므로 `useRef`가 더 적합합니다. 리렌더 없이 최신 값을 추적할 수 있고, `setSettingsState` 리렌더 1회로 처리됩니다.
+
+## 트레이드오프
+
+`isLoadedRef`는 동기적으로 업데이트되지 않으므로, 극단적으로 빠른 연속 클릭에서는 여전히 race 가능성이 있습니다. 실제 확장 프로그램 사용 환경에서는 마운트~초기화가 수십 ms이고 그 사이에 사용자가 설정을 변경하는 경우가 없어 문제가 되지 않았습니다.
+
+`chrome.storage.sync`는 1분당 최대 120회 쓰기 제한이 있습니다. 토글을 빠르게 연속으로 클릭하는 경우 throttle을 추가하면 더 안전합니다.
+
+## 정리
+
+| 방식 | Race Condition | 리렌더 비용 |
+|------|---------------|------------|
+| `isLoaded` useState | 방지 | 초기화 시 2회 |
+| **isLoadedRef 가드** | 방지 | 초기화 시 1회 |
+
+Chrome extension content script는 페이지 새로고침마다 재실행됩니다. 비동기 초기화가 완료되기 전 상태 변경이 가능한 구조에서는 이 가드가 없으면 사용자 설정이 조용히 손실됩니다.

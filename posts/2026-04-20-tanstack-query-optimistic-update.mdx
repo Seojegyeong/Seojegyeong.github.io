@@ -32,7 +32,7 @@ WithTime 프로젝트에서 알람 설정 화면을 개발하면서 토글 버�
 ```ts
 // src/hooks/settingAlarm/useAlarms.ts
 export function useToggleAlarm() {
-  const qc = useQueryClient()
+  const qc = useQueryClient();
 
   return useCoreMutation({
     mutationFn: ({ alarmId, enabled }: { alarmId: number; enabled: boolean }) =>
@@ -40,29 +40,29 @@ export function useToggleAlarm() {
 
     onMutate: async ({ alarmId, enabled }) => {
       // 진행 중인 refetch가 낙관적 업데이트를 덮어쓰지 않도록 취소
-      await qc.cancelQueries({ queryKey: alarmKeys.all })
+      await qc.cancelQueries({ queryKey: alarmKeys.all });
 
       // 롤백을 위해 현재 상태 저장
-      const prev = qc.getQueryData(alarmKeys.list())
+      const prev = qc.getQueryData(alarmKeys.list());
 
       // 즉시 UI 업데이트
       qc.setQueryData(alarmKeys.list(), (old: AlarmItem[] | undefined) =>
         old?.map((a) => (a.id === alarmId ? { ...a, enabled } : a)),
-      )
+      );
 
-      return { prev } // onError에서 롤백에 사용
+      return { prev }; // onError에서 롤백에 사용
     },
 
     onError: (_err, _vars, ctx) => {
       // 에러 시 저장해둔 이전 상태로 복구
-      if (ctx?.prev) qc.setQueryData(alarmKeys.list(), ctx.prev)
+      if (ctx?.prev) qc.setQueryData(alarmKeys.list(), ctx.prev);
     },
 
     onSettled: () => {
       // 성공·실패 무관하게 서버 실제 데이터와 동기화
-      void qc.invalidateQueries({ queryKey: alarmKeys.all })
+      void qc.invalidateQueries({ queryKey: alarmKeys.all });
     },
-  })
+  });
 }
 ```
 
@@ -71,8 +71,8 @@ export function useToggleAlarm() {
 ```tsx
 // src/components/settingTab/AlarmSetting.tsx
 function AlarmSetting() {
-  const { data: alarms } = useAlarms()
-  const { mutate: toggleAlarm } = useToggleAlarm()
+  const { data: alarms } = useAlarms();
+  const { mutate: toggleAlarm } = useToggleAlarm();
 
   return (
     <>
@@ -86,7 +86,7 @@ function AlarmSetting() {
         </div>
       ))}
     </>
-  )
+  );
 }
 ```
 
@@ -149,6 +149,4 @@ Optimistic Update를 처음 쓸 때는 `onMutate`, `onError`, `onSettled` 세 �
 - `onError`: 실패 시 되돌림
 - `onSettled`: 최종 서버 상태와 동기화
 
-`cancelQueries`가 왜 필요한지도 처음에 몰랐습니다. 실제로 이를 빠뜨리고 테스트했더니, 드물게 refetch 응답이 낙관적 업데이트 위에 덮어씌워지는 케이스를 재현할 수 있었습니다. 낙관적 업데이트 직후 기존 refetch가 완료되면 내 업데이트가 사라지는 것이었습니다.
-
-UX 관점에서는, "즉시 반응"과 "데이터 정확성"을 동시에 잡으려면 낙관적 업데이트가 적합한 상황인지 먼저 판단해야 한다는 것을 배웠습니다. 실패 가능성이 낮고 롤백이 의미 있는 경우(토글, 좋아요 등)에 유효합니다.
+UX 관점에서 "즉시 반응"과 "데이터 정확성"을 동시에 잡으려면 낙관적 업데이트가 적합한 상황인지 먼저 판단해야 한다는 것을 배웠습니다. 실패 가능성이 낮고 롤백이 의미 있는 경우(토글, 좋아요 등)에 유효합니다.

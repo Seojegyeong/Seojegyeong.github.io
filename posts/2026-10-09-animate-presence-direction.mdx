@@ -1,0 +1,79 @@
+---
+title: "Framer Motion AnimatePresence — custom prop으로 방향 슬라이드 구현"
+date: "2026-10-09"
+desc: "온보딩 6단계의 앞/뒤 이동이 동일한 방향으로 전환되어 진행 방향이 모호한 문제를, AnimatePresence의 custom prop으로 direction을 variants에 주입해 이동 방향에 맞는 슬라이드를 구현했다."
+tags: ["React", "Framer Motion", "애니메이션", "UX"]
+---
+
+Roome 온보딩은 6단계로 구성됩니다. 이전·다음 버튼으로 단계를 이동할 수 있습니다. 처음 구현했을 때는 단순 페이드로 전환했는데, "이전" 버튼을 누를 때도 "다음" 버튼을 누를 때와 같은 방향으로 전환됐습니다. 사용자가 앞으로 가는지 뒤로 가는지 공간적 맥락을 파악하기 어려웠습니다.
+
+## CSS 애니메이션으로는 exit을 처리하기 어렵다
+
+방향이 있는 슬라이드를 구현하려면 현재 화면이 나가는(exit) 애니메이션과 새 화면이 들어오는(enter) 애니메이션이 모두 필요합니다. CSS transition만으로는 요소가 DOM에서 제거될 때 transition이 실행되지 않습니다. `display: none`으로 숨기면 transition이 즉시 적용되고, DOM에서 실제로 제거되는 경우 브라우저는 transition을 실행할 시간이 없습니다.
+
+Framer Motion의 `AnimatePresence`는 자식 컴포넌트가 언마운트될 때 exit 애니메이션을 실행한 뒤 제거합니다. 언마운트 타이밍을 애니메이션이 끝날 때까지 지연시키는 방식입니다.
+
+## key와 custom으로 방향 슬라이드 구현
+
+두 가지가 필요했습니다. 첫째, 단계가 바뀔 때마다 이전 컴포넌트가 exit되고 새 컴포넌트가 enter되어야 합니다. 둘째, 앞으로 이동인지 뒤로 이동인지에 따라 슬라이드 방향이 달라야 합니다.
+
+```tsx
+// OnboardingPage.tsx
+const [step, setStep] = useState(0);
+const [direction, setDirection] = useState(1); // 1: 앞으로, -1: 뒤로
+
+const goNext = () => { setDirection(1); setStep((s) => s + 1); };
+const goPrev = () => { setDirection(-1); setStep((s) => s - 1); };
+
+<AnimatePresence custom={direction} mode="wait">
+  <motion.div
+    key={step}          // step이 바뀌면 새 컴포넌트로 취급 → exit + enter 트리거
+    custom={direction}  // variants 함수에서 custom 값으로 접근
+    variants={slideVariants}
+    initial="enter"
+    animate="center"
+    exit="exit"
+  >
+    <OnboardingStep step={step} />
+  </motion.div>
+</AnimatePresence>
+```
+
+`key={step}`이 중요합니다. `AnimatePresence`는 자식의 `key`가 변경될 때 이전 컴포넌트를 exit하고 새 컴포넌트를 enter합니다. key가 같으면 같은 컴포넌트로 취급해 재렌더만 하고 애니메이션이 트리거되지 않습니다.
+
+`variants`를 함수로 작성하면 `custom` 값을 인자로 받을 수 있습니다.
+
+```ts
+const slideVariants = {
+  enter: (direction: number) => ({
+    x: direction > 0 ? "100%" : "-100%", // 앞으로: 오른쪽에서 / 뒤로: 왼쪽에서
+    opacity: 0,
+  }),
+  center: {
+    x: 0,
+    opacity: 1,
+    transition: { duration: 0.3 },
+  },
+  exit: (direction: number) => ({
+    x: direction > 0 ? "-100%" : "100%", // 앞으로: 왼쪽으로 / 뒤로: 오른쪽으로
+    opacity: 0,
+    transition: { duration: 0.3 },
+  }),
+};
+```
+
+앞으로 이동하면 새 화면이 오른쪽에서 들어오고 이전 화면이 왼쪽으로 나갑니다. 뒤로 이동하면 반대입니다.
+
+## mode="wait"를 선택한 이유
+
+`mode="wait"`는 exit 애니메이션이 끝난 후 enter 애니메이션을 시작합니다. 기본값에서는 exit와 enter가 동시에 실행되어 두 화면이 겹쳐 보입니다. 온보딩 각 단계의 내용을 명확히 읽어야 하므로 순차 실행이 더 적합했습니다.
+
+단점은 총 전환 시간이 exit duration + enter duration이 된다는 점입니다. 각 0.3s면 전환마다 0.6s가 걸립니다. 빠르게 클릭하면 딜레이가 느껴질 수 있어 duration을 0.25s로 줄였습니다.
+
+## 트레이드오프
+
+`key={step}`으로 단계가 바뀔 때마다 컴포넌트가 완전히 언마운트·마운트됩니다. 하위 컴포넌트의 로컬 상태가 초기화됩니다. 온보딩에서 단계별로 입력한 값을 다음 단계로 전달해야 하므로, 입력값을 부모 state로 lift up해서 관리했습니다.
+
+## 정리
+
+`AnimatePresence`의 `custom` prop과 `key`를 조합하면 방향 정보가 있는 슬라이드 전환을 선언적으로 구현할 수 있습니다. 핵심은 두 가지입니다. `key={step}`으로 단계 변경 시 exit·enter를 트리거하고, `custom={direction}`으로 variants 함수에 방향 값을 전달합니다.
