@@ -19,7 +19,7 @@ ReactDOM.createRoot(container).render(<TooltipLayer />);
 
 내가 만든 컴포넌트를 남의 사이트 DOM에 올리는 순간, **타사 사이트의 CSS가 내 컴포넌트를 오염시키거나 반대로 내 CSS가 타사 레이아웃을 망가뜨리는** 충돌이 생깁니다. 이 충돌은 한 번에 해결되지 않고 3단계 장벽으로 나타났습니다.
 
-## CSS가 침범하는 이유
+## 타사 사이트에 내 컴포넌트를 올릴 때 생기는 일
 
 브라우저는 DOM 트리 전체에 스타일시트를 적용합니다. 익스텐션이 주입한 `div`도 대상 사이트 DOM의 자식이므로, 사이트의 `*`, `body`, `div` 등 글로벌 셀렉터가 그대로 영향을 미칩니다.
 
@@ -36,7 +36,7 @@ div {
 
 특히 오래된 커머스 사이트는 전역 스타일이 공격적입니다. `font-size`, `line-height`, `color`를 `*` 셀렉터로 강제하는 경우가 많습니다.
 
-## Shadow DOM: 격리된 독립 트리
+## 1단계 장벽: Shadow DOM으로 CSS 선택자 격리하기
 
 Shadow DOM은 브라우저가 DOM 트리 안에 만들 수 있는 **격리된 하위 트리**입니다. 외부 CSS 선택자가 Shadow Root 안쪽 요소를 대상으로 삼지 못하고, Shadow Root 안에서 정의한 스타일도 외부로 새어 나가지 않습니다.
 
@@ -78,8 +78,6 @@ flowchart TB
 
 일반 DOM 안의 요소는 대상 사이트 CSS에 영향을 받습니다. Shadow Root 아래의 요소는 받지 않습니다. 이 경계를 **Shadow Boundary**라고 부릅니다.
 
-## 1단계 — CSS 선택자 격리: attachShadow
-
 `attachShadow({ mode: 'open' })`으로 Shadow Root를 생성하고 그 안에 container를 넣습니다. React는 container를 루트로 삼아 렌더링합니다.
 
 ```tsx
@@ -96,7 +94,7 @@ ReactDOM.createRoot(container).render(<TooltipLayer />);
 
 대상 사이트의 `*`, `div` 선택자는 Shadow Boundary를 넘지 못합니다. 1단계 장벽이 해결됩니다.
 
-## 2단계 — 상속 속성 차단: `:host { all: initial }`
+## 2단계 장벽: `:host { all: initial }`로 상속 스타일 차단하기
 
 1단계로 선택자 침범은 막았지만, `font-family`, `color`, `line-height` 같은 **상속 속성(inherited properties)** 은 Shadow Boundary를 넘어 전파됩니다. CSS 선택자가 아닌 부모-자식 상속 메커니즘이기 때문입니다.
 
@@ -111,7 +109,7 @@ ReactDOM.createRoot(container).render(<TooltipLayer />);
 }
 ```
 
-## 3단계 — CSS-in-JS 주입 위치: Emotion createCache
+## 3단계 장벽: Emotion 캐시를 Shadow Root에 바인딩하기
 
 2단계까지 적용했더니 이번엔 Emotion 스타일이 사라졌습니다. Emotion은 기본적으로 `<head>`에 `<style>` 태그를 삽입합니다. Shadow DOM 안 컴포넌트에서 Emotion CSS를 쓰면 스타일 태그는 `<head>`에 붙고, 컴포넌트는 Shadow Root 안에 있습니다.
 
@@ -135,7 +133,7 @@ ReactDOM.createRoot(container).render(
 );
 ```
 
-## 전체 마운트 코드
+### 전체 마운트 코드
 
 ```tsx
 // src/content/mount.tsx
@@ -168,7 +166,7 @@ export function mountTooltipLayer() {
 }
 ```
 
-## 이벤트 retargeting — 리스너는 document에 붙입니다
+## 이벤트 처리: document 리스너로 Retargeting 이슈 우회하기
 
 `<span data-light>` 위에 마우스를 올리면 툴팁이 떠야 합니다. Shadow Root 안에 리스너를 붙이면 될 것 같지만, 이벤트가 Shadow Boundary를 넘는 순간 `event.target`이 Shadow Host(`div#light-root`)로 교체됩니다(retargeting). 어떤 span 위에 마우스가 있는지 알 수 없게 됩니다.
 
@@ -209,7 +207,7 @@ function TooltipLayer() {
 
 익스텐션 콘텐츠 스크립트에서는 `'open'`이 디버깅하기 편합니다. DevTools에서 Shadow Root 내부 요소를 선택하고 스타일을 검사할 수 있습니다. 보안상 중요한 UI라면 `'closed'`를 쓰지만, 콘텐츠 스크립트 수준에서 클로즈드 모드가 제공하는 보안 이점은 제한적입니다.
 
-## 회고
+## 회고: 격리가 필요한 세 가지 레이어
 
 처음에는 `attachShadow` 하나면 CSS 문제가 끝날 줄 알았습니다. 그런데 수정할 때마다 다음 레이어가 드러났습니다.
 
