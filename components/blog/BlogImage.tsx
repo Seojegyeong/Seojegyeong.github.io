@@ -1,13 +1,18 @@
 export default function BlogImage({
   src,
   alt,
+  maxWidth,
 }: {
   src?: string;
   alt?: string;
+  maxWidth?: string;
 }) {
   if (!src) return null;
   return (
-    <figure className="not-prose my-8">
+    <figure
+      className="not-prose my-8 mx-auto"
+      style={maxWidth ? { maxWidth } : undefined}
+    >
       <img
         src={src}
         alt={alt ?? ""}

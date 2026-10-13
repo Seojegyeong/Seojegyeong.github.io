@@ -33,6 +33,7 @@ const components = {
   Intro,
   MermaidBlock,
   TermAnnotation,
+  BlogImage,
   pre: CodeBlock,
   img: (props: React.ImgHTMLAttributes<HTMLImageElement>) => (
     <BlogImage

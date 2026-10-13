@@ -10,7 +10,7 @@ WithTime 프로젝트에서 설정 화면을 개발하면서 토글 버튼의 �
 알람 ON/OFF 토글을 누르면 서버에 요청을 보내고 응답을 받아야 UI가 변합니다.
 만약 서버 응답이 300ms라면 토글을 눌렀을 때 0.3초 동안 아무 반응이 없습니다. 이 지연이 사용자에게는 "버튼이 작동하지 않는 것처럼" 느껴집니다.
 
-![WithTime 알람 설정 화면 — 알림 항목마다 ON/OFF 토글이 달려 있다](/blog/tanstack-query-optimistic-update/tanstack-query-optimistic-update-01.svg)
+<BlogImage src="/blog/tanstack-query-optimistic-update/tanstack-query-optimistic-update-01.svg" alt="WithTime 알람 설정 화면 — 알림 항목마다 ON/OFF 토글이 달려 있다" maxWidth="440px" />
 
 ## 문제: 요청이 끝나야 UI가 바뀐다
 
