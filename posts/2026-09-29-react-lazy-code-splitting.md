@@ -142,13 +142,7 @@ const Workspace = loadable(
 `displayName`을 지정한 이유는 React DevTools에서 `Wrapped`가 아니라 `Loadable(...)`로 표시되게 하기 위해서입니다. `React.lazy()`로 만든 컴포넌트는 `name`이 없어 `displayName`도 `undefined`입니다. 이 경우 fallback인 `"Component"`가 사용되어 DevTools에서 `Loadable(Component)`로만 표시되어 라우트가 많아지면 어느 컴포넌트인지 구분하기 어렵습니다.
 
 <Callout type="tip">
-구체적인 이름이 필요하다면 `lazy` 선언 직후 `displayName`을 지정합니다.
-
-```ts
-const OverviewDashboard = lazy(() => import("@/pages/dashboard/OverviewDashboard"));
-OverviewDashboard.displayName = "OverviewDashboard";
-// DevTools: Loadable(Component) → Loadable(OverviewDashboard)
-```
+구체적인 이름이 필요하다면 `lazy` 선언 직후 `displayName`을 직접 지정합니다. `OverviewDashboard.displayName = "OverviewDashboard"`로 설정하면 DevTools에서 `Loadable(Component)` 대신 `Loadable(OverviewDashboard)`로 표시됩니다.
 </Callout>
 
 ## 수치 측정
