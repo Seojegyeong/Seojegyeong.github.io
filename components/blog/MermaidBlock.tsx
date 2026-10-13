@@ -4,7 +4,7 @@ import { useId, useEffect, useRef } from "react";
 
 let initialized = false;
 
-export default function MermaidBlock({ code }: { code: string }) {
+export default function MermaidBlock({ code, maxWidth }: { code: string; maxWidth?: string }) {
   const ref = useRef<HTMLDivElement>(null);
   const reactId = useId();
   const id = useRef(`mermaid-${reactId.replace(/[^a-z0-9]/gi, "")}`);
@@ -35,7 +35,8 @@ export default function MermaidBlock({ code }: { code: string }) {
   return (
     <div
       ref={ref}
-      className="flex justify-center overflow-x-auto my-8 not-prose"
+      className="flex justify-center overflow-x-auto my-8 not-prose mx-auto"
+      style={maxWidth ? { maxWidth } : undefined}
     />
   );
 }

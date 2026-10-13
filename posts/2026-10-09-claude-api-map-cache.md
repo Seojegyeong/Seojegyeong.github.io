@@ -5,7 +5,7 @@ desc: "뉴스 기사에서 금융 신조어를 감지하는 AI 서버를 구축�
 tags: ["Node.js", "AI", "성능최적화"]
 ---
 
-light는 기사에서 금융 용어를 감지해 툴팁을 보여주는 확장 프로그램입니다. ETF·배당수익률처럼 미리 등록된 용어는 사전 데이터로 처리할 수 있습니다. 문제는 "밸류업 프로그램"이나 "중국 공산당 부동산 규제 완화"같은 신조어·복합어입니다. 사전에 없으니 AI가 판단해야 합니다.
+light는 기사에서 금융 용어를 감지해 툴팁을 보여주는 확장 프로그램입니다. ETF·배당수익률처럼 미리 등록된 용어는 사전 데이터로 처리할 수 있습니다. 문제는 "밸류업 프로그램"이나 "PF 대출 부실화"같은 신조어·복합어입니다. 사전에 없으니 AI가 판단해야 합니다.
 
 처음에는 모든 용어 후보를 Claude API에 전달했습니다. 등록 용어도, 신조어도 구분 없이 함께 보냈습니다. 기사 하나에 용어가 10개 감지되면 API를 10번 호출하는 구조였습니다.
 
@@ -17,7 +17,43 @@ light는 기사에서 금융 용어를 감지해 툴팁을 보여주는 확장 �
 
 ## 2단계 분기: Map 조회 → API 병렬 처리
 
-서버 시작 시 `terms.json`을 Map으로 로드해 둡니다. O(1) 조회가 가능합니다. 요청이 들어오면 등록 여부를 먼저 확인하고, 미등록 용어만 Claude API로 보냅니다.
+서버 시작 시 `terms.json`을 Map으로 로드해 둡니다. Map은 내부적으로 해시 테이블로 동작합니다. 키를 해시 함수로 변환해 값의 위치를 바로 찾기 때문에, 등록 용어가 100개든 10,000개든 조회 시간이 같습니다. 이것이 O(1)입니다.
+
+plain object(`{}`)도 동일하게 O(1)이지만, `"toString"`이나 `"constructor"` 같은 프로토타입 키와 충돌할 위험이 있습니다. Map은 순수한 키-값 저장소로만 동작하고 `.has()`로 존재 여부를 명확하게 확인할 수 있어 선택했습니다.
+
+요청이 들어오면 등록 여부를 먼저 확인하고, 미등록 용어만 Claude API로 보냅니다.
+
+```mermaid 360px
+---
+config:
+  layout: elk
+  theme: base
+  elk:
+    edgeRouting: ORTHOGONAL
+  themeVariables:
+    primaryColor: "#fbfcfd"
+    primaryBorderColor: "#e6e8ea"
+    fontFamily: "Pretendard, sans-serif"
+    clusterBkg: "#fbfcfd"
+    clusterBorder: "#d6d7da"
+---
+flowchart TD
+  A(["요청"]):::request
+  B{"Map 조회"}:::decision
+  C["즉시 반환"]:::success
+  D["Promise.all\nClaude API 병렬 호출"]:::process
+  E["Map 캐시 후 반환"]:::storage
+
+  A --> B
+  B -- "등록됨" --> C
+  B -- "미등록" --> D --> E
+
+  classDef request  fill:#eff6ff,stroke:#7eb1f3,color:#004fa7
+  classDef decision fill:#e0f7f9,stroke:#00b5c5,color:#004fa7
+  classDef process  fill:#c8e0ff,stroke:#7eb1f3,color:#004fa7
+  classDef success  fill:#eff6ff,stroke:#1779e1,color:#004fa7
+  classDef storage  fill:#f5f0ff,stroke:#ab8be3,color:#4a1d96
+```
 
 ```ts
 // light-server/src/server.ts
@@ -97,6 +133,10 @@ Opus·Sonnet 대비 응답 속도가 빠르고 비용이 낮습니다. 금융 �
 ## 트레이드오프
 
 인메모리 Map 캐시는 서버가 재시작되면 소실됩니다. 재시작마다 이미 한 번 처리한 신조어를 다시 API로 호출해야 합니다. 주기적으로 Map 내용을 `terms.json`에 flush하는 로직으로 보완할 수 있습니다.
+
+AI가 처리한 신조어를 Map에 계속 누적하면 장기 운영 시 메모리 사용량이 늘어납니다. 1인 프로젝트 규모에서는 당장 문제가 되지 않지만, 트래픽이 늘어나면 LRU 캐시로 교체해 오래된 항목을 자동 제거하는 방식을 검토할 수 있습니다.
+
+`Promise.all`은 동시 요청 수를 제한하지 않습니다. 미등록 용어가 한 번에 대량으로 들어오면 Anthropic API의 Rate Limit에 부딪힐 수 있습니다. 그 경우 `p-limit` 같은 라이브러리로 동시 요청 수를 제한하는 방향으로 보완할 수 있습니다.
 
 BYOK(Bring Your Own Key) 구조이므로 사용자가 API 키를 입력하지 않으면 서버가 API를 호출할 수 없습니다. 키가 없는 사용자는 등록 용어만 이용 가능합니다.
 

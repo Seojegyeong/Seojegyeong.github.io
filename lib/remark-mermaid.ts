@@ -7,16 +7,18 @@ const remarkMermaid: Plugin<[], Root> = () => {
     visit(tree, "code", (node: any, index, parent: any) => {
       if (node.lang !== "mermaid" || !parent || index === undefined) return;
 
+      const attributes: any[] = [
+        { type: "mdxJsxAttribute", name: "code", value: node.value },
+      ];
+
+      if (node.meta) {
+        attributes.push({ type: "mdxJsxAttribute", name: "maxWidth", value: node.meta });
+      }
+
       parent.children[index] = {
         type: "mdxJsxFlowElement",
         name: "MermaidBlock",
-        attributes: [
-          {
-            type: "mdxJsxAttribute",
-            name: "code",
-            value: node.value,
-          },
-        ],
+        attributes,
         children: [],
       };
     });
