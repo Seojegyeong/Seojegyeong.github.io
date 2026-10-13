@@ -67,7 +67,7 @@ export default function TermAnnotation({ children, def }: Props) {
         ref={termRef}
         onMouseEnter={() => setHovered(true)}
         onMouseLeave={() => setHovered(false)}
-        className="underline decoration-brand-blue decoration-2 underline-offset-2"
+        className="bg-[var(--color-brand-50)] rounded px-1 underline decoration-dotted decoration-brand-blue underline-offset-2 cursor-default"
       >
         {children}
       </span>
