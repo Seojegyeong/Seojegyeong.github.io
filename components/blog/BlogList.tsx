@@ -41,7 +41,7 @@ export default function BlogList({ posts }: { posts: PostMeta[] }) {
           >
             <Link
               href={`/blog/${post.slug}`}
-              className="flex flex-col gap-1 py-5 group sm:flex-row sm:items-start sm:justify-between"
+              className="flex flex-col gap-1 py-4 group sm:flex-row sm:items-start sm:justify-between"
             >
               <div className="flex flex-col gap-1">
                 <span className="text-text-primary font-semibold group-hover:text-brand-blue transition-colors">

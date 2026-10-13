@@ -70,48 +70,24 @@ export const projects: Project[] = [
     ],
     relatedPosts: [
       {
-        title: "IP로 접속하면 로그인이 자꾸 풀리는 이유 (feat. Secure 쿠키)",
-        url: "/blog/2026-08-10-vite-host-secure-cookie",
+        title: "대시보드 Skeleton UI와 LCP 측정",
+        url: "/blog/2026-10-09-skeleton-ui-lcp",
       },
       {
         title: "대시보드 지표 포맷팅, 하나로 흐르게 만들기",
         url: "/blog/2026-06-23-typescript-metric-formatting",
       },
       {
-        title: "queryKey 하나로 캐시 이해하기",
-        url: "/blog/2026-06-18-tanstack-query-cache",
-      },
-      {
-        title: "병렬 401을 단 1번의 재발급으로 처리하는 큐 패턴",
-        url: "/blog/2026-09-22-axios-401-refresh-queue",
-      },
-      {
-        title: "SSE 401 재발급을 1번으로 보장하는 싱글턴 패턴",
-        url: "/blog/2026-10-13-sse-401-refresh-singleton",
-      },
-      {
         title: "React.lazy와 loadable 헬퍼로 초기 번들 78% 줄이기",
         url: "/blog/2026-09-29-react-lazy-code-splitting",
-      },
-      {
-        title: "Cursor와 Playwright로 테스트 자동화하기",
-        url: "/blog/2026-05-18-playwright-cursor-e2e",
-      },
-      {
-        title: "AI 분석 요청의 POST + 폴링 복합 패턴",
-        url: "/blog/2026-10-09-ai-analysis-polling",
       },
       {
         title: "CloudFront Functions로 CSP 헤더와 XSS 방어 구성",
         url: "/blog/2026-10-09-csp-cloudfront",
       },
       {
-        title: "TanStack Query 재시도 정책",
-        url: "/blog/2026-10-09-retry-policy",
-      },
-      {
-        title: "대시보드 Skeleton UI와 LCP 측정",
-        url: "/blog/2026-10-09-skeleton-ui-lcp",
+        title: "SSE 401 재발급을 1번으로 보장하는 싱글턴 패턴",
+        url: "/blog/2026-10-13-sse-401-refresh-singleton",
       },
     ],
   },
@@ -158,10 +134,6 @@ export const projects: Project[] = [
       {
         title: "TanStack Query initialData로 목록-상세 전환 빈 화면 없애기",
         url: "/blog/2026-06-05-tanstack-query-initial-data",
-      },
-      {
-        title: "AnimatePresence custom prop으로 방향별 슬라이드 구현",
-        url: "/blog/2026-10-09-animate-presence-direction",
       },
       {
         title: "axios 인터셉터 성공 처리 통일과 FormData 자동화",
@@ -233,10 +205,6 @@ export const projects: Project[] = [
       {
         title: "Claude API Map 캐시와 Promise.all로 비용 최적화",
         url: "/blog/2026-10-09-claude-api-map-cache",
-      },
-      {
-        title: "Figma MCP와 Claude Code 단일 컨텍스트 워크플로",
-        url: "/blog/2026-10-09-figma-mcp-workflow",
       },
       {
         title: "innerHTML 대신 TreeWalker로 텍스트 하이라이팅",

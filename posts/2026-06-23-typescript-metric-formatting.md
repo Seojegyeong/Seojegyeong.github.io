@@ -1,7 +1,7 @@
 ---
 title: "대시보드 지표 포맷팅, 하나로 흐르게 만들기"
 date: "2026-06-23"
-desc: "포맷 규칙이 16개 파일에 분산되어 화면마다 지표가 다르게 표시되는 버그를 METRIC_REGISTRY 레지스트리 패턴으로 단일화해 해결한 과정 회고."
+desc: "포맷 규칙이 16개 파일에 분산되어 화면마다 지표가 다르게 표시되는 버그를 METRIC_REGISTRY 레지스트리 패턴으로 단일화해 해결한 과정을 정리했다."
 tags: ["TypeScript", "리팩토링"]
 ---
 
@@ -26,15 +26,15 @@ const formatted = String(value);
 
 ![통합 대시보드 — 클릭수·노출수·전환율·ROAS를 각각 다른 포맷으로 표시한다](/blog/metric_registry/METRIC_REGISTRY-07.png)
 
-이 글에서는 분산된 포맷 규칙을 하나의 레지스트리로 모으고, TypeScript로 단단하게 만든 과정을 다섯 단계로 정리합니다.
-
 ![전체 구조: API 응답 → 바인딩 → METRIC_REGISTRY → KPI 카드·일별 테이블·차트](/blog/metric_registry/METRIC_REGISTRY-01.png)
+
+API 응답이 바인딩을 거쳐 `METRIC_REGISTRY`에 연결되고, 레지스트리가 각 컴포넌트에 포맷을 공급하는 구조입니다. 이 흐름을 다섯 단계로 나눠 정리합니다.
 
 ## 1. 레지스트리 — 흩어진 분기를 객체에 모으기
 
 1234라는 숫자가 있다고 합시다. 무슨 지표냐에 따라 다르게 보여줘야 합니다.
 
-```ts
+```js
 function formatValue(metric, value) {
   if (metric === "clicks") return value.toLocaleString();      // "1,234"
   if (metric === "spend") return `₩${value.toLocaleString()}`; // "₩1,234"
@@ -44,7 +44,7 @@ function formatValue(metric, value) {
 
 돌아가긴 하지만 문제는 이 if 덩어리가 카드 컴포넌트, 테이블, 차트 등에 **각자 미묘하게 다른 형태로** 반복된다는 것입니다. 클릭수 표시 규칙을 바꾸려면 여러 군데를 고쳐야 하고, 한 군데라도 빠뜨리면 화면마다 다르게 보입니다.
 
-지표별 규칙을 하나에 모으기로 했습니다. → 레지스트리
+지표별 규칙을 하나의 객체에 등록해두고 어디서든 꺼내 쓰는 구조로 바꾸기로 했습니다. 이런 방식을 레지스트리 패턴이라고 부릅니다. if 분기가 객체의 키로 바뀌고, 규칙을 참조하는 쪽은 키만 알면 됩니다.
 
 ```ts
 const METRIC_REGISTRY = {
@@ -61,7 +61,7 @@ METRIC_REGISTRY.clicks.format(1234); // "1,234"
 METRIC_REGISTRY.spend.format(1234);  // "₩1,234"
 ```
 
-레지스트리 패턴의 핵심은 흩어진 분기를 객체로 모으는 것입니다.
+클릭수 포맷을 바꾸려면 레지스트리 한 줄만 수정하면 됩니다. 카드·테이블·차트는 손댈 필요가 없습니다.
 
 ![METRIC_REGISTRY — KPI 카드·일별 테이블·차트가 하나의 객체를 바라본다](/blog/metric_registry/METRIC_REGISTRY-02.png)
 
@@ -71,6 +71,22 @@ METRIC_REGISTRY.spend.format(1234);  // "₩1,234"
 
 포맷 기준의 축을 아예 바꾸기로 했습니다. 표시 위치가 아니라 값의 타입에 묶는 것입니다.
 
+```ts
+// Before: 위치(컴포넌트)가 포맷 기준 — conversion이 어디서 보이느냐에 따라 달라진다
+conversion: {
+  formatForCard:    (v) => `${v.toFixed(2)}%`,  // KPI 카드: 소수 2자리
+  formatForTable:   (v) => `${v.toFixed(1)}%`,  // 테이블: 소수 1자리
+  formatForSummary: (v) => `${Math.round(v)}%`, // 합계 행: 반올림
+}
+
+// After: 값의 타입이 포맷 기준 — 비율이면 toFixed(2)%, 어디서 쓰든 동일
+conversion: {
+  format: (v) => `${v.toFixed(2)}%`,
+}
+```
+
+Before에서는 같은 지표가 세 개의 포맷을 가집니다. 지표를 추가할 때마다 위치별 포맷을 모두 채워야 하고, 한 군데 빠뜨리면 또 불일치가 생깁니다. After에서는 `conversion`은 비율이므로 `toFixed(2)%` — 이 판단이 레지스트리에 한 번만 들어갑니다.
+
 지표가 많아도 값은 결국 네 종류 중 하나로 떨어집니다.
 
 - 정수형 카운트 → 천 단위 콤마 (1,234)
@@ -79,6 +95,8 @@ METRIC_REGISTRY.spend.format(1234);  // "₩1,234"
 - 증감률 → toFixed(2)% + 절댓값
 
 ![4가지 값 타입과 포맷 규칙 — 정수형 카운트·비율·금액·증감률](/blog/metric_registry/METRIC_REGISTRY-03.png)
+
+같은 타입으로 분류된 지표는 포맷 함수를 공유합니다. `spend`와 `revenue`는 모두 금액이므로 `formatCurrency` 하나를 spread로 재사용합니다.
 
 ```ts
 const currencyFormat = { format: formatCurrency } satisfies Pick<IMetricMeta, "format">;
@@ -176,6 +194,8 @@ const METRIC_REGISTRY = {
 
 지표마다 필요한 능력이 다릅니다. 증감률(`formatDelta`)이 필요한 지표도 있고, 카드 제목용 `kpiLabel`이 필요한 지표도 있습니다.
 
+처음에는 `formatDelta`를 optional로 뒀습니다. 증감률이 없는 지표에 실수로 `formatDelta`를 호출했고, 차트 툴팁에 `undefined%`가 표시됐습니다. 타입 검사는 통과했기 때문에 런타임에 직접 확인하기 전까지는 누락을 알 수 없었습니다.
+
 ```ts
 // ❌ optional 남용 — 빠뜨려도 TypeScript는 가만히 있고, 런타임에 undefined
 interface IMetricMeta {
@@ -227,7 +247,14 @@ spend: {
 - 백엔드 응답: ROAS, ROASChangeRate, cvrChangeRate…
 - 레지스트리 키: roas, conversion, clicks…
 
-바인딩 레이어 없이 컴포넌트가 API 응답을 직접 참조하면 어떻게 될까요.
+바인딩에서 쓰는 두 타입은 각각 레지스트리와 API 응답에서 파생됩니다.
+
+```ts
+type TKpiMetricKey   = keyof typeof METRIC_REGISTRY; // "clicks" | "roas" | "conversion" | ...
+type TMetricApiField = keyof IMetricsResponse;        // "ROAS" | "clicks" | "cvrChangeRate" | ...
+```
+
+바인딩 레이어 없이 컴포넌트가 API 응답을 직접 참조하면 백엔드 필드명이 컴포넌트 곳곳으로 새어 나갑니다.
 
 ```ts
 // 바인딩 없이 — 백엔드 필드명이 컴포넌트 곳곳에 노출된다
@@ -257,13 +284,33 @@ export const OVERVIEW_KPI_BINDINGS: readonly IOverviewKpiBinding[] = [
 
 `TMetricApiField`가 `keyof IMetricsResponse`이기 때문에 응답에 없는 필드명을 오타로 적으면 타입 에러가 납니다. 백엔드 필드명이 바뀌어도 바인딩 한 줄만 고치면 됩니다.
 
+`OVERVIEW_KPI_BINDINGS`를 순회하면 컴포넌트는 레지스트리 키만 참조합니다. API 필드명은 바인딩 배열에만 남습니다.
+
+```tsx
+{OVERVIEW_KPI_BINDINGS.map(({ registryKey, valueField, deltaField }) => {
+  const meta = METRIC_REGISTRY[registryKey];
+  return (
+    <KpiCard
+      key={registryKey}
+      label={meta.kpiLabel}
+      value={meta.format(data[valueField])}
+      delta={meta.formatDelta(data[deltaField])}
+    />
+  );
+})}
+```
+
 ## 마무리
 
 ![① 백엔드 응답(날것의 숫자) → ② 바인딩이 꺼내고 레지스트리가 포맷 → ③ KPI 카드에 표시](/blog/metric_registry/METRIC_REGISTRY-08.png)
 
 다섯 단계가 하나의 흐름으로 연결됩니다.
 
-먼저 흩어진 if 분기를 **레지스트리** 객체 하나로 모읍니다. 다음으로 포맷 기준을 표시 위치가 아니라 **값의 타입**에 묶어, 같은 숫자 종류는 어디서나 똑같이 보이도록 통일합니다. 이 객체를 `satisfies`로 타입 검사하면 누락된 필드를 컴파일 타임에 잡으면서도 키 유니온과 리터럴 타입은 보존됩니다. 지표마다 필요한 능력이 다를 때는 **인터페이스 상속 계층**으로 "필요한 것만, 빠짐없이"를 강제합니다. 마지막으로 **API 바인딩 레이어**가 백엔드 필드명과 레지스트리 키를 잇습니다. 백엔드 네이밍이 바뀌어도 컴포넌트는 손댈 필요가 없습니다.
+흩어진 if 분기를 **레지스트리** 객체 하나로 모으고, 포맷 기준을 표시 위치가 아니라 **값의 타입**에 묶어 통일합니다. 이 객체를 `satisfies`로 타입 검사하면 누락된 필드를 컴파일 타임에 잡으면서도 키 유니온과 리터럴 타입이 보존됩니다.
+
+지표마다 필요한 능력이 다를 때는 **인터페이스 상속 계층**으로 "필요한 것만, 빠짐없이"를 강제합니다. 마지막으로 **API 바인딩 레이어**가 백엔드 필드명과 레지스트리 키를 잇습니다. 백엔드 네이밍이 바뀌어도 컴포넌트는 손댈 필요가 없습니다.
+
+이 작업에서 인터페이스를 먼저 설계하고 구현이 따라오는 순서를 처음으로 의식적으로 적용했습니다. `satisfies`와 상속 계층을 조합하면 지표를 추가할 때 컴파일러가 체크리스트 역할을 합니다. 필드 하나 빠뜨리면 빌드가 실패하고, 통과하면 모든 컴포넌트가 올바른 포맷을 받는다는 보장이 생깁니다. 레지스트리를 도입한 뒤로는 PR에서 "이 지표의 포맷이 맞는가"를 눈으로 추적하는 일이 사라졌습니다.
 
 | 단계 | 해결하는 문제 |
 |------|------|

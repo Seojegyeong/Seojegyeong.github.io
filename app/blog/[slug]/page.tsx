@@ -13,6 +13,7 @@ import BlogImage from "@/components/blog/BlogImage";
 import CodeBlock from "@/components/blog/CodeBlock";
 import MermaidBlock from "@/components/blog/MermaidBlock";
 import TableOfContents from "@/components/blog/TableOfContents";
+import TermAnnotation from "@/components/blog/TermAnnotation";
 import type { Metadata } from "next";
 
 type Props = { params: Promise<{ slug: string }> };
@@ -31,6 +32,7 @@ const components = {
   Callout,
   Intro,
   MermaidBlock,
+  TermAnnotation,
   pre: CodeBlock,
   img: (props: React.ImgHTMLAttributes<HTMLImageElement>) => (
     <BlogImage
@@ -63,10 +65,10 @@ export default async function PostPage({ params }: Props) {
 
   return (
     <main className="min-h-screen bg-white scroll-smooth">
-      <div className="max-w-6xl mx-auto px-6 pt-16 pb-28">
-        <div className="flex gap-16 items-start">
+      <div className="max-w-7xl mx-auto px-6 pt-16 pb-28">
+        <div className="flex gap-12 items-start">
           {/* 목차 */}
-          <aside className="hidden xl:flex flex-col w-56 shrink-0 sticky top-28 self-start">
+          <aside className="hidden xl:flex flex-col w-48 shrink-0 sticky top-28 self-start">
             <Link
               href="/blog"
               className="flex items-center gap-1.5 text-sm text-text-muted hover:text-text-primary transition-colors mb-6"
@@ -114,6 +116,9 @@ export default async function PostPage({ params }: Props) {
               />
             </div>
           </article>
+
+          {/* 어노테이션 패널 */}
+          <aside id="annotation-root" className="hidden xl:block w-64 shrink-0 sticky top-28 self-start" />
         </div>
       </div>
     </main>

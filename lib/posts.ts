@@ -34,11 +34,11 @@ export function extractHeadings(content: string): Heading[] {
 }
 
 export function getAllPosts(): PostMeta[] {
-  const files = fs.readdirSync(postsDir).filter((f) => f.endsWith(".mdx"));
+  const files = fs.readdirSync(postsDir).filter((f) => f.endsWith(".md"));
 
   return files
     .map((filename) => {
-      const slug = filename.replace(/\.mdx$/, "");
+      const slug = filename.replace(/\.md$/, "");
       const raw = fs.readFileSync(path.join(postsDir, filename), "utf-8");
       const { data } = matter(raw);
 
@@ -54,7 +54,7 @@ export function getAllPosts(): PostMeta[] {
 }
 
 export function getPostBySlug(slug: string): Post {
-  const filepath = path.join(postsDir, `${slug}.mdx`);
+  const filepath = path.join(postsDir, `${slug}.md`);
   const raw = fs.readFileSync(filepath, "utf-8");
   const { data, content } = matter(raw);
 

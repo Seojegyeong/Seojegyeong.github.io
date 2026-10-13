@@ -44,28 +44,21 @@ export default function BlogContent({ posts, allTags }: Props) {
             <motion.div whileHover={{ x: 4 }} transition={{ duration: 0.2, ease }}>
               <Link
                 href={`/blog/${post.slug}`}
-                className="flex flex-col gap-1 py-5 group sm:flex-row sm:items-start sm:justify-between"
+                className="flex flex-col gap-1 py-4 group sm:flex-row sm:items-start sm:justify-between"
               >
-                <div className="flex flex-col gap-1.5">
+                <div className="flex flex-col gap-1">
                   <span className="text-text-primary font-semibold group-hover:text-brand-blue transition-colors">
                     {post.title}
                   </span>
+                  {post.tags.length > 0 && (
+                    <span className="text-xs text-text-subtle">
+                      {post.tags.join(" · ")}
+                    </span>
+                  )}
                   {post.desc && (
                     <span className="text-sm text-text-muted line-clamp-1 break-keep">
                       {post.desc}
                     </span>
-                  )}
-                  {post.tags.length > 0 && (
-                    <div className="flex gap-1.5 flex-wrap">
-                      {post.tags.map((t) => (
-                        <span
-                          key={t}
-                          className="text-xs px-2 py-0.5 rounded-md bg-brand-50 text-brand-blue font-medium"
-                        >
-                          {t}
-                        </span>
-                      ))}
-                    </div>
                   )}
                 </div>
                 <span className="text-sm text-text-subtle shrink-0 sm:ml-8 sm:pt-0.5">
