@@ -96,7 +96,7 @@ ReactDOM.createRoot(container).render(<TooltipLayer />);
 
 대상 사이트의 `*`, `div` 선택자는 Shadow Boundary를 넘지 못합니다. 1단계 장벽이 해결됩니다.
 
-## 2단계 — 상속 속성 차단: :host { all: initial }
+## 2단계 — 상속 속성 차단: `:host { all: initial }`
 
 1단계로 선택자 침범은 막았지만, `font-family`, `color`, `line-height` 같은 **상속 속성(inherited properties)** 은 Shadow Boundary를 넘어 전파됩니다. CSS 선택자가 아닌 부모-자식 상속 메커니즘이기 때문입니다.
 
