@@ -1,45 +1,73 @@
 ---
 title: "크롬 확장 프로그램에서 이벤트를 다루는 방법"
 date: "2026-08-13"
-desc: "span마다 리스너를 개별 부착하는 방식의 한계를 발견하고, 이벤트 위임으로 타사 페이지 성능 부담을 최소화한 설계 과정 회고."
+desc: "span마다 리스너를 개별 부착하는 방식의 한계를 발견하고, 이벤트 위임으로 타사 페이지 성능 부담을 최소화한 설계 과정을 정리했다."
 tags: ["JavaScript", "DOM", "Chrome Extension"]
 ---
 
-Light는 경제 뉴스 속 금융 용어를 자동 감지해 툴팁으로 보여주는 Chrome 확장 프로그램입니다. content script가 실행되면 `TreeWalker`로 기사 텍스트를 순회하며 금융 용어를 찾고, 해당 부분을 `<span data-light>` 태그로 감쌉니다.
+Light는 경제 뉴스 속 금융 용어를 자동 감지해 툴팁으로 보여주는 Chrome 확장 프로그램입니다. 사용자가 뉴스 페이지를 열면 content script가 실행되고, `TreeWalker`로 기사 텍스트를 순회하면서 금융 용어를 찾아 해당 텍스트를 <TermAnnotation def="Light가 금융 용어를 발견했을 때 해당 텍스트를 감싸기 위해 직접 삽입하는 HTML 태그입니다. 이 속성값이 용어를 식별하는 키가 됩니다.">`<span data-light>`</TermAnnotation> 태그로 직접 감쌉니다.
 
-이벤트 처리 방식을 설계할 때 세 가지 제약이 동시에 걸렸습니다.
+이 동작 방식 때문에 이벤트 처리를 설계할 때 세 가지 제약이 동시에 걸렸습니다.
 
 ## content script 환경의 세 가지 제약
 
 ### (1) span이 페이지 로드 시점에 존재하지 않는다
 
-스크립트가 실시간으로 텍스트를 훑으며 금융 용어를 찾아 span으로 감쌉니다. 페이지 로드 시점에 `querySelectorAll('[data-light]')`를 실행하면 아무것도 나오지 않습니다. span이 만들어지는 시점에 맞춰 리스너를 달려고 하면 span 개수만큼 리스너가 생깁니다. 기사 한 편에 금융 용어가 수십 개라면 리스너도 수십 개가 타사 페이지에 심어집니다.
+페이지가 처음 로드될 때는 `<span data-light>`이 아예 없습니다. Light content script가 실행되면서 뒤늦게 만들어지기 때문에, 처음부터 `querySelectorAll('[data-light]')`로 찾아 리스너를 붙여두는 방법 자체가 불가능합니다. 그렇다고 span이 생길 때마다 리스너를 추가하면 span 개수만큼 리스너가 쌓입니다.
 
 ### (2) 공통 부모 컨테이너가 없다
 
-내가 만든 페이지였다면 `<div id="app">` 같은 루트 요소 하나에 리스너를 달면 됩니다. 하지만 Light는 기사 본문, 사이드바의 관련 기사 링크 등 페이지 어디서든 금융 용어가 나올 수 있어서, 이 모든 span을 아우르는 단일 컨테이너가 존재하지 않습니다. 리스너를 달 수 있는 공통 지점은 `document` 뿐입니다.
+내가 만든 단독 웹앱이라면 `<div id="app">` 아래 요소들만 감시하면 됩니다. 하지만 Light는 타사 사이트(네이버 뉴스 등)에서 동작합니다. 기사 본문, 사이드바 등 페이지 전체에 흩어진 span들을 아우르는 공통 부모가 없습니다. 리스너를 달 수 있는 유일한 공통 지점은 `document`입니다.
 
 ### (3) 타사 페이지의 성능에도 영향을 준다
 
-네이버 뉴스가 내부적으로 어떤 리스너를 얼마나 달아두었는지 알 수 없습니다. 내가 추가로 심는 리스너는 최소한이어야 합니다. span마다 리스너를 달면 그 수만큼 이벤트 처리 부담이 늘어납니다.
+기사 하나에 금융 용어가 50개라면, 50개의 span에 각각 마우스 이벤트 리스너를 붙이는 것은 브라우저 성능에 부담을 줍니다. 네이버 뉴스가 내부적으로 달아둔 리스너까지 합치면 부담은 더 커집니다.
 
 ## 해결: document 레벨 이벤트 위임
 
-세 제약을 동시에 해결하는 방법은 리스너를 `document`에 딱 두 개만 다는 것입니다.
+세 제약을 한 번에 해결하는 정석 패턴이 **이벤트 위임**(Event Delegation)입니다.
 
-```text
-span N개 × 리스너 2개 = N×2개의 리스너  (사용하지 않음)
-document × 리스너 2개 = 2개의 리스너    (사용함)
+DOM의 모든 이벤트는 자식 요소에서 발생한 뒤, 부모 요소를 타고 최상단인 `document`까지 거슬러 올라갑니다. 이를 **이벤트 버블링**이라고 합니다.
+
+따라서 개별 `<span>`마다 리스너를 50개 달 필요 없이, `document`에 딱 2개의 리스너(`mouseover`, `mouseout`)만 등록하면 됩니다. 사용자가 어떤 span에 마우스를 올리든 그 이벤트는 버블링을 통해 결국 `document`까지 전달되므로, 놓치지 않고 감지할 수 있습니다.
+
+```mermaid
+---
+config:
+  layout: elk
+  theme: base
+  elk:
+    edgeRouting: ORTHOGONAL
+  themeVariables:
+    primaryColor: "#fbfcfd"
+    primaryBorderColor: "#e6e8ea"
+    fontFamily: "Pretendard, sans-serif"
+    clusterBkg: "#fbfcfd"
+    clusterBorder: "#d6d7da"
+---
+flowchart BT
+  DOC["document\nLight content script 리스너"]:::listener
+
+  subgraph news["네이버 뉴스 페이지 DOM — Light가 제어할 수 없는 영역"]
+    ART["&lt;article&gt;"]:::node
+    P["&lt;p&gt;"]:::node
+    SPAN["&lt;span data-light&gt;\nLight가 금융 용어에 삽입한 태그"]:::target
+  end
+
+  SPAN -->|"버블링"| P
+  P -->|"버블링"| ART
+  ART -->|"버블링"| DOC
+
+  classDef listener fill:#c8e0ff,stroke:#7eb1f3,color:#004fa7
+  classDef node    fill:#fbfcfd,stroke:#e6e8ea,color:#374151
+  classDef target  fill:#fff1f2,stroke:#f87171,color:#991b1b
 ```
-
-이것이 가능한 이유는 이벤트 버블링 때문입니다. 이벤트가 발생하면 브라우저는 발생 요소(target)에서 `document` 방향으로 이벤트를 전파(버블링)시킵니다. `<span data-light>`에서 발생한 `mouseover`는 결국 `document`까지 도달합니다.
 
 ```js
 document.addEventListener('mouseover', (e) => {
-  const span = e.target.closest('[data-light]')
-  if (!span) return // 내가 만든 span이 아니면 무시
+  if (!e.target.matches('[data-light]')) return
 
-  showTooltip(span)
+  showTooltip(e.target)
 })
 
 document.addEventListener('mouseout', () => {
@@ -47,21 +75,33 @@ document.addEventListener('mouseout', () => {
 })
 ```
 
-span이 나중에 새로 생겨도 문제가 없습니다. 리스너가 개별 span이 아니라 `document`에 있기 때문에, 새로 추가된 span에서 발생한 이벤트도 버블링을 통해 그대로 잡힙니다. 리스너 개수는 span이 몇 개든 항상 2개로 고정됩니다.
+span이 나중에 새로 생겨도 문제가 없습니다. 리스너가 개별 span이 아니라 `document`에 있기 때문에, 새로 추가된 span에서 발생한 이벤트도 버블링을 통해 그대로 잡힙니다. 리스너 개수는 span이 몇 개든 항상 2개로 고정됩니다. 단, 이 코드는 `<span data-light>`에 자식 요소가 없을 때를 기준으로 합니다. 실제 상황에서 발생하는 엣지 케이스는 뒤에서 보완합니다.
+
+## mouseover를 선택한 이유
+
+처음에는 `mouseenter`/`mouseleave`를 고려했습니다. 이 이벤트는 요소 안으로 진입·이탈할 때 정확히 한 번씩 발생해서 연속 발화 문제가 없습니다.
+
+그런데 `mouseenter`와 `mouseleave`는 **버블링하지 않습니다**. 이벤트가 발생한 요소 자체에서만 처리되고 부모 방향으로 전파되지 않습니다. 이벤트 위임의 핵심은 버블링이므로, 버블링이 없는 이벤트로는 위임이 불가능합니다.
+
+| 이벤트 | 버블링 | document 위임 가능 |
+| --- | --- | --- |
+| `mouseover` / `mouseout` | O | O |
+| `mouseenter` / `mouseleave` | X | X |
+
+Light는 공통 부모 컨테이너 없이 `document`에서 위임해야 하므로 버블링하는 `mouseover`/`mouseout`을 선택했습니다. 연속 발화 문제는 디바운싱으로 별도 해결합니다.
 
 ## 이벤트 대상을 정확히 특정하기 — `closest()`
 
-이벤트가 실제 발생한 요소는 `e.target`입니다. 그런데 `<span data-light>` 안에 자식 요소(예: `<strong>`)가 있을 때, 그 자식에 마우스를 올리면 `e.target`이 `strong`이 됩니다.
+`<span data-light>` 내부에 `<strong>PER</strong>` 같은 자식 태그가 있으면, 마우스를 올렸을 때 이벤트의 출발점(`e.target`)이 span이 아니라 `strong`이 됩니다.
 
-```js
-document.addEventListener('mouseover', (e) => {
-  if (e.target.matches('[data-light]')) {
-    // 자식 요소가 이벤트 타깃이면 이 조건은 통과하지 못한다
-  }
-})
+```text
+<span data-light>
+  "삼성전자 "
+  <strong>PER</strong>  ← 여기에 마우스를 올리면 e.target은 span이 아닌 strong
+</span>
 ```
 
-`closest(selector)`가 이 문제를 해결합니다. 이벤트가 발생한 요소 자신부터 시작해 부모 방향으로 올라가며, 조건에 맞는 첫 번째 요소를 반환합니다.
+`e.target.matches('[data-light]')`를 쓰면 `e.target`이 `strong`일 때 조건을 통과하지 못합니다. 대신 `e.target.closest('[data-light]')`는 호버된 요소로부터 부모 방향으로 거슬러 올라가며 `[data-light]` 속성을 가진 첫 번째 요소를 찾아냅니다.
 
 ```js
 document.addEventListener('mouseover', (e) => {
@@ -74,9 +114,17 @@ document.addEventListener('mouseover', (e) => {
 
 ## 빠른 마우스 이동 — 디바운싱
 
-`document`에 위임을 적용하고 나니 새로운 문제가 생겼습니다. 기사를 가로질러 이동할 때마다 `mouseover`가 연속으로 발생하는 것입니다. 여러 span을 스치며 지나가면 툴팁이 깜빡이고, 불필요한 API 요청이 발생합니다.
+기사를 가로질러 마우스를 빠르게 움직이면 수많은 `mouseover` 이벤트가 연달아 발생합니다. 여러 span을 스치며 지나갈 때마다 툴팁이 깜빡이고, 불필요한 API 요청도 일어납니다.
 
-150ms 디바운싱으로 해결했습니다.
+`setTimeout`과 `clearTimeout`을 이용해, 마우스가 멈춘 지 150ms가 지났을 때만 툴팁을 띄우는 **디바운싱**(Debouncing)을 적용합니다.
+
+```text
+빠른 마우스 이동:
+mouseover → mouseover → mouseover → [150ms 경과] → showTooltip()
+[timer 초기화]  [timer 초기화]  [timer 시작]
+```
+
+150ms 동안 새 `mouseover`가 발생하지 않을 때만 `showTooltip()`이 실행됩니다.
 
 ```js
 let timer = null
@@ -100,31 +148,23 @@ document.addEventListener('mouseout', (e) => {
 })
 ```
 
-150ms는 여러 번 테스트하면서 정한 값입니다. 너무 짧으면 스쳐 지나가는 마우스에도 반응하고, 너무 길면 툴팁이 느리게 뜬다고 느껴집니다.
+150ms는 여러 번 테스트하면서 정한 값입니다. 너무 짧으면 스쳐 지나가는 마우스에도 반응하고, 너무 길면 툴팁이 느리게 뜬다고 느껴졌기 때문입니다.
 
-## mouseover를 선택한 이유
+현재 구현에서는 `mouseout`이 발생하면 타이머를 취소하고 즉시 툴팁을 숨깁니다. 사용자가 툴팁 UI 위로 마우스를 이동할 경우 툴팁이 즉시 사라지는 문제가 생길 수 있습니다. `mouseout`에도 100ms 정도의 유예 시간을 두거나, 툴팁 요소에서 `mouseenter`를 감지해 타이머를 취소하는 방식으로 개선할 수 있습니다.
 
-처음에는 `mouseenter`/`mouseleave`를 고려했습니다. 이 이벤트는 요소 안으로 진입·이탈할 때 정확히 한 번씩 발생해서 `mouseover`의 연속 발화 문제가 없습니다.
-
-그런데 `mouseenter`와 `mouseleave`는 버블링하지 않습니다. 이벤트가 발생한 요소 자체에서만 처리되고 부모 방향으로 전파되지 않습니다. `document` 위임의 핵심은 버블링인데, 버블링이 없으면 위임이 불가능합니다.
-
-Light는 공통 부모 컨테이너 없이 `document`에서 위임해야 하므로 버블링하는 `mouseover`/`mouseout`을 선택했습니다. 디바운싱은 그로 인한 연속 발화 문제를 별도로 해결합니다.
+<Callout type="tip">
+content script가 언로드되거나 페이지가 전환될 때 `document`에 붙인 리스너가 남아 있으면 메모리 누수가 발생할 수 있습니다. `chrome.runtime.onMessage`로 언로드 시점을 감지하거나, MutationObserver를 해제하는 시점에 `document.removeEventListener`로 리스너를 함께 정리합니다.
+</Callout>
 
 ## 툴팁 렌더링은 Shadow DOM 안에서 일어납니다
 
-이벤트는 일반 DOM에서 잡지만, 툴팁 UI는 Shadow DOM 안에서 렌더링됩니다.
+툴팁 UI를 일반 HTML로 만들면, 네이버 뉴스의 전역 CSS가 툴팁 스타일을 망가뜨리거나, 반대로 Light가 삽입한 CSS가 뉴스 페이지 레이아웃을 건드릴 수 있습니다. 이벤트는 일반 DOM에서 잡지만, 툴팁 UI는 Shadow DOM 안에서 렌더링해 이 문제를 해결합니다.
 
-네이버 뉴스 같은 미디어 사이트는 전역 CSS가 복잡합니다. Light의 툴팁 스타일이 그 CSS에 영향을 받아 깨지거나, 반대로 Light가 넣은 CSS가 뉴스 페이지의 레이아웃을 건드릴 위험이 있습니다. Shadow DOM은 외부 선택자의 영향을 막기 때문에 이를 방지하기 위해 사용합니다.
+Shadow DOM은 일반 DOM 요소에 붙일 수 있는 **격리된 DOM 트리**입니다. Shadow Root 안의 스타일은 외부로 새어 나가지 않고, 외부 CSS 선택자도 안으로 침투할 수 없습니다. 브라우저가 내장 컴포넌트(`<video>`, `<input type="range">` 등)의 스타일을 보호할 때도 같은 메커니즘을 사용합니다.
 
-```text
-[일반 DOM]
-  ├── <span data-light>금융 용어</span>  ← 이벤트 발생
-  └── <div id="light-extension-root">
-       └── #shadow-root
-            └── <TooltipLayer />  ← 여기서 렌더링
+Light는 페이지 `<body>`에 `<div id="light-extension-root">`를 하나 삽입하고, 그 안에 Shadow Root를 붙입니다. 툴팁 컴포넌트(`TooltipLayer`)는 이 Shadow Root 안에 React로 렌더링됩니다. `document` 리스너가 span `mouseover`를 감지하면 Shadow Root 안의 React 상태를 업데이트해 툴팁이 표시됩니다.
 
-document 리스너 → span mouseover 감지 → Shadow Root 안 React 상태 업데이트 → 툴팁 표시
-```
+Shadow DOM은 외부 CSS 선택자가 침투하지 못하는 독립 DOM 트리입니다. 네이버 뉴스의 전역 CSS가 아무리 복잡해도 툴팁 스타일에 영향을 줄 수 없고, Light가 삽입한 CSS가 뉴스 페이지 레이아웃을 건드리지도 않습니다.
 
 ## 정리
 
@@ -135,6 +175,12 @@ document 리스너 → span mouseover 감지 → Shadow Root 안 React 상태 �
 | 타사 페이지 성능 영향 최소화 | 리스너를 2개로 고정 |
 | 마우스가 빠르게 지나갈 때 | 150ms 디바운싱 |
 | `mouseenter` 대신 `mouseover` 선택 | `document` 위임에는 버블링하는 이벤트가 필수 |
+
+
+> "동적으로 생기는 수많은 요소에 직접 리스너를 달지 않고, 최상단 document에서 버블링을 이용해 이벤트를 가로챈 뒤(closest), 디바운싱으로 최적화하고, UI는 Shadow DOM으로 격리한다."
+
+이 흐름으로 코드를 작성하면 타사 페이지의 구조를 몰라도 안전하고 가볍게 확장 프로그램을 동작시킬 수 있습니다.
+
 
 **MDN 참고**
 - [`Element.closest()`](https://developer.mozilla.org/en-US/docs/Web/API/Element/closest)
