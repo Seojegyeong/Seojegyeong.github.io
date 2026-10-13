@@ -148,15 +148,21 @@ export function useClickStream(mode: "real" | "dummy" = "real") {
 }
 ```
 
-훅의 실행은 두 경로로 나뉩니다. 왼쪽은 이벤트를 수신해 state를 업데이트하는 경로이고, 오른쪽은 unmount 시 연결을 끊는 cleanup 경로입니다.
+### SSE 생명주기와 AbortController
+
+`fetchEventSource`는 `await` 없이 호출합니다. Promise를 기다리지 않아도 `signal: controller.signal`을 통해 외부에서 연결을 제어할 수 있기 때문입니다. `useEffect` cleanup에서 `controller.abort()`를 호출하면 진행 중인 SSE 연결이 즉시 종료됩니다. 컴포넌트가 unmount되거나 effect가 재실행될 때 이전 연결이 남지 않아 메모리 누수가 없습니다.
 
 ![useClickStream 훅 내부 실행 흐름 — Guard 조건 확인, fetchEventSource 호출, onmessage 처리, cleanup 경로](/blog/sse-fetch-event-source/sse-fetch-event-source-01.png)
 
-설계에서 짚어둘 포인트가 두 가지 있습니다.
+훅의 실행은 두 경로로 나뉩니다. 왼쪽은 이벤트를 수신해 state를 업데이트하는 경로이고, 오른쪽은 unmount 시 연결을 끊는 cleanup 경로입니다.
+
+### State 분리 전략
 
 `data`는 매 tick(1초)마다 완전히 교체되지만, `suspectDetail`은 **별도 state로 분리**해 보존합니다. 이상 징후는 한 번 감지된 뒤 사용자가 확인할 때까지 계속 표시해야 하므로, 새 데이터가 와도 초기화되지 않아야 합니다.
 
-`accessToken`은 `useEffect` 의존성에 포함됩니다. 토큰이 변경되면 `useEffect`가 재실행되어 새 연결을 맺으므로, 401 재발급으로 `accessToken`이 바뀌면 **자동으로 새 연결**로 이어집니다.
+### Zustand 연동과 자동 재연결
+
+`useAuthStore`에서 꺼낸 `accessToken`과 `useWorkspaceStore`에서 꺼낸 `orgId`를 모두 `useEffect` 의존성 배열에 포함합니다. Zustand 스토어의 `accessToken`이 바뀌면 React가 이전 effect를 cleanup하고(기존 연결 abort) 새 effect를 실행해 새 토큰으로 SSE를 재연결합니다. 401 재발급 이후 `setAccessToken(newToken)`을 호출하는 것만으로 자동 재연결이 이어지는 이유입니다. `orgId`도 같은 방식으로 동작해, 워크스페이스를 전환하면 이전 연결이 abort되고 새 org의 스트림으로 자동 전환됩니다.
 
 ## 개발 환경에서 연결이 두 번 되는 이유
 
@@ -166,8 +172,35 @@ React 18 `StrictMode`가 개발 환경에서 effect를 의도적으로 두 번 �
 
 첫 번째 연결은 unmount 시 [`AbortController`](https://developer.mozilla.org/ko/docs/Web/API/AbortController)의 `abort()`로 취소됩니다. Network 탭에서 빨간색으로 표시되는 건 이 abort로 인한 정상 종료이며, 프로덕션 빌드에서는 effect가 한 번만 실행됩니다.
 
+## JWT 만료와 Single-Flight 재발급 처리
+
+FetchEventSource를 선택한 이유 중 하나가 `onopen`에서 `response.status === 401`을 직접 처리할 수 있다는 점이었습니다. 그런데 실제 적용하고 나서 새로운 문제가 드러났습니다.
+
+대시보드에는 채널별로 3개의 SSE 연결이 열려 있었습니다. 세 연결이 동시에 401을 받으면 각자가 독립적으로 재발급을 시도합니다. 서버는 refreshToken을 1회 사용 후 무효화하므로 첫 번째 재발급만 성공하고, 나머지 두 번은 실패해 강제 로그아웃이 발생했습니다.
+
+해결은 모듈 레벨에서 Promise를 캐싱해 **재발급이 진행 중이면 같은 Promise를 공유**하도록 만드는 것이었습니다.
+
+```ts
+let sseRefreshPromise: Promise<string | null> | null = null;
+
+async function refreshTokenOnce(): Promise<string | null> {
+  if (sseRefreshPromise) return sseRefreshPromise; // 진행 중이면 같은 Promise 반환
+
+  sseRefreshPromise = reissueToken()
+    .then((r) => r.data?.accessToken ?? null)
+    .catch(() => null)
+    .finally(() => { sseRefreshPromise = null; });
+
+  return sseRefreshPromise;
+}
+```
+
+3개의 SSE가 동시에 `refreshTokenOnce()`를 호출해도 `/api/auth/reissue`는 한 번만 호출됩니다. 새 토큰으로 `setAccessToken`을 호출하면 `accessToken` 의존성에 의해 세 연결이 모두 자동으로 재연결됩니다.
+
+구체적인 구현(`abort` vs `throw` 선택, `onerror`의 AbortError 분기, axios 레이어와의 락 공유)은 [SSE 401 재발급을 1번으로 보장하는 싱글턴 패턴](/blog/sse-401-refresh-singleton)에서 다룹니다.
+
 ## 정리
 
-JWT 인증 헤더가 필요한 SSE에는 `EventSource`를 쓸 수 없습니다. `FetchEventSource`는 `onopen`과 `onerror` 훅으로 인증 처리와 에러 핸들링을 직접 제어할 수 있어, 이후 401 재발급 로직을 추가할 때 확장하기 좋은 구조입니다.
+JWT 인증 헤더가 필요한 SSE에는 `EventSource`를 쓸 수 없습니다. `FetchEventSource`는 `onopen`과 `onerror` 훅으로 인증 처리와 에러 핸들링을 직접 제어할 수 있습니다. `AbortController`로 생명주기를 관리하고, `accessToken`을 `useEffect` 의존성에 두면 Zustand 스토어의 토큰 갱신이 자동으로 SSE 재연결로 이어집니다.
 
-> SSE는 axios 인터셉터를 거치지 않아, accessToken이 만료됐을 때 재발급을 1번으로 보장하는 문제가 별도로 남습니다.
+> `FetchEventSource`로 JWT 헤더를 붙이고, `AbortController`로 생명주기를 관리하고, 토큰 변경을 의존성으로 감지해 재연결을 자동화한다.
