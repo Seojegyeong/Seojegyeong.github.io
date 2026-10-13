@@ -139,11 +139,21 @@ const Workspace = loadable(
 <Route path="/workspace" element={<Workspace />} />
 ```
 
-`displayName`을 지정한 이유는 React DevTools에서 `Wrapped`가 아니라 `Loadable(...)`로 표시되게 하기 위해서입니다. `React.lazy()`로 만든 컴포넌트는 `name`이 없으므로, 더 구체적인 이름이 필요하다면 lazy 컴포넌트에 `displayName`을 따로 설정해야 합니다.
+`displayName`을 지정한 이유는 React DevTools에서 `Wrapped`가 아니라 `Loadable(...)`로 표시되게 하기 위해서입니다. `React.lazy()`로 만든 컴포넌트는 `name`이 없어 `displayName`도 `undefined`입니다. 이 경우 fallback인 `"Component"`가 사용되어 DevTools에서 `Loadable(Component)`로만 표시되어 라우트가 많아지면 어느 컴포넌트인지 구분하기 어렵습니다.
+
+<Callout type="tip">
+구체적인 이름이 필요하다면 `lazy` 선언 직후 `displayName`을 지정합니다.
+
+```ts
+const OverviewDashboard = lazy(() => import("@/pages/dashboard/OverviewDashboard"));
+OverviewDashboard.displayName = "OverviewDashboard";
+// DevTools: Loadable(Component) → Loadable(OverviewDashboard)
+```
+</Callout>
 
 ## 수치 측정
 
-적용 전후를 정확히 비교하기 위해 `perf/no-splitting` 브랜치를 따로 만들었습니다. `loadable`을 제거하고 전부 정적 `import`로 되돌린 후 빌드해서 비교했습니다. 아래 수치는 빌드 직후 기준(gzip 전)입니다.
+`rollup-plugin-visualizer`로 빌드된 청크 구성을 treemap으로 확인했습니다. 어느 모듈이 번들 크기를 차지하는지 파악한 뒤, 정확한 전후 비교를 위해 `perf/no-splitting` 브랜치를 따로 만들었습니다. `loadable`을 제거하고 전부 정적 `import`로 되돌린 후 빌드해서 비교했습니다. 아래 수치는 빌드 직후 기준(gzip 전)입니다.
 
 | 구분         |  Before  |   After (감소)    |
 | ------------ | :------: | :---------------: |
