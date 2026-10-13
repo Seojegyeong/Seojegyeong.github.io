@@ -5,6 +5,10 @@ desc: "SSE는 axios 인터셉터를 거치지 않아 병렬 401 큐 패턴이 �
 tags: ["SSE", "인증"]
 ---
 
+<Callout type="info">
+이 글은 [JWT 인증이 필요한 SSE FetchEventSource 도입기](/blog/sse-fetch-event-source)의 후속 포스트입니다. FetchEventSource 도입 배경과 `useClickStream` 훅 설계를 먼저 읽으면 이 글의 문제 상황을 파악하기 더 쉽습니다.
+</Callout>
+
 axios 인터셉터로 병렬 401 큐 패턴을 구현한 뒤 한동안 인증이 안정적으로 동작했습니다. 그러다 Sentry에서 예상 밖의 에러가 잡혔습니다. 특정 사용자가 대시보드에 진입하면 드물게 강제 로그아웃되는 패턴이었습니다.
 
 Network 탭을 확인하니 `/api/auth/reissue`가 3번 연달아 호출되고 있었습니다. 세 번째 요청부터는 401을 응답했습니다. 원인은 SSE였습니다.
@@ -13,27 +17,11 @@ Sentry를 더 들여다보니 문제는 하나가 아니었습니다. 토큰 중
 
 ## SSE는 axios 인터셉터를 통과하지 않는다
 
-`@microsoft/fetch-event-source` 라이브러리는 `fetch` API 기반입니다. axios로 감싸지 않기 때문에 인터셉터가 전혀 개입하지 못합니다. 401을 받아도 큐에 등록되지 않습니다.
+`@microsoft/fetch-event-source`는 `fetch` 기반이라 axios 인터셉터를 거치지 않습니다. 401을 받아도 큐에 등록되지 않습니다.
 
 대시보드에는 실시간 클릭 스트림을 위한 SSE 연결이 3개 있었습니다. `AllPlatformTrafficChart` 컴포넌트 하나가 채널별로 3개의 SSE를 열었습니다. 세 연결이 동시에 401을 받으면 각자가 독립적으로 재발급을 시도합니다.
 
 서버는 refreshToken을 1회 사용 후 무효화합니다. 첫 번째 재발급은 성공하고, 나머지 두 번은 401을 받습니다. 두 번째·세 번째 재발급 실패 → 로그아웃.
-
-## 기본 EventSource를 쓰지 않은 이유
-
-`EventSource`는 브라우저 내장 API로 SSE를 간편하게 연결할 수 있습니다. 그러나 `Authorization` 헤더를 지원하지 않습니다. 커스텀 헤더를 전혀 설정할 수 없는 구조입니다.
-
-대시보드는 Bearer 토큰으로 인증합니다. accessToken을 `Authorization` 헤더로 보내야 하므로 `EventSource`를 쓸 수 없습니다. `@microsoft/fetch-event-source`를 사용한 이유입니다. 이 라이브러리는 `fetch`를 기반으로 하므로 헤더를 자유롭게 설정할 수 있습니다.
-
-```ts
-fetchEventSource(url, {
-  headers: {
-    Authorization: `Bearer ${accessToken}`,
-  },
-  onopen: async (response) => { ... },
-  onmessage: (event) => { ... },
-})
-```
 
 ## 해결: sseRefreshPromise 싱글턴
 

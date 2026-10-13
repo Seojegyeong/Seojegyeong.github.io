@@ -178,26 +178,7 @@ FetchEventSource를 선택한 이유 중 하나가 `onopen`에서 `response.stat
 
 대시보드에는 채널별로 3개의 SSE 연결이 열려 있었습니다. 세 연결이 동시에 401을 받으면 각자가 독립적으로 재발급을 시도합니다. 서버는 refreshToken을 1회 사용 후 무효화하므로 첫 번째 재발급만 성공하고, 나머지 두 번은 실패해 강제 로그아웃이 발생했습니다.
 
-해결은 모듈 레벨에서 Promise를 캐싱해 **재발급이 진행 중이면 같은 Promise를 공유**하도록 만드는 것이었습니다.
-
-```ts
-let sseRefreshPromise: Promise<string | null> | null = null;
-
-async function refreshTokenOnce(): Promise<string | null> {
-  if (sseRefreshPromise) return sseRefreshPromise; // 진행 중이면 같은 Promise 반환
-
-  sseRefreshPromise = reissueToken()
-    .then((r) => r.data?.accessToken ?? null)
-    .catch(() => null)
-    .finally(() => { sseRefreshPromise = null; });
-
-  return sseRefreshPromise;
-}
-```
-
-3개의 SSE가 동시에 `refreshTokenOnce()`를 호출해도 `/api/auth/reissue`는 한 번만 호출됩니다. 새 토큰으로 `setAccessToken`을 호출하면 `accessToken` 의존성에 의해 세 연결이 모두 자동으로 재연결됩니다.
-
-구체적인 구현(`abort` vs `throw` 선택, `onerror`의 AbortError 분기, axios 레이어와의 락 공유)은 [SSE 401 재발급을 1번으로 보장하는 싱글턴 패턴](/blog/sse-401-refresh-singleton)에서 다룹니다.
+모듈 레벨에서 Promise를 캐싱해 재발급이 진행 중이면 같은 Promise를 공유하도록 만드는 방식으로 해결했습니다. `abort` vs `throw` 선택, `onerror`의 AbortError 분기, axios 레이어와의 락 공유까지 구체적인 구현은 [SSE 401 재발급을 1번으로 보장하는 싱글턴 패턴](/blog/sse-401-refresh-singleton)에서 다룹니다.
 
 ## 정리
 

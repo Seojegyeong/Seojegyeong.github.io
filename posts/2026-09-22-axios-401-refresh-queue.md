@@ -74,7 +74,61 @@ const onRefreshFailed = (error: unknown) => {
 
 ## 4가지 케이스 처리
 
-401을 받았을 때 상황은 네 가지로 나뉩니다.
+401을 받았을 때 인터셉터가 분기하는 경로는 네 가지입니다.
+
+```mermaid
+---
+config:
+  layout: elk
+  theme: base
+  elk:
+    edgeRouting: ORTHOGONAL
+  themeVariables:
+    primaryColor: "#fbfcfd"
+    primaryBorderColor: "#e6e8ea"
+    fontFamily: "Pretendard, sans-serif"
+    clusterBkg: "#fbfcfd"
+    clusterBorder: "#d6d7da"
+---
+flowchart TD
+  A(["401 수신"]):::request
+
+  B{"accessToken\n있음?"}:::decision
+  C{"isRefreshing?"}:::decision
+  D{"_retry?"}:::decision
+
+  K1["즉시 reject\n케이스 1"]:::error
+  K2["Promise 큐 등록\nresolve 대기\n케이스 2"]:::process
+  K3["logout\n케이스 3"]:::error
+  K4["isRefreshing = true\nreissue 호출\n케이스 4"]:::process
+
+  GS{"성공?"}:::decision
+  OK["setAccessToken\nonRefreshed\n큐 전체 resolve"]:::success
+  FAIL["onRefreshFailed\n큐 전체 reject\nlogout"]:::error
+  DONE(["원래 요청 새 토큰으로 재시도"]):::success
+
+  A --> B
+  B -- "없음" --> K1
+  B -- "있음" --> C
+  C -- "true" --> K2
+  C -- "false" --> D
+  D -- "true" --> K3
+  D -- "false" --> K4
+  K4 --> GS
+  GS -- "성공" --> OK
+  GS -- "실패" --> FAIL
+  OK -.->|"onRefreshed 호출"| K2
+  OK --> DONE
+  K2 --> DONE
+
+  classDef request  fill:#eff6ff,stroke:#7eb1f3,color:#004fa7
+  classDef decision fill:#e0f7f9,stroke:#00b5c5,color:#004fa7
+  classDef process  fill:#c8e0ff,stroke:#7eb1f3,color:#004fa7
+  classDef success  fill:#eff6ff,stroke:#1779e1,color:#004fa7
+  classDef error    fill:#fff1f2,stroke:#f87171,color:#991b1b
+```
+
+케이스 2(큐 대기)와 케이스 4(reissue 실행)는 동시에 진행됩니다. 케이스 4가 새 토큰을 받으면 `onRefreshed`를 호출해 큐를 깨우고(점선), 대기 중이던 케이스 2의 Promise들이 새 토큰으로 원래 요청을 재시도합니다. 결과적으로 9개 요청이 동시에 401을 받아도 `/api/auth/reissue`는 1번만 호출됩니다.
 
 ```ts
 axiosInstance.interceptors.response.use(
@@ -202,20 +256,16 @@ sequenceDiagram
 
 ## 한 걸음 더 — SSE는 이 인터셉터를 통과하지 않습니다
 
-이 패턴으로 일반 API 호출은 해결됐습니다. 그런데 대시보드에는 실시간 클릭 스트림을 위한 SSE 연결이 3개 있었습니다. SSE는 `fetch` 기반으로 구현되기 때문에 axios 인터셉터를 거치지 않습니다.
+이 패턴으로 일반 API 호출은 해결됐습니다. 그런데 SSE는 `fetch` 기반이라 axios 인터셉터를 거치지 않습니다. 여러 SSE 연결이 동시에 401을 받으면 각자 독립적으로 재발급을 시도해 refreshToken이 고갈됩니다.
 
-세 연결이 동시에 401을 받으면 각자 독립적으로 재발급을 시도합니다. refreshToken은 1회 사용 후 무효화되므로 나머지 두 번은 실패 — 강제 로그아웃으로 이어졌습니다.
+SSE 레이어에서는 subscriber 배열 없이 Promise 자체를 캐싱해 같은 문제를 해결할 수 있습니다.
 
-한 가지 더, `isRefreshing`(axios 레이어)과 SSE 레이어의 재발급 락은 서로 독립적입니다. axios 401과 SSE 401이 동시에 발생하면 두 레이어가 각자 재발급을 시도합니다. 이를 근본적으로 해결하려면 재발급 로직을 공유 모듈로 추출해 두 레이어가 같은 Promise를 바라보게 해야 합니다.
-
-SSE 포스트에서는 락을 `isRefreshing` boolean 대신 **Promise 자체를 변수에 캐시**하는 방식으로 구현합니다. 차이는 다음과 같습니다.
-
-|                            | boolean 락               | Promise 락               |
+|                            | boolean 락 (axios)       | Promise 락 (SSE)         |
 | -------------------------- | ------------------------ | ------------------------ |
 | "진행 중인가?"             | ✓                        | ✓                        |
-| "결과를 기다릴 수 있는가?" | ✗ (subscriber 배열 필요) | ✓ (같은 Promise를 await) |
+| "결과를 기다릴 수 있는가?" | ✗ (subscriber 배열 필요) | ✓ (같은 Promise를 `await`) |
 
-boolean은 "진행 중이다/아니다"만 알 수 있습니다. 대기 중인 요청들이 결과를 받으려면 subscriber 배열을 별도로 관리해야 합니다. Promise는 진행 중인 작업 자체를 공유합니다. 여러 호출자가 같은 Promise를 `await`하면 결과도 1번만 생산됩니다. SSE는 abort 후 재연결 구조라 subscriber 배열 없이 Promise 하나로 충분합니다. 같은 원리를 fetch 레이어에서 재구현한 이야기는 다음 글에서 이어집니다.
+구체적인 구현은 [SSE 401 재발급을 1번으로 보장하는 싱글턴 패턴](/blog/sse-401-refresh-singleton)에서 이어집니다.
 
 > **MDN 참고**
 >
