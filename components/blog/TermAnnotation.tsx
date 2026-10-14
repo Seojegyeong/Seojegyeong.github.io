@@ -36,18 +36,28 @@ export default function TermAnnotation({ children, def }: Props) {
     setMounted(true)
     updatePos()
 
-    // Double RAF: first paint with initial state, second triggers transition
+    // Double RAF: recalculate after initial paint, then trigger transition
     requestAnimationFrame(() => {
-      requestAnimationFrame(() => setVisible(true))
+      requestAnimationFrame(() => {
+        updatePos()
+        setVisible(true)
+      })
     })
 
     window.addEventListener('scroll', updatePos, { passive: true })
     window.addEventListener('resize', updatePos)
     window.addEventListener('resize', checkXl)
+
+    // Images/GIFs above the term shift layout after load — recalculate on article resize
+    const article = document.querySelector('article')
+    const resizeObserver = new ResizeObserver(updatePos)
+    if (article) resizeObserver.observe(article)
+
     return () => {
       window.removeEventListener('scroll', updatePos)
       window.removeEventListener('resize', updatePos)
       window.removeEventListener('resize', checkXl)
+      resizeObserver.disconnect()
     }
   }, [])
 
