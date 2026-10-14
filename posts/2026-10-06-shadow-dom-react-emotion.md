@@ -15,7 +15,7 @@ document.body.appendChild(container);
 ReactDOM.createRoot(container).render(<TooltipLayer />);
 ```
 
-로컬 테스트에서는 잘 동작합니다. 그런데 실제 네이버 뉴스에서 실행하면 툴팁 폰트가 대상 사이트 폰트로 바뀌고, z-index가 묻혀 다른 요소 뒤에 숨고, 레이아웃이 완전히 무너졌습니다.
+로컬 테스트에서는 잘 동작합니다. 그런데 실제 네이버 뉴스에서 실행하면 **툴팁 폰트가 뉴스 사이트 폰트로 바뀌고, z-index가 밀려 다른 요소 뒤에 숨고, 전체 레이아웃이 무너졌습니다.**
 
 내가 만든 컴포넌트를 남의 사이트 DOM에 올리는 순간, **타사 사이트의 CSS가 내 컴포넌트를 오염시키거나 반대로 내 CSS가 타사 레이아웃을 망가뜨리는** 충돌이 생깁니다. 이 충돌은 한 번에 해결되지 않고 3단계 장벽으로 나타났습니다.
 
@@ -68,7 +68,7 @@ flowchart TB
 
   host -. "attachShadow()" .-> sr
 
-  subgraph shadow["Shadow Tree — 격리된 공간"]
+  subgraph shadow["Shadow Tree — 외부 CSS 침범 불가"]
     sr["Shadow Root"]
     container["div (container)"]
     react["React 컴포넌트 트리"]
@@ -76,7 +76,7 @@ flowchart TB
   sr --> container --> react
 ```
 
-일반 DOM 안의 요소는 대상 사이트 CSS에 영향을 받습니다. Shadow Root 아래의 요소는 받지 않습니다. 이 경계를 **Shadow Boundary**라고 부릅니다.
+일반 DOM 안의 요소와 달리 Shadow Root 아래의 요소는 선택자 침범을 받지 않습니다. 이 경계가 **Shadow Boundary**입니다.
 
 `attachShadow({ mode: 'open' })`으로 Shadow Root를 생성하고 그 안에 container를 넣습니다. React는 container를 루트로 삼아 렌더링합니다.
 
@@ -113,7 +113,9 @@ ReactDOM.createRoot(container).render(<TooltipLayer />);
 
 2단계까지 적용했더니 이번엔 Emotion 스타일이 사라졌습니다. Emotion은 기본적으로 `<head>`에 `<style>` 태그를 삽입합니다. Shadow DOM 안 컴포넌트에서 Emotion CSS를 쓰면 스타일 태그는 `<head>`에 붙고, 컴포넌트는 Shadow Root 안에 있습니다.
 
-`<head>`의 스타일시트는 Shadow Root 안으로 들어가지 않습니다. CSS가 적용되지 않아 스타일 없는 날것의 HTML이 됩니다.
+> `<head>`에 삽입된 스타일시트는 Shadow Boundary를 넘지 않으므로 Shadow Root 안으로 들어가지 않는다.
+
+CSS가 적용되지 않아 스타일 없는 날것의 HTML이 됩니다.
 
 `createCache`의 `container` 옵션에 Shadow Root를 넘기면 Emotion이 Shadow Root 안에 `<style>` 태그를 삽입합니다. CSS와 컴포넌트가 같은 Shadow Root 안에 있으므로 정상적으로 적용됩니다.
 
@@ -168,7 +170,7 @@ export function mountTooltipLayer() {
 
 ## 이벤트 처리: document 리스너로 Retargeting 이슈 우회하기
 
-`<span data-light>` 위에 마우스를 올리면 툴팁이 떠야 합니다. Shadow Root 안에 리스너를 붙이면 될 것 같지만, 이벤트가 Shadow Boundary를 넘는 순간 `event.target`이 Shadow Host(`div#light-root`)로 교체됩니다(retargeting). 어떤 span 위에 마우스가 있는지 알 수 없게 됩니다.
+`<span data-light>` 위에 마우스를 올리면 툴팁이 떠야 합니다. Shadow Root 안에 리스너를 붙이면 될 것 같지만, 이벤트가 Shadow Boundary를 넘는 순간 브라우저가 보안을 위해 `event.target`을 Shadow Host(`div#light-root`)로 강제 교체합니다(retargeting). Shadow 내부 구조를 외부에서 알 수 없도록 하는 브라우저 동작입니다. 어떤 span 위에 마우스가 있는지 알 수 없게 됩니다.
 
 `document`에 리스너를 붙이고 Shadow Root 안의 React 상태를 업데이트하는 방식으로 이 문제를 피합니다. 이벤트는 일반 DOM에서 감지하고 렌더링만 Shadow Root 안에서 처리합니다.
 

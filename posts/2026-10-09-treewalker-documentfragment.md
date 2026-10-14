@@ -5,11 +5,13 @@ desc: "innerHTML 치환으로 금융 용어에 span을 삽입하면 뉴스 사�
 tags: ["JavaScript", "DOM", "Chrome Extension"]
 ---
 
-light 확장 프로그램이 기사에서 금융 용어를 감지하면 `<span class="light-term">` 태그로 감싸야 합니다. 텍스트 중간에 HTML 태그를 삽입하는 가장 간단한 방법은 `innerHTML`을 사용하는 것입니다. 네이버 뉴스에서 테스트했을 때 용어는 정상적으로 하이라이팅됐지만 기사 공유 버튼이 동작하지 않았습니다. 댓글 영역도 초기화됐습니다.
+light 확장 프로그램이 기사에서 금융 용어를 감지하면 `<span class="light-term">` 태그로 감싸야 합니다. 텍스트 중간에 HTML 태그를 삽입하는 가장 간단한 방법은 `innerHTML`을 사용하는 것입니다. 네이버 뉴스에서 테스트했을 때 용어는 정상적으로 하이라이팅됐지만, **기사 공유 버튼이 먹통이 되고 댓글 영역이 초기화되는 현상**이 일어났습니다.
 
 ## innerHTML을 재설정하면 DOM이 재파싱된다
 
-`element.innerHTML`에 값을 할당하면 해당 요소 전체가 HTML로 재파싱됩니다. 재파싱 과정에서 새 DOM 노드가 생성되는데, 기존 노드에 `addEventListener`로 붙인 리스너는 이 새 노드에 존재하지 않습니다.
+`innerHTML`은 요소 안의 HTML 전체를 문자열로 읽고 쓰는 속성입니다. `element.innerHTML`에 새 값을 할당하면 해당 요소 전체가 HTML 문자열로 재파싱되어 완전히 새로운 DOM 노드가 생성됩니다. 기존 노드에 `addEventListener`로 등록된 이벤트 리스너는 새로 생성된 노드에 존재하지 않으므로, 재파싱 이후에는 해당 이벤트가 동작하지 않습니다.
+
+> `innerHTML`은 해당 요소 전체를 재파싱하므로, 기존 DOM 노드에 붙은 이벤트 리스너가 모두 사라진다.
 
 ```js
 // 위험한 방식
@@ -25,7 +27,7 @@ element.innerHTML = element.innerHTML.replace(
 
 ## TreeWalker — 텍스트 노드만 선택적으로 순회
 
-[`TreeWalker`](https://developer.mozilla.org/ko/docs/Web/API/TreeWalker)는 DOM 트리를 순회하는 API입니다. `NodeFilter.SHOW_TEXT`를 지정하면 텍스트 노드만 방문합니다. `acceptNode` 필터 함수로 순회 대상을 세밀하게 제어할 수 있습니다.
+[`TreeWalker`](https://developer.mozilla.org/ko/docs/Web/API/TreeWalker)는 DOM 트리를 원하는 조건으로 순회하는 브라우저 내장 API입니다. `innerHTML` 치환과 달리 기존 DOM 노드를 그대로 유지하면서 지정한 조건에 맞는 노드만 선택적으로 방문합니다. `NodeFilter.SHOW_TEXT`를 지정하면 텍스트 노드만 방문하고, `acceptNode` 필터 함수로 순회 대상을 세밀하게 제어할 수 있습니다.
 
 ```ts
 // termScanner.ts
@@ -49,13 +51,15 @@ function scanAndHighlight(root: Element, terms: string[]) {
     }
   );
 
-  // 먼저 처리 대상 텍스트 노드 목록 수집
-  // 순회 중 DOM을 직접 수정하면 TreeWalker가 깨지므로 2단계로 처리
+  // 1단계: 처리 대상 텍스트 노드 수집
+  // 순회 중 DOM을 수정하면 TreeWalker 순회 상태가 깨진다
+  // 수집(1단계)과 교체(2단계)를 반드시 분리해야 한다
   const textNodes: Text[] = [];
   while (walker.nextNode()) {
     textNodes.push(walker.currentNode as Text);
   }
 
+  // 2단계: 수집된 텍스트 노드 교체
   textNodes.forEach((textNode) => {
     if (!termPattern.test(textNode.nodeValue ?? "")) return;
     termPattern.lastIndex = 0;
@@ -70,9 +74,15 @@ TreeWalker는 기존 DOM을 유지하면서 텍스트 노드만 방문합니다.
 TreeWalker 순회 중 DOM을 수정하면 순회 상태가 깨집니다. 반드시 텍스트 노드를 먼저 수집한 뒤, 수집이 끝나고 나서 DOM을 수정해야 합니다.
 </Callout>
 
-## DocumentFragment — 리플로우를 1회로 줄이기
+`scanAndHighlight`의 `root` 파라미터에 `document.body` 대신 `<article>` 같은 기사 본문 래퍼를 전달하면, 네비게이션·광고·푸터처럼 탐색할 필요 없는 영역을 순회 대상에서 제외할 수 있습니다. 뉴스 사이트는 DOM 트리가 거대한 경우가 많아 범위를 좁힐수록 순회 비용이 줄어듭니다.
 
-텍스트 노드를 span으로 교체할 때 DOM에 노드를 하나씩 추가하면 추가할 때마다 리플로우가 발생합니다. [`DocumentFragment`](https://developer.mozilla.org/ko/docs/Web/API/DocumentFragment)는 메모리 상의 임시 컨테이너로, DOM에 실제로 연결되어 있지 않습니다. Fragment에 모든 노드를 먼저 구성한 뒤 `replaceChild`로 한 번에 교체하면 리플로우가 1회만 발생합니다.
+## DocumentFragment — 리플로우(화면 재그리기)를 1회로 줄이기
+
+리플로우는 DOM이 변경될 때마다 브라우저가 요소의 위치·크기를 재계산하고 화면을 다시 그리는 작업입니다. DOM에 노드를 하나씩 추가하면 추가할 때마다 리플로우가 발생합니다.
+
+[`DocumentFragment`](https://developer.mozilla.org/ko/docs/Web/API/DocumentFragment)는 메모리 상의 임시 컨테이너로, 실제 DOM에 연결되어 있지 않아 조작해도 리플로우가 발생하지 않습니다. Fragment에 모든 노드를 먼저 구성한 뒤 `replaceChild`로 한 번에 교체하면 리플로우가 1회만 발생합니다.
+
+`text.split(pattern)`에서 `pattern`은 캡처 그룹 `( )`이 있는 정규표현식입니다. 캡처 그룹을 사용하면 `split()` 결과에 구분자, 즉 매칭된 용어 자체도 배열 항목으로 포함됩니다. 예를 들어 `"삼성 ETF는".split(/(ETF)/)` 결과는 `["삼성 ", "ETF", "는"]`이 되어 짝수 인덱스는 일반 텍스트, 홀수 인덱스는 하이라이팅할 용어가 됩니다.
 
 ```ts
 function replaceTextNode(textNode: Text, pattern: RegExp) {
@@ -104,7 +114,7 @@ function replaceTextNode(textNode: Text, pattern: RegExp) {
 
 ## 정리
 
-| 방식 | 이벤트 리스너 | script·style 처리 | 리플로우 |
+| 방식 | 이벤트 리스너 | script·style 처리 | 리플로우(화면 재그리기) |
 |------|--------------|-------------------|---------|
 | `innerHTML` 치환 | 파괴됨 | script 파괴 위험 | N회 |
 | `querySelectorAll("*")` 순회 | 유지 | 포함됨 (오탐) | N회 |

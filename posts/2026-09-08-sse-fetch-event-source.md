@@ -82,7 +82,7 @@ await fetchEventSource(url, {
 
 JWT 인증 헤더가 필요하고 나중에 401 재발급 처리까지 붙여야 했기 때문에 FetchEventSource를 선택했습니다.
 
-## useClickStream — SSE 연결 캡슐화
+## useClickStream으로 SSE 연결 캡슐화
 
 FetchEventSource를 직접 컴포넌트에서 쓰면 연결 생명주기와 상태 관리가 얽힙니다. SSE 연결 전체를 `useClickStream` 훅으로 캡슐화했습니다.
 
