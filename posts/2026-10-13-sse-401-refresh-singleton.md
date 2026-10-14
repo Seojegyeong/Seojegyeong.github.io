@@ -3,6 +3,7 @@ title: "SSE 401 재발급을 1번으로 보장하는 싱글턴 패턴"
 date: "2026-09-15"
 desc: "SSE는 axios 인터셉터를 거치지 않아 병렬 401 큐 패턴이 적용되지 않는다. 3개의 SSE 연결이 동시에 401을 받으면 재발급이 3번 호출되어 refreshToken이 고갈된다. sseRefreshPromise 싱글턴으로 같은 문제를 fetch 레이어에서 해결한 과정을 정리했다."
 tags: ["SSE", "인증"]
+project: "WhereYouAd"
 ---
 
 <Callout type="info">

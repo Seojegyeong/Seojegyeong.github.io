@@ -3,6 +3,7 @@ title: "Shadow DOM에 React 마운트하기"
 date: "2026-07-27"
 desc: "크롬 익스텐션 콘텐츠 스크립트에서 React를 마운트하면 대상 사이트의 CSS가 침범해 레이아웃이 깨진다. Shadow DOM으로 스타일을 격리하고 Emotion 캐시를 Shadow Root에 바인딩하는 방법을 정리했다."
 tags: ["Chrome Extension", "Shadow DOM"]
+project: "Light"
 ---
 
 Light는 경제 뉴스 속 금융 용어를 자동 감지해 툴팁으로 보여주는 Chrome 확장 프로그램입니다. 콘텐츠 스크립트에서 React 컴포넌트를 타사 페이지에 주입하는 구조입니다.

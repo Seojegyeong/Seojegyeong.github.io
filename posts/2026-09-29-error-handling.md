@@ -3,6 +3,7 @@ title: "프론트엔드 에러 처리, 레이어별로 설계하기"
 date: "2026-09-29"
 desc: "WhereYouAd에서 병렬 401 재발급 중복 문제부터 라우트 에러 경계까지, 5레이어 에러 처리 구조를 설계하고 적용한 과정을 정리했다."
 tags: ["axios", "TanStack Query"]
+project: "WhereYouAd"
 ---
 
 > 병렬 401부터 라우트 에러 경계까지 — WhereYouAd에서 실제로 적용한 5단계 구조

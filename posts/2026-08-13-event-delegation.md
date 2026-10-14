@@ -3,6 +3,7 @@ title: "크롬 확장 프로그램에서 이벤트를 다루는 방법"
 date: "2026-08-13"
 desc: "span마다 리스너를 개별 부착하는 방식의 한계를 발견하고, 이벤트 위임으로 타사 페이지 성능 부담을 최소화한 설계 과정을 정리했다."
 tags: ["JavaScript", "DOM", "Chrome Extension"]
+project: "Light"
 ---
 
 ## 1. 전제 상황과 직면한 문제

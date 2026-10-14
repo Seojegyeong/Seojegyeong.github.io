@@ -3,6 +3,7 @@ title: "CloudFront Functions로 CSP 헤더와 XSS 방어 구성"
 date: "2026-07-28"
 desc: "accessToken 메모리 저장만으로는 스크립트 실행 자체를 막지 못한다. CloudFront Functions로 CSP 헤더를 추가해 스크립트 실행 차단과 탈취 피해 최소화 두 레이어로 XSS 방어를 완성했다."
 tags: ["보안", "CSP"]
+project: "WhereYouAd"
 ---
 
 whereYouAd는 accessToken을 로컬스토리지 대신 Zustand 메모리에만 저장해 XSS 탈취 피해를 최소화했습니다. 하지만 이는 어디까지나 스크립트가 실행된 이후의 2차 방어선에 불과합니다. 진정한 의미의 1차 방어는 악성 스크립트 자체가 실행되지 못하도록 원천 차단하는 것이며, 그 역할을 하는 것이 바로 **Content Security Policy**(CSP)입니다.

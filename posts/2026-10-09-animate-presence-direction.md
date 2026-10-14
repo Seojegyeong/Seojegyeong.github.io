@@ -3,6 +3,7 @@ title: "Framer Motion 기초부터 방향별 슬라이드 구현까지"
 date: "2026-01-07"
 desc: "Framer Motion을 처음 적용하며 motion 컴포넌트, variants, AnimatePresence의 개념을 하나씩 파악하고, custom prop으로 방향별 슬라이드를 구현한 과정을 정리했다."
 tags: ["Framer Motion"]
+project: "Roome"
 ---
 
 Roome 온보딩은 6단계로 구성됩니다. 이전·다음 버튼으로 단계를 이동할 수 있습니다.

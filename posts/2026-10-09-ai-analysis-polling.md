@@ -3,6 +3,7 @@ title: "AI 분석 요청의 POST + 폴링 복합 패턴"
 date: "2026-05-26"
 desc: "AI 리포트 생성의 POST(accessToken 발급) → GET 폴링(PENDING→SUCCESS) 2단계 흐름과 조직 공유 리포트 재사용 로직을 단일 훅으로 캡슐화하고, 쿼리 키를 accessToken에서 orgId로 교체해 캐시 파편화 버그를 함께 해결했다."
 tags: ["TanStack Query", "성능최적화"]
+project: "WhereYouAd"
 ---
 
 AI 분석 기능을 구현할 때 비동기 흐름이 단순하지 않았습니다. 일반적인 API는 요청하면 결과가 즉시 돌아오지만, AI 분석은 서버에서 처리를 완료하기까지 수 초가 걸립니다.

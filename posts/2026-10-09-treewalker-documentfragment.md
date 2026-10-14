@@ -3,6 +3,7 @@ title: "innerHTML 대신 TreeWalker로 텍스트 하이라이팅"
 date: "2026-07-27"
 desc: "innerHTML 치환으로 금융 용어에 span을 삽입하면 뉴스 사이트의 이벤트 리스너가 파괴되는 문제를, TreeWalker로 텍스트 노드만 순회하고 DocumentFragment로 일괄 교체해 DOM 무결성을 유지했다."
 tags: ["JavaScript", "DOM", "Chrome Extension"]
+project: "Light"
 ---
 
 light 확장 프로그램이 기사에서 금융 용어를 감지하면 `<span class="light-term">` 태그로 감싸야 합니다. 텍스트 중간에 HTML 태그를 삽입하는 가장 간단한 방법은 `innerHTML`을 사용하는 것입니다. 네이버 뉴스에서 테스트했을 때 용어는 정상적으로 하이라이팅됐지만, **기사 공유 버튼이 먹통이 되고 댓글 영역이 초기화되는 현상**이 일어났습니다.

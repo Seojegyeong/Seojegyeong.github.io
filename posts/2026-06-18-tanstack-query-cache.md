@@ -3,6 +3,7 @@ title: "queryKey 하나로 캐시 이해하기"
 date: "2026-06-18"
 desc: "invalidate 호출 후 화면이 바뀌지 않는 버그를 queryKey 오타에서 찾고, 키를 상수로 중앙 관리하는 구조로 리팩토링한 과정을 정리했다."
 tags: ["TanStack Query"]
+project: "WhereYouAd"
 ---
 
 WhereYouAd 프로젝트에서 워크스페이스 이름을 수정한 뒤 `invalidateQueries`를 호출했는데, 화면의 데이터가 바뀌지 않는 문제가 생겼습니다. B2B 대시보드에서 서버 데이터가 즉시 반영되지 않으면 사용자가 수정 결과를 확인할 방법이 없어집니다. 에러도 없고, 콘솔에도 아무것도 찍히지 않았습니다.

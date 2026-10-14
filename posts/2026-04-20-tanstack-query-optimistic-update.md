@@ -3,6 +3,7 @@ title: "TanStack Query Optimistic Update로 토글 버튼 즉시 반응하게 �
 date: "2026-04-20"
 desc: "WithTime 알람 설정 토글을 서버 응답 전에 즉시 업데이트하고, 실패 시 원래 상태로 롤백하는 Optimistic Update 구현 과정을 정리했다."
 tags: ["TanStack Query", "낙관적 업데이트"]
+project: "withtime"
 ---
 
 WithTime 프로젝트에서 설정 화면을 개발하면서 토글 버튼의 반응 속도 문제를 고민했습니다.

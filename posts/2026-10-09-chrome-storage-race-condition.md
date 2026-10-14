@@ -3,6 +3,7 @@ title: "Chrome Storage 비동기 초기화와 Race Condition"
 date: "2026-07-31"
 desc: "Chrome Storage 초기화 완료 전 settings 변경이 기본값으로 덮어씌워지는 Race Condition을 isLoadedRef 가드로 차단하고, useRef와 useEffect 조합으로 불필요한 리렌더 없이 해결했다."
 tags: ["Chrome Extension"]
+project: "Light"
 ---
 
 light 확장 프로그램은 사용자 설정(카테고리, 하이라이트 색상, API 키)을 Chrome Storage에 저장합니다. `localStorage`와 달리 페이지가 바뀌어도 설정이 유지되고 기기 간 동기화도 되지만, 읽기·쓰기가 모두 비동기입니다. 개발 중 설정을 변경하면 가끔 무시되는 현상이 있었습니다. 하이라이트 색상을 바꿨는데 새로고침하면 기본값으로 돌아오기도 했습니다. 재현 조건을 찾다가 빠르게 설정을 바꿀 때만 발생한다는 것을 알았습니다.
