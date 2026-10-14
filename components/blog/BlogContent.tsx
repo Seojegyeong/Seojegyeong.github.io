@@ -8,7 +8,7 @@ import type { PostMeta } from "@/lib/posts";
 
 type Props = {
   posts: PostMeta[];
-  allTags: string[];
+  projects: string[];
 };
 
 const ease = [0.22, 1, 0.36, 1] as const;
@@ -23,17 +23,17 @@ const item = {
   visible: { opacity: 1, y: 0, transition: { duration: 0.35, ease } },
 };
 
-export default function BlogContent({ posts, allTags }: Props) {
+export default function BlogContent({ posts, projects }: Props) {
   const searchParams = useSearchParams();
-  const tag = searchParams.get("tag");
+  const project = searchParams.get("project");
 
-  const filtered = tag ? posts.filter((p) => p.tags.includes(tag)) : posts;
+  const filtered = project ? posts.filter((p) => p.project === project) : posts;
 
   return (
     <>
-      <TagFilter tags={allTags} selected={tag} />
+      <TagFilter projects={projects} selected={project} />
       <motion.ul
-        key={tag ?? "all"}
+        key={project ?? "all"}
         variants={container}
         initial="hidden"
         animate="visible"
@@ -71,7 +71,7 @@ export default function BlogContent({ posts, allTags }: Props) {
       </motion.ul>
       {filtered.length === 0 && (
         <p className="text-text-muted text-sm py-12 text-center">
-          해당 태그의 포스트가 없습니다.
+          해당 프로젝트의 포스트가 없습니다.
         </p>
       )}
     </>

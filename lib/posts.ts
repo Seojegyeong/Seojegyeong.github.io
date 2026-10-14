@@ -10,6 +10,7 @@ export type PostMeta = {
   date: string;
   desc: string;
   tags: string[];
+  project: string;
 };
 
 export type Post = PostMeta & {
@@ -48,6 +49,7 @@ export function getAllPosts(): PostMeta[] {
         date: data.date ?? "",
         desc: data.desc ?? "",
         tags: data.tags ?? [],
+        project: data.project ?? "",
       };
     })
     .sort((a, b) => (a.date < b.date ? 1 : -1));
@@ -64,6 +66,7 @@ export function getPostBySlug(slug: string): Post {
     date: data.date ?? "",
     desc: data.desc ?? "",
     tags: data.tags ?? [],
+    project: data.project ?? "",
     content,
   };
 }

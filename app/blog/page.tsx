@@ -11,16 +11,14 @@ export const metadata: Metadata = {
   description: "프론트엔드 개발 경험과 트러블슈팅을 기록합니다.",
 };
 
+const PROJECT_ORDER = ["WhereYouAd", "Roome", "Light", "withtime"];
+
 export default function BlogPage() {
   const posts = getAllPosts();
 
-  const allTags = Array.from(new Set(posts.flatMap((p) => p.tags)))
-    .filter((tag) => posts.filter((p) => p.tags.includes(tag)).length >= 2)
-    .sort((a, b) => {
-      const countA = posts.filter((p) => p.tags.includes(a)).length;
-      const countB = posts.filter((p) => p.tags.includes(b)).length;
-      return countB - countA;
-    });
+  const projects = Array.from(new Set(posts.map((p) => p.project).filter(Boolean))).sort(
+    (a, b) => PROJECT_ORDER.indexOf(a) - PROJECT_ORDER.indexOf(b)
+  );
 
   return (
     <main className="min-h-screen bg-white">
@@ -35,7 +33,7 @@ export default function BlogPage() {
         </Link>
         <h1 className="text-3xl font-bold mb-8">블로그</h1>
         <Suspense>
-          <BlogContent posts={posts} allTags={allTags} />
+          <BlogContent posts={posts} projects={projects} />
         </Suspense>
       </div>
     </main>
