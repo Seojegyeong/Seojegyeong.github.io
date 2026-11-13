@@ -1,5 +1,5 @@
 ---
-title: "Claude API Map 캐시와 Promise.all로 비용 최적화"
+title: "LLM을 덜 부르도록 설계한 용어 설명 서버"
 date: "2026-08-07"
 desc: "금융 용어 툴팁 확장 프로그램의 AI 서버를 구축하면서, 등록 용어는 Map에서 즉시 반환하고 미등록 용어만 Claude API에 병렬로 보내 비용과 응답 속도를 동시에 잡았다."
 tags: ["Node.js", "AI", "성능최적화"]

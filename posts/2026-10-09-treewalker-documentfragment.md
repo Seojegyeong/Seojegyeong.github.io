@@ -1,5 +1,5 @@
 ---
-title: "innerHTML 대신 TreeWalker로 텍스트 하이라이팅"
+title: "TreeWalker와 이벤트 위임으로 원본 페이지를 지킨 용어 하이라이트"
 date: "2026-07-27"
 desc: "innerHTML 치환으로 금융 용어에 span을 삽입하면 뉴스 사이트의 이벤트 리스너가 파괴되는 문제를, TreeWalker로 텍스트 노드만 순회하고 DocumentFragment로 일괄 교체해 DOM 무결성을 유지했다."
 tags: ["JavaScript", "DOM", "Chrome Extension"]

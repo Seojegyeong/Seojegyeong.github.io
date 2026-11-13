@@ -1,5 +1,5 @@
 ---
-title: "대시보드 지표 포맷팅, 하나로 흐르게 만들기"
+title: "METRIC_REGISTRY와 Vitest로 지표 표기 단일화"
 date: "2026-06-23"
 desc: "포맷 규칙이 16개 파일에 분산되어 화면마다 지표가 다르게 표시되는 버그를 METRIC_REGISTRY 레지스트리 패턴으로 단일화해 해결한 과정을 정리했다."
 tags: ["TypeScript", "리팩토링"]

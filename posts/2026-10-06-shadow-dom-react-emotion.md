@@ -1,5 +1,5 @@
 ---
-title: "Shadow DOM에 React 마운트하기"
+title: "선택자는 Shadow DOM으로, 상속은 디자인 토큰으로 막은 툴팁 스타일 격리"
 date: "2026-07-27"
 desc: "크롬 익스텐션 콘텐츠 스크립트에서 React를 마운트하면 대상 사이트의 CSS가 침범해 레이아웃이 깨진다. Shadow DOM으로 스타일을 격리하고 Emotion 캐시를 Shadow Root에 바인딩하는 방법을 정리했다."
 tags: ["Chrome Extension", "Shadow DOM"]

@@ -1,5 +1,5 @@
 ---
-title: "JWT 인증이 필요한 SSE FetchEventSource 도입기"
+title: "Sentry 역추적으로 찾은 SSE 401 침묵 오류 해결"
 date: "2026-09-08"
 desc: "EventSource의 커스텀 헤더 미지원으로 JWT 인증이 불가능한 문제를 FetchEventSource로 해결하고, useClickStream 훅으로 SSE 연결을 캡슐화한 과정을 정리했다."
 tags: ["SSE", "인증"]
