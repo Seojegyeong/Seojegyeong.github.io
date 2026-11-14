@@ -70,24 +70,16 @@ export const projects: Project[] = [
     ],
     relatedPosts: [
       {
-        title: "대시보드 Skeleton UI와 LCP 측정",
-        url: "/blog/2026-10-09-skeleton-ui-lcp",
-      },
-      {
         title: "대시보드 지표 포맷팅, 하나로 흐르게 만들기",
         url: "/blog/2026-06-23-typescript-metric-formatting",
       },
       {
-        title: "React.lazy와 loadable 헬퍼로 초기 번들 78% 줄이기",
-        url: "/blog/2026-09-29-react-lazy-code-splitting",
+        title: "Sentry 역추적으로 찾은 SSE 401 침묵 오류 해결",
+        url: "/blog/2026-09-08-sse-fetch-event-source",
       },
       {
-        title: "CloudFront Functions로 CSP 헤더와 XSS 방어 구성",
-        url: "/blog/2026-10-09-csp-cloudfront",
-      },
-      {
-        title: "SSE 401 재발급을 1번으로 보장하는 싱글턴 패턴",
-        url: "/blog/2026-10-13-sse-401-refresh-singleton",
+        title: "동시 401을 하나로 묶은 토큰 재발급 큐 설계",
+        url: "/blog/2026-09-22-axios-401-refresh-queue",
       },
     ],
   },
@@ -140,16 +132,8 @@ export const projects: Project[] = [
         url: "/blog/2026-10-09-axios-interceptor",
       },
       {
-        title: "getQueriesData로 InfiniteData 낙관적 업데이트",
-        url: "/blog/2026-10-09-infinitedata-optimistic-update",
-      },
-      {
         title: "Object URL 메모리 누수와 useRef 클로저 함정",
         url: "/blog/2026-10-09-object-url-memory-leak",
-      },
-      {
-        title: "hover·touchStart 프리페칭으로 탭 전환 스켈레톤 제거",
-        url: "/blog/2026-10-09-prefetching-hover-touchstart",
       },
     ],
   },
@@ -199,10 +183,6 @@ export const projects: Project[] = [
         url: "/blog/2026-10-06-shadow-dom-react-emotion",
       },
       {
-        title: "Chrome Storage 비동기 초기화와 Race Condition",
-        url: "/blog/2026-10-09-chrome-storage-race-condition",
-      },
-      {
         title: "Claude API Map 캐시와 Promise.all로 비용 최적화",
         url: "/blog/2026-10-09-claude-api-map-cache",
       },
@@ -250,10 +230,6 @@ export const projects: Project[] = [
       {
         title: "TanStack Query Optimistic Update로 토글 버튼 즉시 반응하게 만들기",
         url: "/blog/2026-04-20-tanstack-query-optimistic-update",
-      },
-      {
-        title: "아코디언 height:auto 트랜지션 우회와 접근성",
-        url: "/blog/2026-10-09-accordion-aria-max-height",
       },
       {
         title: "검색어 유무에 따른 enabled 듀얼 쿼리",
